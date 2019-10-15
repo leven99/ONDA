@@ -114,5 +114,54 @@ namespace SocketDA.Views
             Application.Current.Shutdown();
         }
         #endregion
+
+        #region 打开/关闭Socket
+        private void OpenCloseSocket(object sender, RoutedEventArgs e)
+        {
+            
+        }
+        #endregion
+
+        #region 发送
+        private void Send(object sender, RoutedEventArgs e)
+        {
+            
+        }
+        #endregion
+
+        #region 发送文件
+        private void SendFile(object sender, RoutedEventArgs e)
+        {
+            
+        }
+        #endregion
+
+        #region 路径选择
+        private void SaveRecvPath(object sender, RoutedEventArgs e)
+        {
+            mainWindowViewModel.SaveRecvPath();
+        }
+        #endregion
+
+        #region 清接收区
+        private void ClarReceData(object sender, RoutedEventArgs e)
+        {
+            mainWindowViewModel.ClarReceData();
+        }
+        #endregion
+
+        #region 清发送区
+        private void ClearSendData(object sender, RoutedEventArgs e)
+        {
+            mainWindowViewModel.ClearSendData();
+        }
+        #endregion
+
+        #region 清空计数
+        private void ClearCount(object sender, RoutedEventArgs e)
+        {
+            mainWindowViewModel.ClearCount();
+        }
+        #endregion
     }
 }
