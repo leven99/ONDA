@@ -1,0 +1,106 @@
+﻿<Window x:Class="SocketDA.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SocketDA.Views"
+        mc:Ignorable="d"
+        Title="SocketDA" WindowStartupLocation="CenterScreen" Style="{DynamicResource MainWindowChromeStyle}">
+
+    <!--Window Style-->
+    <Window.Resources>
+        <Style x:Key="MainWindowChromeStyle" TargetType="{x:Type local:MainWindow}">
+            <Setter Property="WindowChrome.WindowChrome">
+                <Setter.Value>
+                    <WindowChrome/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <!--Root-->
+    <DockPanel x:Name="RootDockPanel">
+
+        <!--菜单栏-->
+        <Grid x:Name="MenuGrid" DockPanel.Dock="Top" WindowChrome.IsHitTestVisibleInChrome="True" MouseMove="MouseMove_Click">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Image x:Name="IconImage" Grid.Column="0" Source="/SocketDA;component/icon/favicon.ico"
+                       Margin="6,3,4,3" Width="18" Height="18"/>
+            <Menu x:Name="ItemMenu" Grid.Column="1" Background="White">
+                <MenuItem x:Name="FileMenuItem" Header="文件(_F)" Style="{StaticResource MainMenuItem}">
+                    <MenuItem x:Name="ExitMenuItem" Header="退出(_X)"
+                                  Click="ExitMenuItem_Click"/>
+                </MenuItem>
+                <MenuItem x:Name="ToolMenuItem" Header="工具(_T)" Style="{StaticResource MainMenuItem}">
+                    <MenuItem x:Name="CalcMenuItem" Header="计算器(_C)" 
+                                  Click="CalcMenuItem_Click"/>
+                </MenuItem>
+                <MenuItem x:Name="ConfMenuItem" Header="选项(_O)" Style="{StaticResource MainMenuItem}">
+                    
+                </MenuItem>
+                <MenuItem x:Name="ViewMenuItem" Header="视图(_V)" Style="{StaticResource MainMenuItem}">
+                    
+                </MenuItem>
+                <MenuItem x:Name="HelpMenuItem" Header="帮助(_H)" Style="{StaticResource MainMenuItem}">
+                    <MenuItem x:Name="VerMenuItem" Header="{Binding HelpModel.VerInfo}" IsEnabled="False"/>
+                    <MenuItem x:Name="VerUpMenuItem" Header="检查更新(_U)" 
+                              Click="VerUpMenuItem_Click"/>
+                    <Separator/>
+                    <MenuItem x:Name="RPMenuItem" Header="Gitee存储库"
+                              Click="RPMenuItem_Click"/>
+                    <MenuItem x:Name="IssueMenuItem" Header="报告问题" 
+                              Click="IssueMenuItem_Click"/>
+                </MenuItem>
+            </Menu>
+            <Button x:Name="MinButton" Grid.Column="2"
+                    Style="{StaticResource MainButton}"
+                    Click="MinButton_Click">
+                <WrapPanel x:Name="MinWrapPanel">
+                    <Image x:Name="MinImage" Source="/SocketDA;component/icon/Min.png"
+                           Width="23" Height="23"/>
+                </WrapPanel>
+            </Button>
+            <Button x:Name="CloseButton" Grid.Column="3"
+                    Style="{StaticResource MainButton}" 
+                    Click="CloseButton_Click">
+                <WrapPanel x:Name="CloseWrapPanel">
+                    <Image x:Name="CloseImage" Source="/SocketDA;component/icon/Close.png"
+                           Width="18" Height="18"/>
+                </WrapPanel>
+            </Button>
+        </Grid>
+
+        <!--状态栏-->
+        <Grid x:Name="StatusBarGrid" DockPanel.Dock="Bottom" Background="#FF007ACD">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StatusBar x:Name="InfoStatus" Grid.Column="0" Background="#FF007ACD" HorizontalAlignment="Left">
+                <StatusBarItem x:Name="InfoStatusBraItem" Content="{Binding DepictInfo}"
+                               Style="{StaticResource SBStatusBarItem}"/>
+            </StatusBar>
+            <ProgressBar x:Name="SendFileProgressBar" Grid.Column="1"
+                         Margin="6,6"
+                         Background="#FF007ACD" BorderBrush="White" Foreground="Yellow"
+                         Visibility="{Binding HelpModel.StatusBarProgressBarVisibility}"
+                         Value="{Binding HelpModel.StatusBarProgressBarValue}"
+                         IsIndeterminate="{Binding HelpModel.StatusBarProgressBarIsIndeterminate}"/>
+            <StatusBar x:Name="TimeStatus" Grid.Column="2" Background="#FF007ACD" HorizontalAlignment="Right">
+                <StatusBarItem x:Name="TimeStatusBraItem" Content="{Binding TimerModel.SystemTime}"
+                               Style="{StaticResource SBStatusBarItem}"/>
+            </StatusBar>
+        </Grid>
+        
+        <!--ALL工作区-->
+        <Grid x:Name="Grid">
+            
+        </Grid>
+    </DockPanel>
+</Window>
