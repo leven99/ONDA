@@ -1,11 +1,30 @@
 using SocketDA.ViewModels;
+using System.Collections.ObjectModel;
+using System.Net.NetworkInformation;
 using System.Windows.Media;
 
 namespace SocketDA.Models
 {
+    public sealed class GetNetworkInterface
+    {
+        public void GetSourceIPAddress()
+        {
+            /* 提示：网络设配器被禁用，则无法获取到相关设备器信息 */
+            NetworkInterface[] networkInterfaces = NetworkInterface.GetAllNetworkInterfaces();
+
+            foreach (NetworkInterface _networkInterface in networkInterfaces)
+            {
+                if(_networkInterface.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
+                {
+                    
+                }
+            }
+        }
+    }
+
     class SocketModel : MainWindowBase
     {
-        public string[] SocketProtocolItemsSource { get; set; }
+        public Collection<string> SocketProtocolItemsSource { get; set; }
 
         private int _SocketProtocolSelectedIndex;
         public int SocketProtocolSelectedIndex
@@ -145,7 +164,10 @@ namespace SocketDA.Models
 
         public void SocketDataContext()
         {
-            SocketProtocolItemsSource = new string[] { "TCP Server", "TCP Client", "UDP Server", "UDP Client" };
+            SocketProtocolItemsSource = new Collection<string>
+            {
+                "TCP Server", "TCP Client", "UDP Server", "UDP Client"
+            };
             SocketProtocolSelectedIndex = 0;
             SocketProtocol = "TCP Server";
 

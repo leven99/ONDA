@@ -1,6 +1,8 @@
 ﻿using Microsoft.Win32;
 using SocketDA.Models;
 using System;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 
@@ -9,6 +11,8 @@ namespace SocketDA.ViewModels
     class MainWindowViewModel : MainWindowBase
     {
         #region 字段
+        private Socket SSocket = null;
+
         private string DataRecvPath = string.Empty;   /* 数据接收路径 */
         #endregion
 
@@ -30,6 +34,35 @@ namespace SocketDA.ViewModels
                     _DepictInfo = value;
                     RaisePropertyChanged(nameof(DepictInfo));
                 }
+            }
+        }
+        #endregion
+
+        #region 打开/关闭套接字
+        public void OpenSocket()
+        {
+            try
+            {
+                if (SocketModel.SocketProtocolSelectedIndex == 0)
+                {
+                    
+                }
+                else if (SocketModel.SocketProtocolSelectedIndex == 1)
+                {
+
+                }
+                else if (SocketModel.SocketProtocolSelectedIndex == 2)
+                {
+
+                }
+                else if (SocketModel.SocketProtocolSelectedIndex == 3)
+                {
+
+                }
+            }
+            catch
+            {
+
             }
         }
         #endregion
