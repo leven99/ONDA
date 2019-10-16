@@ -7,7 +7,24 @@ namespace SocketDA.Models
     {
         public string[] SocketProtocolItemsSource { get; set; }
 
-        public string _SocketProtocol;
+        private int _SocketProtocolSelectedIndex;
+        public int SocketProtocolSelectedIndex
+        {
+            get
+            {
+                return _SocketProtocolSelectedIndex;
+            }
+            set
+            {
+                if (_SocketProtocolSelectedIndex != value)
+                {
+                    _SocketProtocolSelectedIndex = value;
+                    RaisePropertyChanged(nameof(SocketProtocolSelectedIndex));
+                }
+            }
+        }
+
+        private string _SocketProtocol;
         public string SocketProtocol
         {
             get
@@ -24,24 +41,41 @@ namespace SocketDA.Models
             }
         }
 
-        public string _SocketPort;
-        public string SocketPort
+        private string _SocketSourcePort;
+        public string SocketSourcePort
         {
             get
             {
-                return _SocketPort;
+                return _SocketSourcePort;
             }
             set
             {
-                if (_SocketPort != value)
+                if (_SocketSourcePort != value)
                 {
-                    _SocketPort = value;
-                    RaisePropertyChanged(nameof(SocketPort));
+                    _SocketSourcePort = value;
+                    RaisePropertyChanged(nameof(SocketSourcePort));
                 }
             }
         }
 
-        public Brush _SocketBrush;
+        private string _SocketDestinationPort;
+        public string SocketDestinationPort
+        {
+            get
+            {
+                return _SocketDestinationPort;
+            }
+            set
+            {
+                if (_SocketDestinationPort != value)
+                {
+                    _SocketDestinationPort = value;
+                    RaisePropertyChanged(nameof(SocketDestinationPort));
+                }
+            }
+        }
+
+        private Brush _SocketBrush;
         public Brush SocketBrush
         {
             get
@@ -58,7 +92,7 @@ namespace SocketDA.Models
             }
         }
 
-        public string _OpenCloseSocket;
+        private string _OpenCloseSocket;
         public string OpenCloseSocket
         {
             get
@@ -92,17 +126,37 @@ namespace SocketDA.Models
             }
         }
 
+        private string _DestinationVisibility;
+        public string DestinationVisibility
+        {
+            get
+            {
+                return _DestinationVisibility;
+            }
+            set
+            {
+                if (_DestinationVisibility != value)
+                {
+                    _DestinationVisibility = value;
+                    RaisePropertyChanged(nameof(DestinationVisibility));
+                }
+            }
+        }
+
         public void SocketDataContext()
         {
             SocketProtocolItemsSource = new string[] { "TCP Server", "TCP Client", "UDP Server", "UDP Client" };
-
+            SocketProtocolSelectedIndex = 0;
             SocketProtocol = "TCP Server";
-            SocketPort = "6088";
+
+            SocketSourcePort = "8088";
+            SocketDestinationPort = "8088";
 
             SocketBrush = Brushes.Red;
             OpenCloseSocket = string.Format(cultureInfo, "TCP ÕìÌý");
 
             SocketProtocolIsEnabled = true;
+            DestinationVisibility = "Collapsed";
         }
     }
 }

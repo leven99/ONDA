@@ -201,6 +201,30 @@ namespace SocketDA.ViewModels
         }
         #endregion
 
+        #region Combobox Support
+        public void ProtocolComboBox_SelectionChanged()
+        {
+            if(SocketModel.SocketProtocolSelectedIndex == 0)
+            {
+                SocketModel.DestinationVisibility = "Collapsed";
+                SocketModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 侦听");
+            }
+            else if (SocketModel.SocketProtocolSelectedIndex == 1)
+            {
+                SocketModel.DestinationVisibility = "Visible";
+                SocketModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 连接");
+            }
+            else if (SocketModel.SocketProtocolSelectedIndex == 2)
+            {
+
+            }
+            else if (SocketModel.SocketProtocolSelectedIndex == 3)
+            {
+
+            }
+        }
+        #endregion
+
         public MainWindowViewModel()
         {
             HelpModel = new HelpModel();

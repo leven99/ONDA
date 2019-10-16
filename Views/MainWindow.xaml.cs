@@ -163,5 +163,12 @@ namespace SocketDA.Views
             mainWindowViewModel.ClearCount();
         }
         #endregion
+
+        #region Combobox Support
+        private void ProtocolComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            mainWindowViewModel.ProtocolComboBox_SelectionChanged();
+        }
+        #endregion
     }
 }

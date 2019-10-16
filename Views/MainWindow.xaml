@@ -121,6 +121,7 @@
                 
                 <!--发送区-->
                 <GroupBox x:Name="SendDataGroupBox"
+                          Header="{Binding SendModel.SendDataCount}" HeaderStringFormat="{}发送区：已发送{0}字节"
                           Grid.Row="1"
                           Margin="5,0,5,3"
                           BorderBrush="#FF007ACD">
@@ -162,8 +163,8 @@
                           Visibility="{Binding HelpModel.ViewVisibility}">
                     <Grid x:Name="ConfigGrid">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="1*"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition/>
@@ -173,28 +174,60 @@
                             <RowDefinition/>
                             <RowDefinition/>
                             <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
                         </Grid.RowDefinitions>
                         <TextBlock x:Name="ProtocolTextBlock" Text="协议类型：" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
-                                   Style="{StaticResource ConfigTextBlock}"/>
+                                   Style="{StaticResource ConfigTextBlock}"
+                                   HorizontalAlignment="Center"/>
                         <ComboBox x:Name="ProtocolComboBox" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
                                   ItemsSource="{Binding SocketModel.SocketProtocolItemsSource}"
                                   SelectedItem="{Binding SocketModel.SocketProtocol}"
+                                  SelectedIndex="{Binding SocketModel.SocketProtocolSelectedIndex}"
                                   Style="{DynamicResource ConfigComboBox}"
-                                  IsEnabled="{Binding SocketModel.SocketProtocolIsEnabled}"/>
-                        <TextBlock x:Name="AddressTextBlock" Text="IP 地址：" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
-                                   Style="{StaticResource ConfigTextBlock}"/>
-                        <ComboBox x:Name="AddressComboBox" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
-                                  Style="{DynamicResource ConfigComboBox}"/>
-                        <TextBlock x:Name="PortTextBlock" Text="端口号：" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
-                                   Style="{StaticResource ConfigTextBlock}"/>
-                        <TextBox x:Name="PortTextBox" Text="{Binding SocketModel.SocketPort}"
+                                  IsEnabled="{Binding SocketModel.SocketProtocolIsEnabled}"
+                                  SelectionChanged="ProtocolComboBox_SelectionChanged"
+                                  HorizontalContentAlignment="Center"/>
+                        <TextBlock x:Name="DestinationAddressTextBlock" Text="目的 IP 地址："
+                                   Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                   Style="{StaticResource ConfigTextBlock}"
+                                   HorizontalAlignment="Left"
+                                   Visibility="{Binding SocketModel.DestinationVisibility}"/>
+                        <ComboBox x:Name="DestinationAddressComboBox"
+                                  Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                                  Style="{DynamicResource ConfigComboBox}"
+                                  Visibility="{Binding SocketModel.DestinationVisibility}"/>
+                        <TextBlock x:Name="DestinationPortTextBlock" Text="目的端口号："
+                                   Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
+                                   Style="{StaticResource ConfigTextBlock}"
+                                   HorizontalAlignment="Left"
+                                   Visibility="{Binding SocketModel.DestinationVisibility}"/>
+                        <TextBox x:Name="DestinationPortTextBox" Text="{Binding SocketModel.SocketDestinationPort}"
                                  Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
-                                 Style="{StaticResource ConfigTextBox}"/>
+                                 Style="{StaticResource ConfigTextBox}"
+                                 Visibility="{Binding SocketModel.DestinationVisibility}"/>
+                        <TextBlock x:Name="SourceAddressTextBlock" Text="源 IP 地址："
+                                   Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2"
+                                   Style="{StaticResource ConfigTextBlock}"
+                                   HorizontalAlignment="Right"/>
+                        <ComboBox x:Name="SourceAddressComboBox"
+                                  Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2"
+                                  Style="{DynamicResource ConfigComboBox}"/>
+                        <TextBlock x:Name="SourcePortTextBlock" Text="源端口号："
+                                   Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2"
+                                   Style="{StaticResource ConfigTextBlock}"
+                                   HorizontalAlignment="Right"/>
+                        <TextBox x:Name="SourcePortTextBox" Text="{Binding SocketModel.SocketSourcePort}"
+                                 Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2"
+                                 Style="{StaticResource ConfigTextBox}"
+                                 HorizontalContentAlignment="Right"/>
                         <Ellipse x:Name="OnOffElipse" Fill="{Binding SocketModel.SocketBrush}"
-                                 Grid.Row="6" Grid.Column="0"
+                                 Grid.Row="10" Grid.Column="0"
                                  Style="{StaticResource ConfigEilipse}"/>
                         <Button x:Name="OnOffButton" Content="{Binding SocketModel.OpenCloseSocket}"
-                                Grid.Row="6" Grid.Column="1"
+                                Grid.Row="10" Grid.Column="1"
                                 Style="{DynamicResource ConfigButton}"
                                 Click="OpenCloseSocket"/>
                     </Grid>
