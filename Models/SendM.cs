@@ -1,11 +1,11 @@
-using SocketDA.ViewModels;
+ï»¿using SocketDA.ViewModels;
 
 namespace SocketDA.Models
 {
     public class SendModel : MainWindowBase
     {
         /// <summary>
-        /// ·¢ËÍÇøHeaderÖĞµÄ·¢ËÍ¼ÆÊı
+        /// å‘é€åŒºHeaderä¸­çš„å‘é€è®¡æ•°
         /// </summary>
         private int _SendDataCount;
         public int SendDataCount
@@ -42,7 +42,7 @@ namespace SocketDA.Models
         }
 
         /// <summary>
-        /// ¸¨ÖúÇø - ×ÔËÍ·¢ËÍµÄÊ±¼ä¼ä¸ô
+        /// è¾…åŠ©åŒº - è‡ªé€å‘é€çš„æ—¶é—´é—´éš”
         /// </summary>
         private int _AutoSendNum;
         public int AutoSendNum

@@ -1,27 +1,10 @@
-using SocketDA.ViewModels;
+锘縰sing SocketDA.ViewModels;
 using System.Collections.ObjectModel;
 using System.Net.NetworkInformation;
 using System.Windows.Media;
 
 namespace SocketDA.Models
 {
-    public sealed class GetNetworkInterface
-    {
-        public void GetSourceIPAddress()
-        {
-            /* 提示：网络设配器被禁用，则无法获取到相关设备器信息 */
-            NetworkInterface[] networkInterfaces = NetworkInterface.GetAllNetworkInterfaces();
-
-            foreach (NetworkInterface _networkInterface in networkInterfaces)
-            {
-                if(_networkInterface.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
-                {
-                    
-                }
-            }
-        }
-    }
-
     class SocketModel : MainWindowBase
     {
         public Collection<string> SocketProtocolItemsSource { get; set; }
@@ -175,7 +158,7 @@ namespace SocketDA.Models
             SocketDestinationPort = "8088";
 
             SocketBrush = Brushes.Red;
-            OpenCloseSocket = string.Format(cultureInfo, "TCP 侦听");
+            OpenCloseSocket = string.Format(cultureInfo, "TCP 渚﹀惉");
 
             SocketProtocolIsEnabled = true;
             DestinationVisibility = "Collapsed";

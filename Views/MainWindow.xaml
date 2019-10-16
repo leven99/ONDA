@@ -16,6 +16,38 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style TargetType="HeaderedContentControl">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type HeaderedContentControl}">
+                        <ContentPresenter ContentSource="Header"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DataTemplate x:Key="RecvGroupBoxHeader">
+            <TextBlock>
+                <TextBlock.Text>
+                    <MultiBinding StringFormat="{}接收区：已接收{0}字节，接收自动保存[{1}]，接收状态[{2}]">
+                        <Binding Path="RecvModel.RecvDataCount"/>
+                        <Binding Path="RecvModel.RecvAutoSave"/>
+                        <Binding Path="RecvModel.RecvEnable"/>
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+        </DataTemplate>
+
+        <DataTemplate x:Key="SendGroupBoxHeader">
+            <TextBlock>
+                <TextBlock.Text>
+                    <MultiBinding StringFormat="{}发送区：已发送{0}字节">
+                        <Binding Path="SendModel.SendDataCount"/>
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+        </DataTemplate>
     </Window.Resources>
 
     <!--Root-->
@@ -44,7 +76,7 @@
                     
                 </MenuItem>
                 <MenuItem x:Name="ViewMenuItem" Header="视图(_V)" Style="{StaticResource MainMenuItem}">
-                    
+                    <MenuItem x:Name="EveryMenuItem" Header="精简视图"/>
                 </MenuItem>
                 <MenuItem x:Name="HelpMenuItem" Header="帮助(_H)" Style="{StaticResource MainMenuItem}">
                     <MenuItem x:Name="VerMenuItem" Header="{Binding HelpModel.VerInfo}" IsEnabled="False"/>
@@ -114,6 +146,8 @@
 
                 <!--接收区-->
                 <GroupBox x:Name="ReceDataGroupBox"
+                          Header="{Binding}"
+                          HeaderTemplate="{StaticResource RecvGroupBoxHeader}"
                           Grid.Row="0"
                           Margin="5,0,5,2"
                           BorderBrush="#FF007ACD">
@@ -121,7 +155,8 @@
                 
                 <!--发送区-->
                 <GroupBox x:Name="SendDataGroupBox"
-                          Header="{Binding SendModel.SendDataCount}" HeaderStringFormat="{}发送区：已发送{0}字节"
+                          Header="{Binding}"
+                          HeaderTemplate="{StaticResource SendGroupBoxHeader}"
                           Grid.Row="1"
                           Margin="5,0,5,3"
                           BorderBrush="#FF007ACD">
@@ -190,7 +225,7 @@
                                   IsEnabled="{Binding SocketModel.SocketProtocolIsEnabled}"
                                   SelectionChanged="ProtocolComboBox_SelectionChanged"
                                   HorizontalContentAlignment="Center"/>
-                        <TextBlock x:Name="DestinationAddressTextBlock" Text="目的 IP 地址："
+                        <TextBlock x:Name="DestinationAddressTextBlock" Text="目的IP地址："
                                    Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
                                    Style="{StaticResource ConfigTextBlock}"
                                    HorizontalAlignment="Left"
@@ -208,7 +243,7 @@
                                  Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
                                  Style="{StaticResource ConfigTextBox}"
                                  Visibility="{Binding SocketModel.DestinationVisibility}"/>
-                        <TextBlock x:Name="SourceAddressTextBlock" Text="源 IP 地址："
+                        <TextBlock x:Name="SourceAddressTextBlock" Text="源IP地址："
                                    Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2"
                                    Style="{StaticResource ConfigTextBlock}"
                                    HorizontalAlignment="Right"/>

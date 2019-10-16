@@ -1,9 +1,7 @@
 ﻿using Microsoft.Win32;
 using SocketDA.Models;
 using System;
-using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Threading.Tasks;
 using System.Windows.Threading;
 
 namespace SocketDA.ViewModels
@@ -68,7 +66,7 @@ namespace SocketDA.ViewModels
         #endregion
 
         #region 辅助区
-        public bool _HexSend;
+        private bool _HexSend;
         public bool HexSend
         {
             get
@@ -94,7 +92,7 @@ namespace SocketDA.ViewModels
             }
         }
 
-        public bool _AutoSend;
+        private bool _AutoSend;
         public bool AutoSend
         {
             get
@@ -126,7 +124,7 @@ namespace SocketDA.ViewModels
             }
         }
 
-        public bool _SaveRecv;
+        private bool _SaveRecv;
         public bool SaveRecv
         {
             get
@@ -154,27 +152,27 @@ namespace SocketDA.ViewModels
         #endregion
 
         #region 自动发送定时器实现
-        public DispatcherTimer AutoSendDispatcherTimer = new DispatcherTimer();
+        private readonly DispatcherTimer AutoSendDispatcherTimer = new DispatcherTimer();
 
-        public void InitAutoSendTimer()
+        private void InitAutoSendTimer()
         {
             AutoSendDispatcherTimer.IsEnabled = false;
             AutoSendDispatcherTimer.Tick += AutoSendDispatcherTimer_Tick;
         }
 
-        public void AutoSendDispatcherTimer_Tick(object sender, EventArgs e)
+        private void AutoSendDispatcherTimer_Tick(object sender, EventArgs e)
         {
             Send();
         }
 
-        public void StartAutoSendTimer(int interval)
+        private void StartAutoSendTimer(int interval)
         {
             AutoSendDispatcherTimer.IsEnabled = true;
             AutoSendDispatcherTimer.Interval = TimeSpan.FromMilliseconds(interval);
             AutoSendDispatcherTimer.Start();
         }
 
-        public void StopAutoSendTimer()
+        private void StopAutoSendTimer()
         {
             AutoSendDispatcherTimer.IsEnabled = false;
             AutoSendDispatcherTimer.Stop();
@@ -249,39 +247,40 @@ namespace SocketDA.ViewModels
             }
             else if (SocketModel.SocketProtocolSelectedIndex == 2)
             {
-
+                SocketModel.DestinationVisibility = "Collapsed";
+                SocketModel.OpenCloseSocket = string.Format(cultureInfo, "UDP 侦听");
             }
             else if (SocketModel.SocketProtocolSelectedIndex == 3)
             {
-
+                SocketModel.DestinationVisibility = "Visible";
+                SocketModel.OpenCloseSocket = string.Format(cultureInfo, "UDP 连接");
             }
         }
         #endregion
 
         public MainWindowViewModel()
         {
-            HelpModel = new HelpModel();
-            HelpModel.HelpDataContext();
-
-            RecvModel = new RecvModel();
-            RecvModel.RecvDataContext();
+            SocketModel = new SocketModel();
+            SocketModel.SocketDataContext();
 
             SendModel = new SendModel();
             SendModel.SendDataContext();
 
-            SocketModel = new SocketModel();
-            SocketModel.SocketDataContext();
-
-            DepictInfo = string.Format(cultureInfo, "网络端口调试助手");
+            RecvModel = new RecvModel();
+            RecvModel.RecvDataContext();
 
             TimerModel = new TimerModel();
             TimerModel.TimerDataContext();
 
+            HelpModel = new HelpModel();
+            HelpModel.HelpDataContext();
+
+            SaveRecv = false;
             HexSend = false;
             AutoSend = false;
             InitAutoSendTimer();
 
-            SaveRecv = false;
+            DepictInfo = string.Format(cultureInfo, "网络端口调试助手");
         }
     }
 }
