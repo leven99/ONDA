@@ -41,7 +41,7 @@
                 <Setter Property="Margin" Value="3,5,0,0"/>
             </Style>
             <Style TargetType="ComboBox" x:Key="ConfigComboBox">
-                <Setter Property="Margin" Value="0,5,3,3"/>
+                <Setter Property="Margin" Value="0,5,3,0"/>
                 <Setter Property="Padding" Value="6,6,0,6"/>
                 <Setter Property="HorizontalAlignment" Value="Stretch"/>
                 <Setter Property="ItemContainerStyle">

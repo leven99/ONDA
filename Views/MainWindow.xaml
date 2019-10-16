@@ -233,7 +233,8 @@
                         <ComboBox x:Name="DestinationAddressComboBox"
                                   Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
                                   Style="{DynamicResource ConfigComboBox}"
-                                  Visibility="{Binding SocketModel.DestinationVisibility}"/>
+                                  Visibility="{Binding SocketModel.DestinationVisibility}"
+                                  IsEditable="True"/>
                         <TextBlock x:Name="DestinationPortTextBlock" Text="目的端口号："
                                    Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
                                    Style="{StaticResource ConfigTextBlock}"
@@ -249,7 +250,8 @@
                                    HorizontalAlignment="Right"/>
                         <ComboBox x:Name="SourceAddressComboBox"
                                   Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2"
-                                  Style="{DynamicResource ConfigComboBox}"/>
+                                  Style="{DynamicResource ConfigComboBox}"
+                                  IsEditable="True"/>
                         <TextBlock x:Name="SourcePortTextBlock" Text="源端口号："
                                    Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2"
                                    Style="{StaticResource ConfigTextBlock}"
