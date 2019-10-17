@@ -3,6 +3,7 @@ using SocketDA.Models;
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Windows.Threading;
 
 namespace SocketDA.ViewModels
@@ -11,6 +12,10 @@ namespace SocketDA.ViewModels
     {
         #region 字段
         private Socket SSocket = null;
+
+        private static ManualResetEvent ConnectDone = new ManualResetEvent(false);
+        private static ManualResetEvent SendDone = new ManualResetEvent(false);
+        private static ManualResetEvent ReceiveDone = new ManualResetEvent(false);
 
         private string DataRecvPath = string.Empty;   /* 数据接收路径 */
         #endregion
@@ -42,6 +47,7 @@ namespace SocketDA.ViewModels
         {
             try
             {
+                /* 对目的IP地址判断有效性 */
                 if (IPAddress.TryParse(SocketModel.SocketDestinationIPAddressText, out _))
                 {
                     IPAddress _IPAddress = IPAddress.Parse(SocketModel.SocketDestinationIPAddressText);
@@ -54,10 +60,15 @@ namespace SocketDA.ViewModels
                     SocketModel.SocketDestinationIPAddress = _IPAddress;
                 }
 
+                /* 对目的端口号、源端口号判断有效性 */
+
                 /* TCP Server */
                 if (SocketModel.SocketProtocolSelectedIndex == 0)
                 {
-                    if(SocketModel.SocketSourceIPAddress.IsIPv6LinkLocal)
+                    IPEndPoint localIPEndPoint = new IPEndPoint(SocketModel.SocketSourceIPAddress, SocketModel.SocketSourcePort);
+
+                    /* 创建 TCP/IP Socket（区分 IPv4、IPv6） */
+                    if (SocketModel.SocketSourceIPAddress.IsIPv6LinkLocal)
                     {
                         SSocket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.IPv6);
                     }
@@ -65,26 +76,62 @@ namespace SocketDA.ViewModels
                     {
                         SSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IPv4);
                     }
+
+                    /* 绑定本地Point */
+                    SSocket.Bind(localIPEndPoint);
+
+                    /* 侦听客户端连接（排队长度最大设置为10个【可以随意设置】） */
+                    SSocket.Listen(10);
+
+                    SocketModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 断开");
                 }
                 /* TCP Client */
                 else if (SocketModel.SocketProtocolSelectedIndex == 1)
                 {
+                    IPEndPoint RemoteIPEndPoint = new IPEndPoint(SocketModel.SocketDestinationIPAddress, SocketModel.SocketDestinationPort);
 
+                    /* 创建 TCP/IP Socket（区分 IPv4、IPv6） */
+                    if (SocketModel.SocketDestinationIPAddress.IsIPv6LinkLocal)
+                    {
+                        SSocket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.IPv6);
+                    }
+                    else
+                    {
+                        SSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IPv4);
+                    }
+
+                    /* 连接远程主机（服务器） */
+                    SSocket.BeginConnect(RemoteIPEndPoint, new AsyncCallback(ConnectCallback), SSocket);
+                    ConnectDone.WaitOne();
+
+                    SocketModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 断开");
                 }
                 /* UDP Server */
                 else if (SocketModel.SocketProtocolSelectedIndex == 2)
                 {
-
+                    SocketModel.OpenCloseSocket = string.Format(cultureInfo, "UDP 断开");
                 }
                 /* UDP Client */
                 else if (SocketModel.SocketProtocolSelectedIndex == 3)
                 {
-
+                    SocketModel.OpenCloseSocket = string.Format(cultureInfo, "UDP 断开");
                 }
             }
             catch
             {
                 DepictInfo = string.Format(cultureInfo, "请检查参数是否正确！");
+            }
+        }
+
+        private void ConnectCallback(IAsyncResult ar)
+        {
+            try
+            {
+
+            }
+            catch
+            {
+
             }
         }
         #endregion
