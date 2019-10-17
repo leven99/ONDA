@@ -54,7 +54,7 @@
                 </Setter>
             </Style>
             <Style TargetType="TextBox" x:Key="ConfigTextBox">
-                <Setter Property="Margin" Value="0,5"/>
+                <Setter Property="Margin" Value="0,5,3,5"/>
                 <Setter Property="Padding" Value="6,5,6,5"/>
             </Style>
             <Style TargetType="Ellipse" x:Key="ConfigEilipse">
