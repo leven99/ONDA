@@ -145,6 +145,40 @@ namespace SocketDA.Models
             }
         }
 
+        private string _IPString;
+        public string IPString
+        {
+            get
+            {
+                return _IPString;
+            }
+            set
+            {
+                if (_IPString != value)
+                {
+                    _IPString = value;
+                    RaisePropertyChanged(nameof(IPString));
+                }
+            }
+        }
+
+        private string _PortString;
+        public string PortString
+        {
+            get
+            {
+                return _PortString;
+            }
+            set
+            {
+                if (_PortString != value)
+                {
+                    _PortString = value;
+                    RaisePropertyChanged(nameof(PortString));
+                }
+            }
+        }
+
         public void SocketDataContext()
         {
             SocketProtocolItemsSource = new Collection<string>
@@ -162,6 +196,9 @@ namespace SocketDA.Models
 
             SocketProtocolIsEnabled = true;
             DestinationVisibility = "Collapsed";
+
+            IPString = "IP";
+            PortString = "Port";
         }
     }
 }

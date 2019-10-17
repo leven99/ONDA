@@ -39,7 +39,9 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0">
                     <TextBlock.Text>
-                        <MultiBinding StringFormat="{}接收区：已接收{0}字节，接收自动保存[{1}]，接收状态[{2}]">
+                        <MultiBinding StringFormat="{}[{0}:{1}]接收区：已接收{2}字节，接收自动保存[{3}]，接收状态[{4}]">
+                            <Binding Path="SocketModel.IPString"/>
+                            <Binding Path="SocketModel.PortString"/>
                             <Binding Path="RecvModel.RecvDataCount"/>
                             <Binding Path="RecvModel.RecvAutoSave"/>
                             <Binding Path="RecvModel.RecvEnable"/>
@@ -54,7 +56,9 @@
         <DataTemplate x:Key="SendGroupBoxHeader">
             <TextBlock>
                 <TextBlock.Text>
-                    <MultiBinding StringFormat="{}发送区：已发送{0}字节">
+                    <MultiBinding StringFormat="{}[{0}:{1}]发送区：已发送{2}字节">
+                        <Binding Path="SocketModel.IPString"/>
+                        <Binding Path="SocketModel.PortString"/>
                         <Binding Path="SendModel.SendDataCount"/>
                     </MultiBinding>
                 </TextBlock.Text>
