@@ -66,6 +66,23 @@ namespace SocketDA.Models
         }
         #endregion
 
+        private string _RecvData;
+        public string RecvData
+        {
+            get
+            {
+                return _RecvData;
+            }
+            set
+            {
+                if (_RecvData != value)
+                {
+                    _RecvData = value;
+                    RaisePropertyChanged(nameof(RecvData));
+                }
+            }
+        }
+
         /// <summary>
         /// 辅助区 - 十六进制接收
         /// </summary>
@@ -92,6 +109,7 @@ namespace SocketDA.Models
             RecvAutoSave = string.Format(cultureInfo, "已停止");
             RecvEnable = string.Format(cultureInfo, " 提示：双击文本框更改接收状态 ");
 
+            RecvData = string.Empty;
             HexRecv = false;
         }
     }

@@ -18,6 +18,10 @@
         </Style>
 
         <Style TargetType="HeaderedContentControl">
+            <Setter Property="OverridesDefaultStyle"
+          Value="True" />
+            <Setter Property="SnapsToDevicePixels"
+          Value="True" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type HeaderedContentControl}">
@@ -28,15 +32,23 @@
         </Style>
 
         <DataTemplate x:Key="RecvGroupBoxHeader">
-            <TextBlock>
-                <TextBlock.Text>
-                    <MultiBinding StringFormat="{}接收区：已接收{0}字节，接收自动保存[{1}]，接收状态[{2}]">
-                        <Binding Path="RecvModel.RecvDataCount"/>
-                        <Binding Path="RecvModel.RecvAutoSave"/>
-                        <Binding Path="RecvModel.RecvEnable"/>
-                    </MultiBinding>
-                </TextBlock.Text>
-            </TextBlock>
+            <Grid Margin="0,4,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0">
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="{}接收区：已接收{0}字节，接收自动保存[{1}]，接收状态[{2}]">
+                            <Binding Path="RecvModel.RecvDataCount"/>
+                            <Binding Path="RecvModel.RecvAutoSave"/>
+                            <Binding Path="RecvModel.RecvEnable"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+                <Image Grid.Column="1" Source="/SocketDA;component/icon/Close.png"
+                       Margin="6,0,0,0" Width="11" Height="11"/>
+            </Grid>
         </DataTemplate>
 
         <DataTemplate x:Key="SendGroupBoxHeader">
@@ -48,6 +60,52 @@
                 </TextBlock.Text>
             </TextBlock>
         </DataTemplate>
+
+        <Style x:Key="TabcontrolStyle" TargetType="{x:Type TabControl}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TabControl}">
+                        <TabPanel x:Name="RecvTabPanel"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TabcontrolStyles" TargetType="{x:Type TabControl}">
+            <Setter Property="Margin" Value="6,0,5,2"/>
+            <Setter Property="BorderBrush" Value="#FF007ACD"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TabControl}">
+                        <Grid x:Name="templateRoot"
+                              ClipToBounds="true"
+                              SnapsToDevicePixels="true"
+                              KeyboardNavigation.TabNavigation="Local">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="1*"/>
+                            </Grid.RowDefinitions>
+                            <TabPanel x:Name="headerPanel" Grid.Row="0" Grid.Column="0"
+                                      Margin="2,2,2,0"
+                                      IsItemsHost="true"
+                                      KeyboardNavigation.TabIndex="1" Panel.ZIndex="1"/>
+                            <Border x:Name="contentPanel" Grid.Row="1" Grid.Column="0"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    Background="{TemplateBinding Background}"
+                                    KeyboardNavigation.DirectionalNavigation="Contained"
+                                    KeyboardNavigation.TabIndex="2"
+                                    KeyboardNavigation.TabNavigation="Local">
+                                <ContentPresenter x:Name="PART_SelectedContentHost"
+                                                  ContentSource="SelectedContent"
+                                                  Margin="{TemplateBinding Padding}"
+                                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <!--Root-->
@@ -147,20 +205,22 @@
                 <!--接收区-->
                 <TabControl x:Name="RecvTabControl"
                             Margin="6,0,5,2"
-                            BorderBrush="#FF007ACD">
+                            BorderBrush="#FF007ACD"
+                            Style="{StaticResource TabcontrolStyles}">
                     <TabItem x:Name="RecvTabItem"
                              Header="{Binding}"
                              HeaderTemplate="{StaticResource RecvGroupBoxHeader}">
                         <Grid x:Name="RecvGrid">
                             <RichTextBox x:Name="RecvRichTextBox"
-                                         BorderBrush="#FF0078D7" Margin="2">
+                                         Margin="2"
+                                         BorderBrush="#FF007ACD"
+                                         Block.LineHeight="6">
                                 <FlowDocument>
                                     <Paragraph>
-                                        <Run Text=""/>
+                                        <Run Text="{Binding RecvModel.RecvData}"/>
                                     </Paragraph>
                                 </FlowDocument>
                             </RichTextBox>
-
                         </Grid>
                     </TabItem>
                 </TabControl>
@@ -288,6 +348,7 @@
                           BorderBrush="#FF007ACD"
                           Visibility="{Binding HelpModel.ViewVisibility}">
                     <DataGrid x:Name="ConnectDataGrid"
+                              HeadersVisibility="None"
                               BorderBrush="#FF007ACD" Background="White"/>
                 </GroupBox>
                 
