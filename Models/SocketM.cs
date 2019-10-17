@@ -47,8 +47,8 @@ namespace SocketDA.Models
             }
         }
 
-        private string _SocketDestinationIPAddress;
-        public string SocketDestinationIPAddress
+        private IPAddress _SocketDestinationIPAddress;
+        public IPAddress SocketDestinationIPAddress
         {
             get
             {
@@ -146,6 +146,40 @@ namespace SocketDA.Models
                 {
                     _SocketDestinationIPAddressSelectedIndex = value;
                     RaisePropertyChanged(nameof(SocketDestinationIPAddressSelectedIndex));
+                }
+            }
+        }
+
+        private string _SocketSourceIPAddressText;
+        public string SocketSourceIPAddressText
+        {
+            get
+            {
+                return _SocketSourceIPAddressText;
+            }
+            set
+            {
+                if (_SocketSourceIPAddressText != value)
+                {
+                    _SocketSourceIPAddressText = value;
+                    RaisePropertyChanged(nameof(SocketSourceIPAddressText));
+                }
+            }
+        }
+
+        private string _SocketDestinationIPAddressText;
+        public string SocketDestinationIPAddressText
+        {
+            get
+            {
+                return _SocketDestinationIPAddressText;
+            }
+            set
+            {
+                if (_SocketDestinationIPAddressText != value)
+                {
+                    _SocketDestinationIPAddressText = value;
+                    RaisePropertyChanged(nameof(SocketDestinationIPAddressText));
                 }
             }
         }

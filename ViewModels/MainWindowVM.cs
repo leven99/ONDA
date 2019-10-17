@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using SocketDA.Models;
 using System;
+using System.Net;
 using System.Net.Sockets;
 using System.Windows.Threading;
 
@@ -41,18 +42,41 @@ namespace SocketDA.ViewModels
         {
             try
             {
+                if (IPAddress.TryParse(SocketModel.SocketDestinationIPAddressText, out _))
+                {
+                    IPAddress _IPAddress = IPAddress.Parse(SocketModel.SocketDestinationIPAddressText);
+
+                    if (!SocketModel.SocketDestinationIPAddressItemsSource.Contains(_IPAddress))
+                    {
+                        SocketModel.SocketDestinationIPAddressItemsSource.Add(_IPAddress);
+                    }
+
+                    SocketModel.SocketDestinationIPAddress = _IPAddress;
+                }
+
+                /* TCP Server */
                 if (SocketModel.SocketProtocolSelectedIndex == 0)
                 {
-                    
+                    if(SocketModel.SocketSourceIPAddress.IsIPv6LinkLocal)
+                    {
+                        SSocket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.IPv6);
+                    }
+                    else
+                    {
+                        SSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IPv4);
+                    }
                 }
+                /* TCP Client */
                 else if (SocketModel.SocketProtocolSelectedIndex == 1)
                 {
 
                 }
+                /* UDP Server */
                 else if (SocketModel.SocketProtocolSelectedIndex == 2)
                 {
 
                 }
+                /* UDP Client */
                 else if (SocketModel.SocketProtocolSelectedIndex == 3)
                 {
 
@@ -60,7 +84,7 @@ namespace SocketDA.ViewModels
             }
             catch
             {
-                
+                DepictInfo = string.Format(cultureInfo, "请检查参数是否正确！");
             }
         }
         #endregion
