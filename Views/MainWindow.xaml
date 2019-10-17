@@ -138,7 +138,11 @@
                     
                 </MenuItem>
                 <MenuItem x:Name="ViewMenuItem" Header="视图(_V)" Style="{StaticResource MainMenuItem}">
-                    <MenuItem x:Name="EveryMenuItem" Header="精简视图"/>
+                    <MenuItem x:Name="AssistEveryMenuItem" Header="辅助区" IsChecked="{Binding HelpModel.AssistReducedEnable}"
+                              Click="AssistEveryMenuItem_Click"/>
+                    <Separator/>
+                    <MenuItem x:Name="EveryMenuItem" Header="精简视图" IsChecked="{Binding HelpModel.ReducedEnable}"
+                              Click="EveryMenuItem_Click"/>
                 </MenuItem>
                 <MenuItem x:Name="HelpMenuItem" Header="帮助(_H)" Style="{StaticResource MainMenuItem}">
                     <MenuItem x:Name="VerMenuItem" Header="{Binding HelpModel.VerInfo}" IsEnabled="False"/>
@@ -269,7 +273,7 @@
 
                 <!--Socket配置区-->
                 <GroupBox x:Name="ConfigGroupPort" Header="网络配置" Grid.Row="0"
-                          Margin="0,0,5,2"
+                          Margin="0,0,5,3"
                           BorderBrush="#FF007ACD"
                           Visibility="{Binding HelpModel.ViewVisibility}">
                     <Grid x:Name="ConfigGrid">
@@ -356,7 +360,7 @@
                 
                 <!--连接区-->
                 <GroupBox x:Name="ConnectGroupBox" Header="连接" Grid.Row="1"
-                          Margin="0,0,5,2"
+                          Margin="0,0,5,3"
                           BorderBrush="#FF007ACD"
                           Visibility="{Binding HelpModel.ViewVisibility}">
                     <DataGrid x:Name="ConnectDataGrid"
@@ -368,7 +372,7 @@
                 <GroupBox x:Name="AssistGroupBox" Header="辅助" Grid.Row="2"
                           Margin="0,0,5,3"
                           BorderBrush="#FF007ACD"
-                          Visibility="{Binding HelpModel.ViewVisibility}">
+                          Visibility="{Binding HelpModel.AssistViewVisibility}">
                     <Grid x:Name="AssistGrid">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="1*"/>

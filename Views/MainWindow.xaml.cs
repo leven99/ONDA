@@ -61,6 +61,28 @@ namespace SocketDA.Views
         }
         #endregion
 
+        #region 视图
+        /// <summary>
+        /// 辅助区视图
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AssistEveryMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            mainWindowViewModel.AssistReduced_Enable();
+        }
+
+        /// <summary>
+        /// 精简视图
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void EveryMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            mainWindowViewModel.Reduced_Enable();
+        }
+        #endregion
+
         #region 帮助
         /// <summary>
         /// 检查更新

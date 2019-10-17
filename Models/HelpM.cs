@@ -82,6 +82,23 @@ namespace SocketDA.Models
             }
         }
 
+        private bool _AssistReducedEnable;
+        public bool AssistReducedEnable
+        {
+            get
+            {
+                return _AssistReducedEnable;
+            }
+            set
+            {
+                if (_AssistReducedEnable != value)
+                {
+                    _AssistReducedEnable = value;
+                    RaisePropertyChanged(nameof(AssistReducedEnable));
+                }
+            }
+        }
+
         /// <summary>
         /// 精简视图 - 视图可见性
         /// </summary>
@@ -98,6 +115,23 @@ namespace SocketDA.Models
                 {
                     _ViewVisibility = value;
                     RaisePropertyChanged(nameof(ViewVisibility));
+                }
+            }
+        }
+
+        private string _AssistViewVisibility;
+        public string AssistViewVisibility
+        {
+            get
+            {
+                return _AssistViewVisibility;
+            }
+            set
+            {
+                if (_AssistViewVisibility != value)
+                {
+                    _AssistViewVisibility = value;
+                    RaisePropertyChanged(nameof(AssistViewVisibility));
                 }
             }
         }
@@ -164,7 +198,10 @@ namespace SocketDA.Models
             UpdateInfo = string.Format(cultureInfo, "SocketDA发现新版本le........");
 
             ReducedEnable = false;
+            AssistReducedEnable = false;
+
             ViewVisibility = "Visible";
+            AssistViewVisibility = "Visible";
 
             StatusBarProgressBarVisibility = "Collapsed";
             StatusBarProgressBarValue = 0;

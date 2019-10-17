@@ -42,6 +42,48 @@ namespace SocketDA.ViewModels
         }
         #endregion
 
+        #region 菜单栏
+
+        #region 选项
+        #endregion
+
+        #region 视图
+        public void AssistReduced_Enable()
+        {
+            HelpModel.AssistReducedEnable = !HelpModel.AssistReducedEnable;
+
+            if(HelpModel.AssistReducedEnable)
+            {
+                HelpModel.AssistViewVisibility = "Collapsed";
+            }
+            else
+            {
+                HelpModel.AssistViewVisibility = "Visible";
+            }
+        }
+
+        public void Reduced_Enable()
+        {
+            HelpModel.ReducedEnable = !HelpModel.ReducedEnable;
+
+            if (HelpModel.ReducedEnable)
+            {
+                HelpModel.ViewVisibility = "Collapsed";
+            }
+            else
+            {
+                HelpModel.ViewVisibility = "Visible";
+            }
+
+            AssistReduced_Enable();
+        }
+        #endregion
+
+        #region 帮助
+        #endregion
+
+        #endregion
+
         #region 打开/关闭套接字
         public void OpenSocket()
         {
