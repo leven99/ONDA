@@ -5,9 +5,6 @@ using System.Windows.Input;
 
 namespace SocketDA.Views
 {
-    /// <summary>
-    /// MainWindow.xaml 的交互逻辑
-    /// </summary>
     public partial class MainWindow : Window
     {
         private readonly MainWindowViewModel mainWindowViewModel = null;
@@ -91,7 +88,7 @@ namespace SocketDA.Views
         /// <param name="e"></param>
         private void VerUpMenuItem_Click(object sender, RoutedEventArgs e)
         {
-
+            mainWindowViewModel.Update();
         }
 
         /// <summary>
@@ -101,7 +98,7 @@ namespace SocketDA.Views
         /// <param name="e"></param>
         private void RPMenuItem_Click(object sender, RoutedEventArgs e)
         {
-
+            Process.Start("https://gitee.com/leven9/SocketDA");
         }
 
         /// <summary>
@@ -111,7 +108,7 @@ namespace SocketDA.Views
         /// <param name="e"></param>
         private void IssueMenuItem_Click(object sender, RoutedEventArgs e)
         {
-
+            Process.Start("https://gitee.com/leven9/SocketDA/issues");
         }
         #endregion
 
@@ -147,14 +144,14 @@ namespace SocketDA.Views
         #region 发送
         private void Send(object sender, RoutedEventArgs e)
         {
-            
+            mainWindowViewModel.Send();
         }
         #endregion
 
         #region 发送文件
         private void SendFile(object sender, RoutedEventArgs e)
         {
-            
+            mainWindowViewModel.SendFile();
         }
         #endregion
 

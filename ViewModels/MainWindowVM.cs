@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using SocketDA.Models;
 using System;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -13,9 +14,12 @@ namespace SocketDA.ViewModels
         #region 字段
         private Socket SSocket = null;
 
-        private static ManualResetEvent ConnectDone = new ManualResetEvent(false);
-        private static ManualResetEvent SendDone = new ManualResetEvent(false);
-        private static ManualResetEvent ReceiveDone = new ManualResetEvent(false);
+        private readonly int SocketListenBacklog = 10;
+
+        private readonly ManualResetEvent AllDone = new ManualResetEvent(false);
+        private readonly ManualResetEvent ConnectDone = new ManualResetEvent(false);
+        private readonly ManualResetEvent SendDone = new ManualResetEvent(false);
+        private readonly ManualResetEvent ReceiveDone = new ManualResetEvent(false);
 
         private string DataRecvPath = string.Empty;   /* 数据接收路径 */
         #endregion
@@ -80,6 +84,10 @@ namespace SocketDA.ViewModels
         #endregion
 
         #region 帮助
+        public void Update()
+        {
+
+        }
         #endregion
 
         #endregion
@@ -87,6 +95,11 @@ namespace SocketDA.ViewModels
         #region 打开/关闭套接字
         public void OpenSocket()
         {
+            if(SSocket != null)
+            {
+                CloseSocket(SSocket);
+            }
+
             try
             {
                 /* 对目的IP地址判断有效性 */
@@ -122,8 +135,8 @@ namespace SocketDA.ViewModels
                     /* 绑定本地Point */
                     SSocket.Bind(localIPEndPoint);
 
-                    /* 侦听客户端连接（排队长度最大设置为10个【可以随意设置】） */
-                    SSocket.Listen(10);
+                    /* 侦听客户端连接 */
+                    SSocket.Listen(SocketListenBacklog);
 
                     SocketModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 断开");
                 }
@@ -165,11 +178,97 @@ namespace SocketDA.ViewModels
             }
         }
 
+        public void CloseSocket(Socket socket)
+        {
+            try
+            {
+                socket.Shutdown(SocketShutdown.Both);
+                socket.Close();
+            }
+            catch
+            {
+
+            }
+        }
+        #endregion
+
+        #region Socket回调函数
+        private void AcceptCallback(IAsyncResult ar)
+        {
+            try
+            {
+                /* 主线程继续 */
+                AllDone.Set();
+
+                /* 获取并处理客户端请求的套接字 */
+                Socket _Socket = (Socket)ar.AsyncState;
+                Socket _SocketAccept = _Socket.EndAccept(ar);
+
+                /* 创建状态对象（state object）*/
+                StateObject _StateObject = new StateObject();
+                _StateObject.workSocket = _SocketAccept;
+
+                /* 从客户端接收数据 */
+            }
+            catch
+            {
+
+            }
+        }
+
         private void ConnectCallback(IAsyncResult ar)
         {
             try
             {
+                /* 从状态对象（state object）检索 Socket */
+                Socket _Socket = (Socket)ar.AsyncState;
 
+                /* 连接服务器 */
+                _Socket.EndConnect(ar);
+
+                /* 已连接服务器 */
+                ConnectDone.Set();
+            }
+            catch
+            {
+
+            }
+        }
+
+        private void ReceiveCallback(IAsyncResult ar)
+        {
+            try
+            {
+                /* 从状态对象（state object）检索 Socket */
+                StateObject _StateObject = (StateObject)ar.AsyncState;
+                Socket _Socket = _StateObject.workSocket;
+
+                /* 从远程设备接收数据 */
+                int _BytesSent = _Socket.EndReceive(ar);
+
+                if(_BytesSent > 0)
+                {
+
+                }
+            }
+            catch
+            {
+
+            }
+        }
+
+        private void SendCallback(IAsyncResult ar)
+        {
+            try
+            {
+                /* 从状态对象（state object）检索 Socket */
+                Socket _Socket = (Socket)ar.AsyncState;
+
+                /* 向远程设备发送数据 */
+                int _BytesSent = _Socket.EndSend(ar);
+
+                /* 已发送数据 */
+                SendDone.Set();
             }
             catch
             {
@@ -342,6 +441,27 @@ namespace SocketDA.ViewModels
         public void ClearCount()
         {
 
+        }
+        #endregion
+
+        #region 保存接收数据
+        public void SaveRecvData(string ReceData)
+        {
+            try
+            {
+                if (DataRecvPath == null)
+                {
+                    Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + "\\ReceData\\");
+                }
+                else
+                {
+
+                }
+            }
+            catch
+            {
+
+            }
         }
         #endregion
 

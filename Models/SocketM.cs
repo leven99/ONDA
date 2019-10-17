@@ -1,11 +1,24 @@
 ﻿using SocketDA.ViewModels;
 using System.Collections.ObjectModel;
 using System.Net;
-using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using System.Text;
 using System.Windows.Media;
 
 namespace SocketDA.Models
 {
+    class StateObject
+    {
+        /* 接收 Socket */
+        public Socket workSocket = null;
+        /* 接收缓冲区大小 */
+        public const int BufferSize = 1024;
+        /* 接收缓冲区 */  
+        public byte[] buffer = new byte[BufferSize];
+        /* 接收数据 */ 
+        public StringBuilder sb = new StringBuilder();
+    }
+
     class SocketModel : MainWindowBase
     {
         public Collection<string> SocketProtocolItemsSource { get; set; }
