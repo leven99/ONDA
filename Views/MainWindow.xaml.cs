@@ -118,7 +118,7 @@ namespace SocketDA.Views
         #region 打开/关闭Socket
         private void OpenCloseSocket(object sender, RoutedEventArgs e)
         {
-            
+            mainWindowViewModel.OpenSocket();
         }
         #endregion
 

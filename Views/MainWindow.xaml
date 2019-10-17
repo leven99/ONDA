@@ -301,13 +301,15 @@
                                   IsEnabled="{Binding SocketModel.SocketProtocolIsEnabled}"
                                   SelectionChanged="ProtocolComboBox_SelectionChanged"
                                   HorizontalContentAlignment="Center"/>
-                        <TextBlock x:Name="DestinationAddressTextBlock" Text="目的IP地址："
+                        <TextBlock x:Name="DestinationAddressTextBlock" Text="目的IP地址(IPv4,IPv6)："
                                    Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
                                    Style="{StaticResource ConfigTextBlock}"
                                    HorizontalAlignment="Left"
                                    Visibility="{Binding SocketModel.DestinationVisibility}"/>
-                        <ComboBox x:Name="DestinationAddressComboBox"
-                                  Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                        <ComboBox x:Name="DestinationAddressComboBox" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                                  ItemsSource="{Binding SocketModel.SocketDestinationIPAddressItemsSource}"
+                                  SelectedItem="{Binding SocketModel.SocketDestinationIPAddress}"
+                                  SelectedIndex="{Binding SocketModel.SocketDestinationIPAddressSelectedIndex}"
                                   Style="{DynamicResource ConfigComboBox}"
                                   Visibility="{Binding SocketModel.DestinationVisibility}"
                                   IsEditable="True"/>
@@ -320,14 +322,16 @@
                                  Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
                                  Style="{StaticResource ConfigTextBox}"
                                  Visibility="{Binding SocketModel.DestinationVisibility}"/>
-                        <TextBlock x:Name="SourceAddressTextBlock" Text="源IP地址："
+                        <TextBlock x:Name="SourceAddressTextBlock" Text="源IP地址(IPv4,IPv6)："
                                    Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2"
                                    Style="{StaticResource ConfigTextBlock}"
                                    HorizontalAlignment="Right"/>
-                        <ComboBox x:Name="SourceAddressComboBox"
-                                  Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2"
+                        <ComboBox x:Name="SourceAddressComboBox" Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2"
+                                  ItemsSource="{Binding SocketModel.SocketSourceIPAddressItemsSource}"
+                                  SelectedItem="{Binding SocketModel.SocketSourceIPAddress}"
+                                  SelectedIndex="{Binding SocketModel.SocketSourceIPAddressSelectedIndex}"
                                   Style="{DynamicResource ConfigComboBox}"
-                                  IsEditable="True"/>
+                                  IsEditable="False"/>
                         <TextBlock x:Name="SourcePortTextBlock" Text="源端口号："
                                    Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2"
                                    Style="{StaticResource ConfigTextBlock}"

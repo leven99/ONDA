@@ -60,7 +60,7 @@ namespace SocketDA.ViewModels
             }
             catch
             {
-
+                
             }
         }
         #endregion
