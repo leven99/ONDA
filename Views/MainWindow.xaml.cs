@@ -42,7 +42,12 @@ namespace SocketDA.Views
         /// <param name="e"></param>
         private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
         {
+            if(mainWindowViewModel.SSocket != null)
+            {
+                mainWindowViewModel.CloseSocket(mainWindowViewModel.SSocket);
+            }
 
+            Close();
         }
         #endregion
 

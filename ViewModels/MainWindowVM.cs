@@ -12,7 +12,7 @@ namespace SocketDA.ViewModels
     class MainWindowViewModel : MainWindowBase
     {
         #region 字段
-        private Socket SSocket = null;
+        public Socket SSocket = null;
 
         private readonly int SocketListenBacklog = 10;
 
