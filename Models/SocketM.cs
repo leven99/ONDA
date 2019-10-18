@@ -7,7 +7,7 @@ using System.Windows.Media;
 
 namespace SocketDA.Models
 {
-    class StateObject
+    internal class StateObject
     {
         /* 接收 Socket */
         public Socket workSocket = null;

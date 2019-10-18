@@ -12,7 +12,7 @@ namespace SocketDA.ViewModels
     internal class MainWindowViewModel : MainWindowBase
     {
         #region 字段
-        private Socket SSocket = null;
+        private Socket SocketBase = null;
 
         private readonly int SocketListenBacklog = 10;
 
@@ -52,9 +52,9 @@ namespace SocketDA.ViewModels
         #region 文件
         public void ExitWindow()
         {
-            if (SSocket != null)
+            if (SocketBase != null)
             {
-                CloseSocket(SSocket);
+                CloseSocket(SocketBase);
             }
         }
         #endregion
@@ -106,9 +106,9 @@ namespace SocketDA.ViewModels
         #region 打开/关闭套接字
         public void OpenSocket()
         {
-            if(SSocket != null)
+            if(SocketBase != null)
             {
-                CloseSocket(SSocket);
+                CloseSocket(SocketBase);
             }
 
             try
@@ -136,18 +136,18 @@ namespace SocketDA.ViewModels
                     /* 创建 TCP/IP Socket（区分 IPv4、IPv6） */
                     if (SocketModel.SocketSourceIPAddress.IsIPv6LinkLocal)
                     {
-                        SSocket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.IPv6);
+                        SocketBase = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.IPv6);
                     }
                     else
                     {
-                        SSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IPv4);
+                        SocketBase = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IPv4);
                     }
 
                     /* 绑定本地Point */
-                    SSocket.Bind(localIPEndPoint);
+                    SocketBase.Bind(localIPEndPoint);
 
                     /* 侦听客户端连接 */
-                    SSocket.Listen(SocketListenBacklog);
+                    SocketBase.Listen(SocketListenBacklog);
 
                     SocketModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 断开");
                 }
@@ -159,15 +159,15 @@ namespace SocketDA.ViewModels
                     /* 创建 TCP/IP Socket（区分 IPv4、IPv6） */
                     if (SocketModel.SocketDestinationIPAddress.IsIPv6LinkLocal)
                     {
-                        SSocket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.IPv6);
+                        SocketBase = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.IPv6);
                     }
                     else
                     {
-                        SSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IPv4);
+                        SocketBase = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IPv4);
                     }
 
                     /* 连接远程主机（服务器） */
-                    SSocket.BeginConnect(RemoteIPEndPoint, new AsyncCallback(ConnectCallback), SSocket);
+                    SocketBase.BeginConnect(RemoteIPEndPoint, new AsyncCallback(ConnectCallback), SocketBase);
                     ConnectDone.WaitOne();
 
                     SocketModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 断开");

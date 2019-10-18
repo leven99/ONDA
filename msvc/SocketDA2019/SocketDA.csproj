@@ -104,6 +104,36 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="..\..\Views\MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+      <Link>Views\MainWindow.xaml</Link>
+    </Page>
+    <Page Include="..\..\Views\WPFUpdate.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+      <Link>Views\WPFUpdate.xaml</Link>
+    </Page>
+    <Page Include="..\..\Views\TCPClientPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+	  <Link>Views\TCPClientPage.xaml</Link>
+    </Page>
+    <Page Include="..\..\Views\TCPServerPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+	  <Link>Views\TCPServerPage.xaml</Link>
+    </Page>
+    <Page Include="..\..\Views\UDPClientPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+	  <Link>Views\UDPClientPage.xaml</Link>
+    </Page>
+    <Page Include="..\..\Views\UDPServerPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+	  <Link>Views\UDPServerPage.xaml</Link>
+    </Page>
     <Compile Include="..\..\ViewModels\MainWindowVM.cs">
       <Link>ViewModels\MainWindowVM.cs</Link>
     </Compile>
@@ -128,16 +158,22 @@
     <Compile Include="..\..\Models\SocketM.cs">
       <Link>Models\SocketM.cs</Link>
     </Compile>
-    <Page Include="..\..\Views\MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Link>Views\MainWindow.xaml</Link>
-    </Page>
-    <Page Include="..\..\Views\WPFUpdate.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Link>Views\WPFUpdate.xaml</Link>
-    </Page>
+    <Compile Include="..\..\ViewModels\TCPClientPageVM.cs">
+	  <Link>ViewModels\TCPClientPageVM.cs</Link>
+	</Compile>
+    <Compile Include="..\..\ViewModels\TCPServerPage.cs">
+	  <Link>ViewModels\TCPServerPage.cs</Link>
+	</Compile>
+    <Compile Include="..\..\ViewModels\UDPClientPageVM.cs">
+	  <Link>ViewModels\UDPClientPageVM.cs</Link>
+	</Compile>
+    <Compile Include="..\..\ViewModels\UDPServerPageVM.cs">
+	  <Link>ViewModels\UDPServerPageVM.cs</Link>
+	</Compile>
+    <Compile Include="..\..\App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="..\..\Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -148,9 +184,21 @@
       <SubType>Code</SubType>
       <Link>Views\WPFUpdate.xaml.cs</Link>
     </Compile>
-    <Compile Include="..\..\App.xaml.cs">
-      <DependentUpon>App.xaml</DependentUpon>
-      <SubType>Code</SubType>
+    <Compile Include="..\..\Views\TCPClientPage.xaml.cs">
+      <DependentUpon>TCPClientPage.xaml</DependentUpon>
+	  <Link>Views\TCPClientPage.xaml.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Views\TCPServerPage.xaml.cs">
+      <DependentUpon>TCPServerPage.xaml</DependentUpon>
+	  <Link>Views\TCPServerPage.xaml.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Views\UDPClientPage.xaml.cs">
+      <DependentUpon>UDPClientPage.xaml</DependentUpon>
+	  <Link>Views\UDPClientPage.xaml.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Views\UDPServerPage.xaml.cs">
+      <DependentUpon>UDPServerPage.xaml</DependentUpon>
+	  <Link>Views\UDPServerPage.xaml.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
