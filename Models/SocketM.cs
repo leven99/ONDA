@@ -19,7 +19,7 @@ namespace SocketDA.Models
         public StringBuilder sb = new StringBuilder();
     }
 
-    class SocketModel : MainWindowBase
+    internal class SocketModel : MainWindowBase
     {
         public Collection<string> SocketProtocolItemsSource { get; set; }
         public IPAddress[] SocketSourceIPAddressItemsSource { get; set; }

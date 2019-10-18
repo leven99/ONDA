@@ -2,7 +2,7 @@
 
 namespace SocketDA.Models
 {
-    public class RecvModel : MainWindowBase
+    internal class RecvModel : MainWindowBase
     {
         #region 接收区 - Header
         /// <summary>

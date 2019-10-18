@@ -4,7 +4,7 @@ using System.Timers;
 
 namespace SocketDA.Models
 {
-    public class TimerModel : MainWindowBase
+    internal class TimerModel : MainWindowBase
     {
         /// <summary>
         /// 状态栏 - 系统时间

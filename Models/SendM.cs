@@ -2,7 +2,7 @@
 
 namespace SocketDA.Models
 {
-    public class SendModel : MainWindowBase
+    internal class SendModel : MainWindowBase
     {
         /// <summary>
         /// 发送区Header中的发送计数

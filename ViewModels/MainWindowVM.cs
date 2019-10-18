@@ -9,10 +9,10 @@ using System.Windows.Threading;
 
 namespace SocketDA.ViewModels
 {
-    class MainWindowViewModel : MainWindowBase
+    internal class MainWindowViewModel : MainWindowBase
     {
         #region 字段
-        public Socket SSocket = null;
+        private Socket SSocket = null;
 
         private readonly int SocketListenBacklog = 10;
 
@@ -29,6 +29,7 @@ namespace SocketDA.ViewModels
         public RecvModel RecvModel { get; set; }
         public TimerModel TimerModel { get; set; }
         public HelpModel HelpModel { get; set; }
+        public GitRelease LatestRelease { get; set; }
 
         #region 状态栏- 信息描述
         private string _DepictInfo;
@@ -47,6 +48,16 @@ namespace SocketDA.ViewModels
         #endregion
 
         #region 菜单栏
+
+        #region 文件
+        public void ExitWindow()
+        {
+            if (SSocket != null)
+            {
+                CloseSocket(SSocket);
+            }
+        }
+        #endregion
 
         #region 选项
         #endregion
