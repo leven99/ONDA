@@ -118,13 +118,17 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <Button x:Name="TCPServerButton" Content="TCP Server" Grid.Column="0"
-                        Style="{StaticResource SocketButton}"/>
+                        Style="{StaticResource SocketButton}"
+                        Background="Black" BorderBrush="Black" Foreground="White"/>
                 <Button x:Name="TCPClientButton" Content="TCP Client" Grid.Column="1"
-                        Style="{StaticResource SocketButton}"/>
+                        Style="{StaticResource SocketButton}"
+                        Background="White" BorderBrush="White" Foreground="Black"/>
                 <Button x:Name="UDPServerButton" Content="UDP Server" Grid.Column="2"
-                        Style="{StaticResource SocketButton}"/>
+                        Style="{StaticResource SocketButton}"
+                        Background="White" BorderBrush="White" Foreground="Black"/>
                 <Button x:Name="UDPClientButton" Content="UDP Client" Grid.Column="3"
-                        Style="{StaticResource SocketButton}"/>
+                        Style="{StaticResource SocketButton}"
+                        Background="White" BorderBrush="White" Foreground="Black"/>
             </Grid>
             <Button x:Name="MinButton" Grid.Column="3"
                     Style="{StaticResource MainButton}"
@@ -170,7 +174,7 @@
         <!--ALL工作区-->
         <Grid x:Name="Grid">
             <Frame x:Name="TCPServerFrame" Source="/SocketDA;component/Views/TCPServerPage.xaml"
-                   Visibility="Collapsed"/>
+                   Visibility="Visible"/>
             <Frame x:Name="TCPClientFrame" Source="/SocketDA;component/Views/TCPClientPage.xaml"
                    Visibility="Collapsed"/>
             <Frame x:Name="UDPServerFrame" Source="/SocketDA;component/Views/UDPServerPage.xaml"

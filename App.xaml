@@ -17,9 +17,7 @@
                 <Setter Property="BorderBrush" Value="White"/>
             </Style>
             <Style TargetType="Button" x:Key="SocketButton">
-                <Setter Property="Background" Value="White"/>
-                <Setter Property="BorderBrush" Value="White"/>
-                <Setter Property="Padding" Value="5,3,5,3"/>
+                <Setter Property="Padding" Value="8,3,8,3"/>
             </Style>
 
             <!--MainWindows XAML - Status style-->
