@@ -56,7 +56,8 @@
                                     Height="30"
                                     BorderBrush="Transparent">
                                     <TextBlock x:Name="HeaderTextBlock" 
-                                               Text="{Binding RelativeSource={RelativeSource Mode=TemplatedParent},Path=Header}"
+                                               Text="{Binding RelativeSource={RelativeSource Mode=TemplatedParent},
+                                        Path=Header}"
                                                VerticalAlignment="Center" Margin="30,0,30,0"/>
                                 </Border>
                             </Grid>
@@ -96,10 +97,8 @@
             <DataTemplate x:Key="TCPServerRecvGroupBoxHeaderData">
                 <TextBlock>
                         <TextBlock.Text>
-                            <MultiBinding StringFormat="{}[{0}:{1}]接收区：已接收{2}字节，接收自动保存[{3}]，接收状态[{4}]">
-                                <Binding Path="SocketModel.IPString"/>
-                                <Binding Path="SocketModel.PortString"/>
-                                <Binding Path="RecvModel.TCPServerRecvDataCount"/>
+                        <MultiBinding StringFormat="{}接收区：已接收{0}字节，接收自动保存[{1}]，接收状态[{2}]">
+                            <Binding Path="RecvModel.TCPServerRecvDataCount"/>
                                 <Binding Path="RecvModel.TCPServerRecvAutoSave"/>
                                 <Binding Path="RecvModel.TCPServerRecvEnable"/>
                             </MultiBinding>
@@ -111,9 +110,7 @@
             <DataTemplate x:Key="TCPServerSendGroupBoxHeaderData">
                 <TextBlock>
                     <TextBlock.Text>
-                        <MultiBinding StringFormat="{}[{0}:{1}]发送区：已发送{2}字节">
-                            <Binding Path="SocketModel.IPString"/>
-                            <Binding Path="SocketModel.PortString"/>
+                        <MultiBinding StringFormat="{}发送区：已发送{0}字节">
                             <Binding Path="SendModel.TCPServerSendDataCount"/>
                         </MultiBinding>
                     </TextBlock.Text>
@@ -124,9 +121,7 @@
             <DataTemplate x:Key="TCPClientRecvGroupBoxHeaderData">
                 <TextBlock>
                     <TextBlock.Text>
-                        <MultiBinding StringFormat="{}[{0}:{1}]接收区：已接收{2}字节，接收自动保存[{3}]，接收状态[{4}]">
-                            <Binding Path="SocketModel.IPString"/>
-                            <Binding Path="SocketModel.PortString"/>
+                        <MultiBinding StringFormat="{}接收区：已接收{0}字节，接收自动保存[{1}]，接收状态[{2}]">
                             <Binding Path="RecvModel.TCPClientRecvDataCount"/>
                             <Binding Path="RecvModel.TCPClientRecvAutoSave"/>
                             <Binding Path="RecvModel.TCPClientRecvEnable"/>
@@ -139,9 +134,7 @@
             <DataTemplate x:Key="TCPClientSendGroupBoxHeaderData">
                 <TextBlock>
                     <TextBlock.Text>
-                        <MultiBinding StringFormat="{}[{0}:{1}]发送区：已发送{2}字节">
-                            <Binding Path="SocketModel.IPString"/>
-                            <Binding Path="SocketModel.PortString"/>
+                        <MultiBinding StringFormat="{}发送区：已发送{0}字节">
                             <Binding Path="SendModel.TCPClientSendDataCount"/>
                         </MultiBinding>
                     </TextBlock.Text>
@@ -152,9 +145,7 @@
             <DataTemplate x:Key="UDPServerRecvGroupBoxHeaderData">
                 <TextBlock>
                     <TextBlock.Text>
-                        <MultiBinding StringFormat="{}[{0}:{1}]接收区：已接收{2}字节，接收自动保存[{3}]，接收状态[{4}]">
-                            <Binding Path="SocketModel.IPString"/>
-                            <Binding Path="SocketModel.PortString"/>
+                        <MultiBinding StringFormat="{}接收区：已接收{0}字节，接收自动保存[{1}]，接收状态[{2}]">
                             <Binding Path="RecvModel.UDPServerRecvDataCount"/>
                             <Binding Path="RecvModel.UDPServerRecvAutoSave"/>
                             <Binding Path="RecvModel.UDPServerRecvEnable"/>
@@ -167,9 +158,7 @@
             <DataTemplate x:Key="UDPServerSendGroupBoxHeaderData">
                 <TextBlock>
                     <TextBlock.Text>
-                        <MultiBinding StringFormat="{}[{0}:{1}]发送区：已发送{2}字节">
-                            <Binding Path="SocketModel.IPString"/>
-                            <Binding Path="SocketModel.PortString"/>
+                        <MultiBinding StringFormat="{}发送区：已发送{0}字节">
                             <Binding Path="SendModel.UDPServerSendDataCount"/>
                         </MultiBinding>
                     </TextBlock.Text>
@@ -180,9 +169,7 @@
             <DataTemplate x:Key="UDPClientRecvGroupBoxHeaderData">
                 <TextBlock>
                     <TextBlock.Text>
-                        <MultiBinding StringFormat="{}[{0}:{1}]接收区：已接收{2}字节，接收自动保存[{3}]，接收状态[{4}]">
-                            <Binding Path="SocketModel.IPString"/>
-                            <Binding Path="SocketModel.PortString"/>
+                        <MultiBinding StringFormat="{}接收区：已接收{0}字节，接收自动保存[{1}]，接收状态[{2}]">
                             <Binding Path="RecvModel.UDPClientRecvDataCount"/>
                             <Binding Path="RecvModel.UDPClientRecvAutoSave"/>
                             <Binding Path="RecvModel.UDPClientRecvEnable"/>
@@ -195,9 +182,7 @@
             <DataTemplate x:Key="UDPClientSendGroupBoxHeaderData">
                 <TextBlock>
                     <TextBlock.Text>
-                        <MultiBinding StringFormat="{}[{0}:{1}]发送区：已发送{2}字节">
-                            <Binding Path="SocketModel.IPString"/>
-                            <Binding Path="SocketModel.PortString"/>
+                        <MultiBinding StringFormat="{}发送区：已发送{0}字节">
                             <Binding Path="SendModel.UDPClientSendDataCount"/>
                         </MultiBinding>
                     </TextBlock.Text>
@@ -243,8 +228,8 @@
                 <Setter Property="VerticalAlignment" Value="Center"/>
             </Style>
             <Style TargetType="ComboBox" x:Key="ConfigComboBox">
-                <Setter Property="Margin" Value="0,3,3,3"/>
-                <Setter Property="Padding" Value="6,6,0,6"/>
+                <Setter Property="Margin" Value="0,3,0,3"/>
+                <Setter Property="Padding" Value="6,5,6,5"/>
                 <Setter Property="HorizontalAlignment" Value="Stretch"/>
                 <Setter Property="ItemContainerStyle">
                     <Setter.Value>
@@ -256,7 +241,7 @@
                 </Setter>
             </Style>
             <Style TargetType="TextBox" x:Key="ConfigTextBox">
-                <Setter Property="Margin" Value="0,3,3,3"/>
+                <Setter Property="Margin" Value="0,3,0,3"/>
                 <Setter Property="Padding" Value="6,5,6,5"/>
                 <Setter Property="BorderBrush" Value="Black"/>
                 <Setter Property="HorizontalContentAlignment" Value="Center"/>
@@ -267,7 +252,7 @@
                 <Setter Property="Height" Value="28"/>
             </Style>
             <Style TargetType="Button" x:Key="ConfigButton">
-                <Setter Property="Margin" Value="0,3,3,3"/>
+                <Setter Property="Margin" Value="0,3,0,3"/>
                 <Setter Property="Padding" Value="55,6,55,6"/>
                 <Setter Property="Background" Value="White"/>
                 <Setter Property="BorderBrush" Value="Black"/>

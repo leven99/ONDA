@@ -10,42 +10,6 @@ namespace SocketDA.Models
         public Collection<IPAddress> SocketSrcPAddrItemsSource { get; set; }
         public Collection<string> SocketSourceIPAddressItemsSource { get; set; }
 
-        #region 接收区/发送区Header[IP:Port]
-        private string _IPString;
-        public string IPString
-        {
-            get
-            {
-                return _IPString;
-            }
-            set
-            {
-                if (_IPString != value)
-                {
-                    _IPString = value;
-                    RaisePropertyChanged(nameof(IPString));
-                }
-            }
-        }
-
-        private string _PortString;
-        public string PortString
-        {
-            get
-            {
-                return _PortString;
-            }
-            set
-            {
-                if (_PortString != value)
-                {
-                    _PortString = value;
-                    RaisePropertyChanged(nameof(PortString));
-                }
-            }
-        }
-        #endregion
-
         public void SocketDataContext()
         {
             SocketSrcPAddrItemsSource = new Collection<IPAddress>();
@@ -76,9 +40,6 @@ namespace SocketDA.Models
                     }
                 }
             }
-
-            IPString = "IP";
-            PortString = "Port";
         }
     }
 }
