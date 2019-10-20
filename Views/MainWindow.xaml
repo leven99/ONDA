@@ -723,7 +723,7 @@
                             <GroupBox x:Name="UDPClientAssistGroupBox" Header="辅助" Grid.Row="2"
                                       Margin="5,0,2.5,3"
                                       BorderBrush="#FF007ACD"
-                                      Visibility="{Binding HelpModel.AssistViewVisibility}">
+                                      Visibility="{Binding HelpModel.ViewVisibility}">
                                 <Grid x:Name="UDPClientAssistGrid">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="1*"/>

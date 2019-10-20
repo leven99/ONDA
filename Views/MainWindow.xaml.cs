@@ -134,7 +134,7 @@ namespace SocketDA.Views
         #region 打开/关闭网络
         private void TCPServerOnOffButton_Click(object sender, RoutedEventArgs e)
         {
-
+            mainWindowViewModel.TCPServerOpenCloseSocket();
         }
         #endregion
 
@@ -187,7 +187,7 @@ namespace SocketDA.Views
         #region 打开/关闭网络
         private void TCPClientOnOffButton_Click(object sender, RoutedEventArgs e)
         {
-
+            mainWindowViewModel.TCPClientOpenCloseSocket();
         }
         #endregion
 
@@ -240,7 +240,7 @@ namespace SocketDA.Views
         #region 打开/关闭网络
         private void UDPServerOnOffButton_Click(object sender, RoutedEventArgs e)
         {
-
+            mainWindowViewModel.UDPServerOpenCloseSocket();
         }
         #endregion
 
@@ -293,7 +293,7 @@ namespace SocketDA.Views
         #region 打开/关闭网络
         private void UDPClientOnOffButton_Click(object sender, RoutedEventArgs e)
         {
-
+            mainWindowViewModel.UDPServerOpenCloseSocket();
         }
         #endregion
 

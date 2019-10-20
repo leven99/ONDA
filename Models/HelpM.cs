@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace SocketDA.Models
 {
     [DataContract]
-    public sealed class GitRelease
+    sealed class GitRelease
     {
         private Version _version = null;
 
@@ -30,7 +30,7 @@ namespace SocketDA.Models
         }
     }
 
-    public class HelpModel : MainWindowBase
+    internal class HelpModel : MainWindowBase
     {
         /// <summary>
         /// 本地软件的版本号

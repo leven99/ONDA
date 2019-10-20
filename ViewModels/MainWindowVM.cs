@@ -1,19 +1,12 @@
 ﻿using Microsoft.Win32;
 using SocketDA.Models;
 using System;
-using System.IO;
-using System.Net.Sockets;
-using System.Threading;
 using System.Windows.Threading;
 
 namespace SocketDA.ViewModels
 {
     internal class MainWindowViewModel : MainWindowBase
     {
-        #region 字段
-        private string DataRecvPath = string.Empty;   /* 数据接收路径 */
-        #endregion
-
         public SocketModel SocketModel { get; set; }
         public TCPServerModel TCPServerModel { get; set; }
         public TCPClientModel TCPClientModel { get; set; }
@@ -79,6 +72,16 @@ namespace SocketDA.ViewModels
         #endregion
 
         #region TCP Server
+
+        #region 打开/关闭网络
+        public void TCPServerOpenCloseSocket()
+        {
+
+        }
+
+        #endregion
+
+        #region 辅助区
         private bool _TCPServerHexSend;
         public bool TCPServerHexSend
         {
@@ -164,7 +167,18 @@ namespace SocketDA.ViewModels
         }
         #endregion
 
+        #endregion
+
         #region TCP Client
+
+        #region 打开/关闭网络
+        public void TCPClientOpenCloseSocket()
+        {
+
+        }
+        #endregion
+
+        #region 辅助区
         private bool _TCPClientHexSend;
         public bool TCPClientHexSend
         {
@@ -250,7 +264,18 @@ namespace SocketDA.ViewModels
         }
         #endregion
 
+        #endregion
+
         #region UDP Server
+
+        #region 打开/关闭网络
+        public void UDPServerOpenCloseSocket()
+        {
+            
+        }
+        #endregion
+
+        #region 辅助区
         private bool _UDPServerHexSend;
         public bool UDPServerHexSend
         {
@@ -336,7 +361,18 @@ namespace SocketDA.ViewModels
         }
         #endregion
 
+        #endregion
+
         #region UDP Client
+
+        #region 打开/关闭网络
+        public void UDOClientOpenCloseSocket()
+        {
+
+        }
+        #endregion
+
+        #region 辅助区
         private bool _UDPClientHexSend;
         public bool UDPClientHexSend
         {
@@ -422,6 +458,8 @@ namespace SocketDA.ViewModels
         }
         #endregion
 
+        #endregion
+
         #region 自动发送定时器实现
         private readonly DispatcherTimer AutoSendDispatcherTimer = new DispatcherTimer();
 
@@ -463,7 +501,7 @@ namespace SocketDA.ViewModels
 
             if (ReceDataSaveFileDialog.ShowDialog() == true)
             {
-                DataRecvPath = ReceDataSaveFileDialog.FileName;
+                _ = ReceDataSaveFileDialog.FileName;
             }
         }
         #endregion
@@ -496,6 +534,8 @@ namespace SocketDA.ViewModels
 
             HelpModel = new HelpModel();
             HelpModel.HelpDataContext();
+
+            LatestRelease = new GitRelease();
 
             TCPServerHexSend = false;
             TCPServerAutoSend = false;
