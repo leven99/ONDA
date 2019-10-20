@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:SocketDA.Views"
         mc:Ignorable="d"
         Title="SocketDA" WindowStartupLocation="CenterScreen" Style="{DynamicResource MainWindowChromeStyle}">
-
+    
     <!--Window Style-->
     <Window.Resources>
         <Style x:Key="MainWindowChromeStyle" TargetType="{x:Type local:MainWindow}">
@@ -16,54 +16,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
-        <Style TargetType="HeaderedContentControl">
-            <Setter Property="OverridesDefaultStyle"
-          Value="True" />
-            <Setter Property="SnapsToDevicePixels"
-          Value="True" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type HeaderedContentControl}">
-                        <ContentPresenter ContentSource="Header"/>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <DataTemplate x:Key="RecvGroupBoxHeader">
-            <Grid Margin="0,4,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="1*"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0">
-                    <TextBlock.Text>
-                        <MultiBinding StringFormat="{}[{0}:{1}]接收区：已接收{2}字节，接收自动保存[{3}]，接收状态[{4}]">
-                            <Binding Path="SocketModel.IPString"/>
-                            <Binding Path="SocketModel.PortString"/>
-                            <Binding Path="RecvModel.RecvDataCount"/>
-                            <Binding Path="RecvModel.RecvAutoSave"/>
-                            <Binding Path="RecvModel.RecvEnable"/>
-                        </MultiBinding>
-                    </TextBlock.Text>
-                </TextBlock>
-                <Image Grid.Column="1" Source="/SocketDA;component/icon/Close.png"
-                       Margin="6,0,0,0" Width="11" Height="11"/>
-            </Grid>
-        </DataTemplate>
-
-        <DataTemplate x:Key="SendGroupBoxHeader">
-            <TextBlock>
-                <TextBlock.Text>
-                    <MultiBinding StringFormat="{}[{0}:{1}]发送区：已发送{2}字节">
-                        <Binding Path="SocketModel.IPString"/>
-                        <Binding Path="SocketModel.PortString"/>
-                        <Binding Path="SendModel.SendDataCount"/>
-                    </MultiBinding>
-                </TextBlock.Text>
-            </TextBlock>
-        </DataTemplate>
     </Window.Resources>
 
     <!--Root-->
@@ -72,7 +24,6 @@
         <!--菜单栏-->
         <Grid x:Name="MenuGrid" DockPanel.Dock="Top" WindowChrome.IsHitTestVisibleInChrome="True" MouseMove="MouseMove_Click">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -90,12 +41,9 @@
                               Click="CalcMenuItem_Click"/>
                 </MenuItem>
                 <MenuItem x:Name="ConfMenuItem" Header="选项(_O)" Style="{StaticResource MainMenuItem}">
-                    
+
                 </MenuItem>
                 <MenuItem x:Name="ViewMenuItem" Header="视图(_V)" Style="{StaticResource MainMenuItem}">
-                    <MenuItem x:Name="AssistEveryMenuItem" Header="辅助区" IsChecked="{Binding HelpModel.AssistReducedEnable}"
-                              Click="AssistEveryMenuItem_Click"/>
-                    <Separator/>
                     <MenuItem x:Name="EveryMenuItem" Header="精简视图" IsChecked="{Binding HelpModel.ReducedEnable}"
                               Click="EveryMenuItem_Click"/>
                 </MenuItem>
@@ -110,27 +58,7 @@
                               Click="IssueMenuItem_Click"/>
                 </MenuItem>
             </Menu>
-            <Grid x:Name="SocketGrid" Grid.Column="2" HorizontalAlignment="Center">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <Button x:Name="TCPServerButton" Content="TCP Server" Grid.Column="0"
-                        Style="{StaticResource SocketButton}"
-                        Background="Black" BorderBrush="Black" Foreground="White"/>
-                <Button x:Name="TCPClientButton" Content="TCP Client" Grid.Column="1"
-                        Style="{StaticResource SocketButton}"
-                        Background="White" BorderBrush="White" Foreground="Black"/>
-                <Button x:Name="UDPServerButton" Content="UDP Server" Grid.Column="2"
-                        Style="{StaticResource SocketButton}"
-                        Background="White" BorderBrush="White" Foreground="Black"/>
-                <Button x:Name="UDPClientButton" Content="UDP Client" Grid.Column="3"
-                        Style="{StaticResource SocketButton}"
-                        Background="White" BorderBrush="White" Foreground="Black"/>
-            </Grid>
-            <Button x:Name="MinButton" Grid.Column="3"
+            <Button x:Name="MinButton" Grid.Column="2"
                     Style="{StaticResource MainButton}"
                     Click="MinButton_Click">
                 <WrapPanel x:Name="MinWrapPanel">
@@ -138,7 +66,7 @@
                            Width="23" Height="23"/>
                 </WrapPanel>
             </Button>
-            <Button x:Name="CloseButton" Grid.Column="4"
+            <Button x:Name="CloseButton" Grid.Column="3"
                     Style="{StaticResource MainButton}" 
                     Click="CloseButton_Click">
                 <WrapPanel x:Name="CloseWrapPanel">
@@ -170,17 +98,733 @@
                                Style="{StaticResource SBStatusBarItem}"/>
             </StatusBar>
         </Grid>
-        
+
         <!--ALL工作区-->
-        <Grid x:Name="Grid">
-            <Frame x:Name="TCPServerFrame" Source="/SocketDA;component/Views/TCPServerPage.xaml"
-                   Visibility="Visible"/>
-            <Frame x:Name="TCPClientFrame" Source="/SocketDA;component/Views/TCPClientPage.xaml"
-                   Visibility="Collapsed"/>
-            <Frame x:Name="UDPServerFrame" Source="/SocketDA;component/Views/UDPServerPage.xaml"
-                   Visibility="Collapsed"/>
-            <Frame x:Name="UDPClientFrame" Source="/SocketDA;component/Views/UDPClientPage.xaml"
-                   Visibility="Collapsed"/>
+        <Grid x:Name="WorkGrid" Background="#FF3FB0F9">
+            <TabControl x:Name="WrokTabControl" Style="{DynamicResource TabControlStyle}">
+                
+                <!--TCP Server-->
+                <TabItem x:Name="TCPServerTabItem" Header="TCP Server" Style="{DynamicResource TabItemStyle}">
+                    <Grid x:Name="TCPServerGrid" Background="White">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="1*"/>
+                        </Grid.RowDefinitions>
+
+                        <!--Socket配置区-->
+                        <Grid x:Name="TCPServerConfGrid" Background="White" Grid.Row="0">
+                            <GroupBox x:Name="TCPServerConfigGroupPort" Header="网络配置"
+                                      Margin="5,3,5,3"
+                                      BorderBrush="#FF007ACD"
+                                      Visibility="{Binding HelpModel.ViewVisibility}">
+                                <Grid x:Name="TCPServerConfigGrid">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="1*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="TCPServerSrcAddrTextBlock" Text="源 IP 地址（支持IPv4，IPv6）："
+                                               Grid.Row="0" Grid.Column="0"
+                                               Style="{StaticResource ConfigTextBlock}"/>
+                                    <ComboBox x:Name="TCPServerSrcAddrComboBox" Grid.Row="0" Grid.Column="1"
+                                              ItemsSource="{Binding SocketModel.SocketSourceIPAddressItemsSource}"
+                                              Text="{Binding TCPServerModel.SocketSrcPAddrText}"
+                                              SelectedIndex="{Binding TCPServerModel.SocketSrcIPAddrSelectedIndex}"
+                                              Style="{DynamicResource ConfigComboBox}"
+                                              IsEditable="True" IsReadOnly="False"/>
+                                    <TextBlock x:Name="TCPServerSrcPortTextBlock" Text="源端口号："
+                                               Grid.Row="0" Grid.Column="2"
+                                               Style="{StaticResource ConfigTextBlock}"/>
+                                    <TextBox x:Name="TCPServerSrcPortTextBox" Text="{Binding TCPServerModel.SocketSrcPort}"
+                                             Grid.Row="0" Grid.Column="3"
+                                             Style="{StaticResource ConfigTextBox}"
+                                             Width="120" MaxLength="5"/>
+                                    <Ellipse x:Name="TCPServerOnOffElipse" Fill="{Binding TCPServerModel.SocketBrush}"
+                                             Grid.Row="0" Grid.Column="4"
+                                             Style="{StaticResource ConfigEilipse}"/>
+                                    <Button x:Name="TCPServerOnOffButton" Content="{Binding TCPServerModel.OpenCloseSocket}"
+                                            Grid.Row="0" Grid.Column="5"
+                                            Style="{DynamicResource ConfigButton}"
+                                            Click="TCPServerOnOffButton_Click"/>
+                                </Grid>
+                            </GroupBox>
+                        </Grid>
+                        
+                        <!--接收区、发送区、连接区和辅助区-->
+                        <Grid x:Name="TCPServerWorkGrid" Background="White" Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!--接受区和发送区-->
+                            <Grid x:Name="TCPServerDataGrid" Grid.Column="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="286*"/>
+                                    <RowDefinition Height="100*"/>
+                                </Grid.RowDefinitions>
+
+                                <!--接收区-->
+                                <GroupBox x:Name="TCPServerRecvDataGroupBox"
+                                          Header="{Binding}"
+                                          HeaderTemplate="{StaticResource TCPServerRecvGroupBoxHeaderData}"
+                                          Grid.Row="0"
+                                          Margin="5,3,2.5,3"
+                                          BorderBrush="#FF007ACD">
+                                </GroupBox>
+
+                                <!--发送区-->
+                                <GroupBox x:Name="TCPServerSendDataGroupBox"
+                                          Header="{Binding}"
+                                          HeaderTemplate="{StaticResource TCPServerSendGroupBoxHeaderData}"
+                                          Grid.Row="1"
+                                          Margin="5,0,2.5,3"
+                                          BorderBrush="#FF007ACD">
+                                    <Grid x:Name="TCPServerSendDataGrid">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox x:Name="TCPServerSendTextBox" Text="{Binding SendModel.TCPServerSendData}" Grid.RowSpan="2"
+                                             Style="{StaticResource RSTextBox}"/>
+                                        <Button x:Name="TCPServerSendFileButton" Content="发送文件" Grid.Row="0" Grid.Column="1"
+                                            Style="{StaticResource SendButton}"
+                                            Margin="3,3,0,0"
+                                            Click="TCPServerSendFileButton_Click"/>
+                                        <Button x:Name="TCPServerSenfButton" Content="发送" Grid.Row="1" Grid.Column="1"
+                                            Style="{StaticResource SendButton}"
+                                            Margin="3,3,0,0"
+                                            Click="TCPServerSenfButton_Click"/>
+                                    </Grid>
+                                </GroupBox>
+                            </Grid>
+                            
+                            <!--连接区和辅助区-->
+                            <Grid x:Name="TCPServerSocketGrid" Grid.Column="1">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="1*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!--连接区-->
+                                <GroupBox x:Name="TCPServerConnectGroupBox" Header="连接" Grid.Row="0"
+                                      Margin="2.5,0,5,3"
+                                      BorderBrush="#FF007ACD"
+                                      Visibility="{Binding HelpModel.ViewVisibility}">
+                                    <DataGrid x:Name="TCPServerConnectDataGrid"
+                                          HeadersVisibility="None"
+                                          BorderBrush="#FF007ACD" Background="White"/>
+                                </GroupBox>
+
+                                <!--辅助区-->
+                                <GroupBox x:Name="TCPServerAssistGroupBox" Header="辅助" Grid.Row="1"
+                                      Margin="2.5,0,5,3"
+                                      BorderBrush="#FF007ACD"
+                                      Visibility="{Binding HelpModel.ViewVisibility}">
+                                    <Grid x:Name="TCPServerAssistGrid">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="1*"/>
+                                            <RowDefinition Height="1*"/>
+                                            <RowDefinition Height="1*"/>
+                                            <RowDefinition Height="1*"/>
+                                            <RowDefinition Height="1*"/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1*"/>
+                                            <ColumnDefinition Width="1*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox x:Name="TCPServerHexReceCheckBox" Content="Hex接收" Grid.Row="0" Grid.Column="0" 
+                                              Style="{StaticResource AssistCheckBox}"
+                                              Margin="0,6,2.5,6"
+                                              IsChecked="{Binding RecvModel.TCPServerHexRecv}"/>
+                                        <CheckBox x:Name="TCPServerHexSendCheckBox" Content="Hex发送" Grid.Row="0" Grid.Column="1"
+                                              Style="{StaticResource AssistCheckBox}"
+                                              Margin="2.5,6,0,6"
+                                              IsChecked="{Binding TCPServerHexSend}"/>
+                                        <CheckBox x:Name="TCPServerAutoSendCheckBox" Content="自动发送(ms)" Grid.Row="1" Grid.Column="0"
+                                              Style="{StaticResource AssistCheckBox}"
+                                              Margin="0,3,2.5,5" 
+                                              IsChecked="{Binding TCPServerAutoSend}"/>
+                                        <TextBox x:Name="TCPServerAutoSendNumTextBox" Text="{Binding SendModel.TCPServerAutoSendNum}" 
+                                             Grid.Row="1" Grid.Column="1"
+                                             Style="{DynamicResource AutoSendNumTextBox}"
+                                             Margin="2.5,3,0,5"/>
+                                        <CheckBox x:Name="TCPServerSaveReceCheckBox" Content="保存接收" Grid.Row="2" Grid.Column="0"
+                                              Style="{StaticResource AssistCheckBox}"
+                                              Margin="0,3,2.5,5" 
+                                              IsChecked="{Binding TCPServerSaveRecv}"/>
+                                        <Button x:Name="TCPServerSaveReceButton" Content="路径选择"  Grid.Row="2" Grid.Column="1"
+                                            Style="{StaticResource AssistButton}"
+                                            Margin="2.5,3,0,5"
+                                            Click="TCPServerSaveReceButton_Click"/>
+                                        <Button x:Name="TCPServerClearReceButton" Content="清接收区"  Grid.Row="3" Grid.Column="0"
+                                            Style="{StaticResource AssistButton}" 
+                                            Margin="0,3,2.5,5"
+                                            Click="TCPServerClearReceButton_Click"/>
+                                        <Button x:Name="TCPServerClearSendButton" Content="清发送区"  Grid.Row="3" Grid.Column="1"
+                                            Style="{StaticResource AssistButton}" 
+                                            Margin="2.5,3,0,5"
+                                            Click="TCPServerClearSendButton_Click"/>
+                                        <Button x:Name="TCPServerClearCountButton" Content="清空计数" 
+                                            Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
+                                            Style="{StaticResource AssistButton}" 
+                                            Margin="0,3,0,0"
+                                            Click="TCPServerClearCountButton_Click"/>
+                                    </Grid>
+                                </GroupBox>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </TabItem>
+                
+                <!--TCP Client-->
+                <TabItem x:Name="TCPClientTabItem" Header="TCP Client" Style="{DynamicResource TabItemStyle}">
+                    <Grid x:Name="TCPClientGrid" Background="White">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!--接受区和发送区-->
+                        <Grid x:Name="TCPClientDataGrid" Grid.Column="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="348*"/>
+                                <RowDefinition Height="100*"/>
+                            </Grid.RowDefinitions>
+
+                            <!--接收区-->
+                            <GroupBox x:Name="TCPClientRecvDataGroupBox"
+                                      Header="{Binding}"
+                                      HeaderTemplate="{StaticResource TCPClientRecvGroupBoxHeaderData}"
+                                      Grid.Row="0"
+                                      Margin="5,3,2.5,3"
+                                      BorderBrush="#FF007ACD">
+                            </GroupBox>
+
+                            <!--发送区-->
+                            <GroupBox x:Name="TCPClientSendDataGroupBox"
+                                      Header="{Binding}"
+                                      HeaderTemplate="{StaticResource TCPClientSendGroupBoxHeaderData}"
+                                      Grid.Row="1"
+                                      Margin="5,0,2.5,3"
+                                      BorderBrush="#FF007ACD">
+                                <Grid x:Name="TCPClientSendDataGrid">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="1*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox x:Name="TCPClientSendTextBox" Text="{Binding SendModel.TCPClientSendData}" Grid.RowSpan="2"
+                                             Style="{StaticResource RSTextBox}"/>
+                                    <Button x:Name="TCPClientSendFileButton" Content="发送文件" Grid.Row="0" Grid.Column="1"
+                                            Style="{StaticResource SendButton}"
+                                            Margin="3,3,0,0"
+                                            Click="TCPClientSendFileButton_Click"/>
+                                    <Button x:Name="TCPClientSenfButton" Content="发送" Grid.Row="1" Grid.Column="1"
+                                            Style="{StaticResource SendButton}"
+                                            Margin="3,3,0,0"
+                                            Click="TCPClientSenfButton_Click"/>
+                                </Grid>
+                            </GroupBox>
+                        </Grid>
+                        
+                        <!--Socket配置区、连接区和辅助区-->
+                        <Grid x:Name="TCPClientSocketGrid" Grid.Column="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="1*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!--Socket配置区-->
+                            <GroupBox x:Name="TCPClientConfigGroupPort" Header="网络配置" Grid.Row="0"
+                                      Margin="2.5,3,5,3"
+                                      BorderBrush="#FF007ACD"
+                                      Visibility="{Binding HelpModel.ViewVisibility}">
+                                <Grid x:Name="TCPClientConfigGrid">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="1*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock x:Name="TCPClientDestAddrTextBlock" Text="（支持IPv4，IPv6）目的 IP 地址："
+                                               Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                                               Style="{StaticResource ConfigTextBlock}"
+                                               HorizontalAlignment="Right"/>
+                                    <ComboBox x:Name="TCPClientDestAddrComboBox" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                              ItemsSource="{Binding TCPClientModel.SocketDestIPAddrItemsSource}"
+                                              Text="{Binding TCPClientModel.SocketDestPAddrText}"
+                                              SelectedIndex="{Binding TCPClientModel.SocketDestIPAddrSelectedIndex}"
+                                              Style="{DynamicResource ConfigComboBox}"
+                                              IsEditable="True"
+                                              IsReadOnly="False"/>
+                                    <TextBlock x:Name="TCPClientDestPortTextBlock" Text="目的端口号："
+                                               Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                               Style="{StaticResource ConfigTextBlock}"
+                                               HorizontalAlignment="Right"/>
+                                    <TextBox x:Name="TCPClientDestPortTextBox" Text="{Binding TCPClientModel.SocketDestPort}"
+                                             Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                                             Style="{StaticResource ConfigTextBox}"
+                                             MaxLength="5"
+                                             HorizontalContentAlignment="Left"/>
+                                    <Ellipse x:Name="TCPClientOnOffElipse" Fill="{Binding TCPClientModel.SocketBrush}"
+                                             Grid.Row="4" Grid.Column="0"
+                                             Style="{StaticResource ConfigEilipse}"/>
+                                    <Button x:Name="TCPClientOnOffButton" Content="{Binding TCPClientModel.OpenCloseSocket}"
+                                            Grid.Row="4" Grid.Column="1"
+                                            Style="{DynamicResource ConfigButton}"
+                                            Click="TCPClientOnOffButton_Click"/>
+                                </Grid>
+                            </GroupBox>
+
+                            <!--连接区-->
+                            <GroupBox x:Name="TCPClientConnectGroupBox" Header="连接" Grid.Row="1"
+                                      Margin="2.5,0,5,3"
+                                      BorderBrush="#FF007ACD"
+                                      Visibility="{Binding HelpModel.ViewVisibility}">
+                                <DataGrid x:Name="TCPClientConnectDataGrid"
+                                          HeadersVisibility="None"
+                                          BorderBrush="#FF007ACD" Background="White"/>
+                            </GroupBox>
+
+                            <!--辅助区-->
+                            <GroupBox x:Name="TCPClientAssistGroupBox" Header="辅助" Grid.Row="2"
+                                      Margin="2.5,0,5,3"
+                                      BorderBrush="#FF007ACD"
+                                      Visibility="{Binding HelpModel.ViewVisibility}">
+                                <Grid x:Name="TCPClientAssistGrid">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="1*"/>
+                                        <RowDefinition Height="1*"/>
+                                        <RowDefinition Height="1*"/>
+                                        <RowDefinition Height="1*"/>
+                                        <RowDefinition Height="1*"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="1*"/>
+                                        <ColumnDefinition Width="1*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <CheckBox x:Name="TCPClientHexReceCheckBox" Content="Hex接收" Grid.Row="0" Grid.Column="0" 
+                                              Style="{StaticResource AssistCheckBox}"
+                                              Margin="0,6,2.5,6"
+                                              IsChecked="{Binding RecvModel.TCPClientHexRecv}"/>
+                                    <CheckBox x:Name="TCPClientHexSendCheckBox" Content="Hex发送" Grid.Row="0" Grid.Column="1"
+                                              Style="{StaticResource AssistCheckBox}"
+                                              Margin="2.5,6,0,6"
+                                              IsChecked="{Binding TCPClientHexSend}"/>
+                                    <CheckBox x:Name="TCPClientAutoSendCheckBox" Content="自动发送(ms)" Grid.Row="1" Grid.Column="0"
+                                              Style="{StaticResource AssistCheckBox}"
+                                              Margin="0,3,2.5,5" 
+                                              IsChecked="{Binding TCPClientAutoSend}"/>
+                                    <TextBox x:Name="TCPClientAutoSendNumTextBox" Text="{Binding SendModel.TCPClientAutoSendNum}" 
+                                             Grid.Row="1" Grid.Column="1"
+                                             Style="{DynamicResource AutoSendNumTextBox}"
+                                             Margin="2.5,3,0,5"/>
+                                    <CheckBox x:Name="TCPClientSaveReceCheckBox" Content="保存接收" Grid.Row="2" Grid.Column="0"
+                                              Style="{StaticResource AssistCheckBox}"
+                                              Margin="0,3,2.5,5" 
+                                              IsChecked="{Binding TCPClientSaveRecv}"/>
+                                    <Button x:Name="TCPClientSaveReceButton" Content="路径选择"  Grid.Row="2" Grid.Column="1"
+                                            Style="{StaticResource AssistButton}"
+                                            Margin="2.5,3,0,5"
+                                            Click="TCPClientSaveReceButton_Click"/>
+                                    <Button x:Name="TCPClientClearReceButton" Content="清接收区"  Grid.Row="3" Grid.Column="0"
+                                            Style="{StaticResource AssistButton}" 
+                                            Margin="0,3,2.5,5"
+                                            Click="TCPClientClearReceButton_Click"/>
+                                    <Button x:Name="TCPClientClearSendButton" Content="清发送区"  Grid.Row="3" Grid.Column="1"
+                                            Style="{StaticResource AssistButton}" 
+                                            Margin="2.5,3,0,5"
+                                            Click="TCPClientClearSendButton_Click"/>
+                                    <Button x:Name="TCPClientClearCountButton" Content="清空计数" 
+                                            Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
+                                            Style="{StaticResource AssistButton}" 
+                                            Margin="0,3,0,0"
+                                            Click="TCPClientClearCountButton_Click"/>
+                                </Grid>
+                            </GroupBox>
+                        </Grid>
+                    </Grid>
+                </TabItem>
+
+                <!--UDP Server-->
+                <TabItem x:Name="UDPServerTabItem" Header="UDP Server" Style="{DynamicResource TabItemStyle}">
+                    <Grid x:Name="UDPServerGrid" Background="White">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="1*"/>
+                        </Grid.RowDefinitions>
+
+                        <!--Socket配置区-->
+                        <Grid x:Name="UDPServerConfGrid" Background="White" Grid.Row="0">
+                            <GroupBox x:Name="UDPServerConfigGroupPort" Header="网络配置"
+                                      Margin="5,3,2.5,3"
+                                      BorderBrush="#FF007ACD"
+                                      Visibility="{Binding HelpModel.ViewVisibility}">
+                                <Grid x:Name="UDPServerConfigGrid">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="1*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="UDPServerSrcAddrTextBlock" Text="源 IP 地址（支持IPv4，IPv6）："
+                                               Grid.Row="0" Grid.Column="0"
+                                               Style="{StaticResource ConfigTextBlock}"
+                                               HorizontalAlignment="Right"/>
+                                    <ComboBox x:Name="UDPServerSrcAddrComboBox" Grid.Row="0" Grid.Column="1"
+                                              ItemsSource="{Binding SocketModel.SocketSourceIPAddressItemsSource}"
+                                              Text="{Binding UDPServerModel.SocketSrcPAddrText}"
+                                              SelectedIndex="{Binding UDPServerModel.SocketSrcIPAddrSelectedIndex}"
+                                              Style="{DynamicResource ConfigComboBox}"
+                                              IsEditable="True"
+                                              IsReadOnly="False"/>
+                                    <TextBlock x:Name="UDPServerSrcPortTextBlock" Text="源端口号："
+                                               Grid.Row="0" Grid.Column="2"
+                                               Style="{StaticResource ConfigTextBlock}"/>
+                                    <TextBox x:Name="UDPServerSrcPortTextBox" Text="{Binding UDPServerModel.SocketSrcPort}"
+                                             Grid.Row="0" Grid.Column="3"
+                                             Style="{StaticResource ConfigTextBox}"
+                                             Width="120" MaxLength="5"/>
+                                    <Ellipse x:Name="UDPServerOnOffElipse" Fill="{Binding UDPServerModel.SocketBrush}"
+                                             Grid.Row="0" Grid.Column="4"
+                                             Style="{StaticResource ConfigEilipse}"/>
+                                    <Button x:Name="UDPServerOnOffButton" Content="{Binding UDPServerModel.OpenCloseSocket}"
+                                            Grid.Row="0" Grid.Column="5"
+                                            Style="{DynamicResource ConfigButton}"
+                                            Click="UDPServerOnOffButton_Click"/>
+                                </Grid>
+                            </GroupBox>
+                        </Grid>
+                        
+                        <!--接收区、发送区、连接区和辅助区-->
+                        <Grid x:Name="UDPServerWorkGrid" Background="White"  Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!--连接区和辅助区-->
+                            <Grid x:Name="UDPServerSocketGrid" Grid.Column="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="1*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!--连接区-->
+                                <GroupBox x:Name="UDPServerConnectGroupBox" Header="连接" Grid.Row="0"
+                                      Margin="5,0,2.5,3"
+                                      BorderBrush="#FF007ACD"
+                                      Visibility="{Binding HelpModel.ViewVisibility}">
+                                    <DataGrid x:Name="UDPServerConnectDataGrid"
+                                          HeadersVisibility="None"
+                                          BorderBrush="#FF007ACD" Background="White"/>
+                                </GroupBox>
+
+                                <!--辅助区-->
+                                <GroupBox x:Name="UDPServerAssistGroupBox" Header="辅助" Grid.Row="1"
+                                      Margin="5,0,2.5,3"
+                                      BorderBrush="#FF007ACD"
+                                      Visibility="{Binding HelpModel.ViewVisibility}">
+                                    <Grid x:Name="UDPServerAssistGrid">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="1*"/>
+                                            <RowDefinition Height="1*"/>
+                                            <RowDefinition Height="1*"/>
+                                            <RowDefinition Height="1*"/>
+                                            <RowDefinition Height="1*"/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1*"/>
+                                            <ColumnDefinition Width="1*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox x:Name="UDPServerHexReceCheckBox" Content="Hex接收" Grid.Row="0" Grid.Column="0" 
+                                              Style="{StaticResource AssistCheckBox}"
+                                              Margin="0,6,2.5,6"
+                                              IsChecked="{Binding RecvModel.UDPServerHexRecv}"/>
+                                        <CheckBox x:Name="UDPServerHexSendCheckBox" Content="Hex发送" Grid.Row="0" Grid.Column="1"
+                                              Style="{StaticResource AssistCheckBox}"
+                                              Margin="2.5,6,0,6"
+                                              IsChecked="{Binding UDPServerHexSend}"/>
+                                        <CheckBox x:Name="UDPServerAutoSendCheckBox" Content="自动发送(ms)" Grid.Row="1" Grid.Column="0"
+                                              Style="{StaticResource AssistCheckBox}"
+                                              Margin="0,3,2.5,5" 
+                                              IsChecked="{Binding UDPServerAutoSend}"/>
+                                        <TextBox x:Name="UDPServerAutoSendNumTextBox" Text="{Binding SendModel.UDPServerAutoSendNum}" 
+                                             Grid.Row="1" Grid.Column="1"
+                                             Style="{DynamicResource AutoSendNumTextBox}"
+                                             Margin="2.5,3,0,5"/>
+                                        <CheckBox x:Name="UDPServerSaveReceCheckBox" Content="保存接收" Grid.Row="2" Grid.Column="0"
+                                              Style="{StaticResource AssistCheckBox}"
+                                              Margin="0,3,2.5,5" 
+                                              IsChecked="{Binding UDPServerSaveRecv}"/>
+                                        <Button x:Name="UDPServerSaveReceButton" Content="路径选择"  Grid.Row="2" Grid.Column="1"
+                                            Style="{StaticResource AssistButton}"
+                                            Margin="2.5,3,0,5"
+                                            Click="UDPServerSaveReceButton_Click"/>
+                                        <Button x:Name="UDPServerClearReceButton" Content="清接收区"  Grid.Row="3" Grid.Column="0"
+                                            Style="{StaticResource AssistButton}" 
+                                            Margin="0,3,2.5,5"
+                                            Click="UDPServerClearReceButton_Click"/>
+                                        <Button x:Name="UDPServerClearSendButton" Content="清发送区"  Grid.Row="3" Grid.Column="1"
+                                            Style="{StaticResource AssistButton}" 
+                                            Margin="2.5,3,0,5"
+                                            Click="UDPServerClearSendButton_Click"/>
+                                        <Button x:Name="UDPServerClearCountButton" Content="清空计数" 
+                                            Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
+                                            Style="{StaticResource AssistButton}" 
+                                            Margin="0,3,0,0"
+                                            Click="UDPServerClearCountButton_Click"/>
+                                    </Grid>
+                                </GroupBox>
+                            </Grid>
+
+                            <!--接受区和发送区-->
+                            <Grid x:Name="UDPServerDataGrid" Grid.Column="1">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="286*"/>
+                                    <RowDefinition Height="100*"/>
+                                </Grid.RowDefinitions>
+
+                                <!--接收区-->
+                                <GroupBox x:Name="UDPServerRecvDataGroupBox"
+                                          Header="{Binding}"
+                                          HeaderTemplate="{StaticResource UDPServerRecvGroupBoxHeaderData}"
+                                          Grid.Row="0"
+                                          Margin="2.5,3,5,3"
+                                          BorderBrush="#FF007ACD">
+                                </GroupBox>
+
+                                <!--发送区-->
+                                <GroupBox x:Name="UDPServerSendDataGroupBox"
+                                          Header="{Binding}"
+                                          HeaderTemplate="{StaticResource UDPServerSendGroupBoxHeaderData}"
+                                          Grid.Row="1"
+                                          Margin="2.5,0,5,3"
+                                          BorderBrush="#FF007ACD">
+                                    <Grid x:Name="UDPServerSendDataGrid">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox x:Name="UDPServerSendTextBox" Text="{Binding SendModel.UDPServerSendData}" Grid.RowSpan="2"
+                                                 Style="{StaticResource RSTextBox}"/>
+                                        <Button x:Name="UDPServerSendFileButton" Content="发送文件" Grid.Row="0" Grid.Column="1"
+                                                Style="{StaticResource SendButton}"
+                                                Margin="3,3,0,0"
+                                                Click="UDPServerSendFileButton_Click"/>
+                                        <Button x:Name="UDPServerSenfButton" Content="发送" Grid.Row="1" Grid.Column="1"
+                                                Style="{StaticResource SendButton}"
+                                                Margin="3,3,0,0"
+                                                Click="UDPServerSenfButton_Click"/>
+                                    </Grid>
+                                </GroupBox>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </TabItem>
+
+                <!--UDP Client-->
+                <TabItem x:Name="UDPClientTabItem" Header="UDP Client" Style="{DynamicResource TabItemStyle}">
+                    <Grid x:Name="UDPClientGrid" Background="White">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!--Socket配置区、连接区和辅助区-->
+                        <Grid x:Name="UDPClientSocketGrid" Grid.Column="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="1*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!--Socket配置区-->
+                            <GroupBox x:Name="UDPClientConfigGroupPort" Header="网络配置" Grid.Row="0"
+                                      Margin="5,3,2.5,3"
+                                      BorderBrush="#FF007ACD"
+                                      Visibility="{Binding HelpModel.ViewVisibility}">
+                                <Grid x:Name="UDPClientConfigGrid">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="1*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock x:Name="UDPClientDestAddrTextBlock" Text="（支持IPv4，IPv6）目的 IP 地址："
+                                               Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                                               Style="{StaticResource ConfigTextBlock}"
+                                               HorizontalAlignment="Right"/>
+                                    <ComboBox x:Name="UDPClientDestAddrComboBox" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                              ItemsSource="{Binding UDPClientModel.SocketDestIPAddrItemsSource}"
+                                              Text="{Binding UDPClientModel.SocketDestPAddrText}"
+                                              SelectedIndex="{Binding UDPClientModel.SocketDestIPAddrSelectedIndex}"
+                                              Style="{DynamicResource ConfigComboBox}"
+                                              IsEditable="True"
+                                              IsReadOnly="False"/>
+                                    <TextBlock x:Name="UDPClientDestPortTextBlock" Text="目的端口号："
+                                               Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                               Style="{StaticResource ConfigTextBlock}"
+                                               HorizontalAlignment="Right"/>
+                                    <TextBox x:Name="UDPClientDestPortTextBox" Text="{Binding UDPClientModel.SocketDestPort}"
+                                             Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                                             Style="{StaticResource ConfigTextBox}"
+                                             MaxLength="5"
+                                             HorizontalContentAlignment="Left"/>
+                                    <Ellipse x:Name="UDPClientOnOffElipse" Fill="{Binding UDPClientModel.SocketBrush}"
+                                             Grid.Row="4" Grid.Column="0"
+                                             Style="{StaticResource ConfigEilipse}"/>
+                                    <Button x:Name="UDPClientOnOffButton" Content="{Binding UDPClientModel.OpenCloseSocket}"
+                                            Grid.Row="4" Grid.Column="1"
+                                            Style="{DynamicResource ConfigButton}"
+                                            Click="UDPClientOnOffButton_Click"/>
+                                </Grid>
+                            </GroupBox>
+
+                            <!--连接区-->
+                            <GroupBox x:Name="UDPClientConnectGroupBox" Header="连接" Grid.Row="1"
+                                      Margin="5,0,2.5,3"
+                                      BorderBrush="#FF007ACD"
+                                      Visibility="{Binding HelpModel.ViewVisibility}">
+                                <DataGrid x:Name="UDPClientConnectDataGrid"
+                                          HeadersVisibility="None"
+                                          BorderBrush="#FF007ACD" Background="White"/>
+                            </GroupBox>
+
+                            <!--辅助区-->
+                            <GroupBox x:Name="UDPClientAssistGroupBox" Header="辅助" Grid.Row="2"
+                                      Margin="5,0,2.5,3"
+                                      BorderBrush="#FF007ACD"
+                                      Visibility="{Binding HelpModel.AssistViewVisibility}">
+                                <Grid x:Name="UDPClientAssistGrid">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="1*"/>
+                                        <RowDefinition Height="1*"/>
+                                        <RowDefinition Height="1*"/>
+                                        <RowDefinition Height="1*"/>
+                                        <RowDefinition Height="1*"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="1*"/>
+                                        <ColumnDefinition Width="1*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <CheckBox x:Name="UDPClientHexReceCheckBox" Content="Hex接收" Grid.Row="0" Grid.Column="0" 
+                                              Style="{StaticResource AssistCheckBox}"
+                                              Margin="0,6,2.5,6"
+                                              IsChecked="{Binding RecvModel.UDPClientHexRecv}"/>
+                                    <CheckBox x:Name="UDPClientHexSendCheckBox" Content="Hex发送" Grid.Row="0" Grid.Column="1"
+                                              Style="{StaticResource AssistCheckBox}"
+                                              Margin="2.5,6,0,6"
+                                              IsChecked="{Binding UDPClientHexSend}"/>
+                                    <CheckBox x:Name="UDPClientAutoSendCheckBox" Content="自动发送(ms)" Grid.Row="1" Grid.Column="0"
+                                              Style="{StaticResource AssistCheckBox}"
+                                              Margin="0,3,2.5,5" 
+                                              IsChecked="{Binding UDPClientAutoSend}"/>
+                                    <TextBox x:Name="UDPClientAutoSendNumTextBox" Text="{Binding SendModel.UDPClientAutoSendNum}" 
+                                             Grid.Row="1" Grid.Column="1"
+                                             Style="{DynamicResource AutoSendNumTextBox}"
+                                             Margin="2.5,3,0,5"/>
+                                    <CheckBox x:Name="UDPClientSaveReceCheckBox" Content="保存接收" Grid.Row="2" Grid.Column="0"
+                                              Style="{StaticResource AssistCheckBox}"
+                                              Margin="0,3,2.5,5" 
+                                              IsChecked="{Binding UDPClientSaveRecv}"/>
+                                    <Button x:Name="UDPClientSaveReceButton" Content="路径选择"  Grid.Row="2" Grid.Column="1"
+                                            Style="{StaticResource AssistButton}"
+                                            Margin="2.5,3,0,5"
+                                            Click="UDPClientSaveReceButton_Click"/>
+                                    <Button x:Name="UDPClientClearReceButton" Content="清接收区"  Grid.Row="3" Grid.Column="0"
+                                            Style="{StaticResource AssistButton}" 
+                                            Margin="0,3,2.5,5"
+                                            Click="UDPClientClearReceButton_Click"/>
+                                    <Button x:Name="UDPClientClearSendButton" Content="清发送区"  Grid.Row="3" Grid.Column="1"
+                                            Style="{StaticResource AssistButton}" 
+                                            Margin="2.5,3,0,5"
+                                            Click="UDPClientClearSendButton_Click"/>
+                                    <Button x:Name="UDPClientClearCountButton" Content="清空计数" 
+                                            Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
+                                            Style="{StaticResource AssistButton}" 
+                                            Margin="0,3,0,0"
+                                            Click="UDPClientClearCountButton_Click"/>
+                                </Grid>
+                            </GroupBox>
+                        </Grid>
+
+                        <!--接受区和发送区-->
+                        <Grid x:Name="UDPClientDataGrid" Grid.Column="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="348*"/>
+                                <RowDefinition Height="100*"/>
+                            </Grid.RowDefinitions>
+
+                            <!--接收区-->
+                            <GroupBox x:Name="UDPClientRecvDataGroupBox"
+                                      Header="{Binding}"
+                                      HeaderTemplate="{StaticResource UDPClientRecvGroupBoxHeaderData}"
+                                      Grid.Row="0"
+                                      Margin="2.5,3,5,3"
+                                      BorderBrush="#FF007ACD">
+                            </GroupBox>
+
+                            <!--发送区-->
+                            <GroupBox x:Name="UDPClientSendDataGroupBox"
+                                      Header="{Binding}"
+                                      HeaderTemplate="{StaticResource UDPClientSendGroupBoxHeaderData}"
+                                      Grid.Row="1"
+                                      Margin="2.5,0,5,3"
+                                      BorderBrush="#FF007ACD">
+                                <Grid x:Name="UDPClientSendDataGrid">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="1*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox x:Name="UDPClientSendTextBox" Text="{Binding SendModel.UDPClientSendData}" Grid.RowSpan="2"
+                                             Style="{StaticResource RSTextBox}"/>
+                                    <Button x:Name="UDPClientSendFileButton" Content="发送文件" Grid.Row="0" Grid.Column="1"
+                                            Style="{StaticResource SendButton}"
+                                            Margin="3,3,0,0"
+                                            Click="UDPClientSendFileButton_Click"/>
+                                    <Button x:Name="UDPClientSenfButton" Content="发送" Grid.Row="1" Grid.Column="1"
+                                            Style="{StaticResource SendButton}"
+                                            Margin="3,3,0,0"
+                                            Click="UDPClientSenfButton_Click"/>
+                                </Grid>
+                            </GroupBox>
+                        </Grid>
+                    </Grid>
+                </TabItem>
+            </TabControl>
         </Grid>
     </DockPanel>
 </Window>

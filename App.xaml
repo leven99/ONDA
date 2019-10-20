@@ -5,6 +5,204 @@
              StartupUri="Views\MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
+
+            <!--MainWindows XAML - TabControl Style-->
+            <Style x:Key="TabControlStyle" TargetType="TabControl">
+                <Setter Property="OverridesDefaultStyle" Value="True" />
+                <Setter Property="SnapsToDevicePixels" Value="True" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type TabControl}">
+                            <Grid x:Name="templateRoot"
+                                  ClipToBounds="true"
+                                  SnapsToDevicePixels="true"
+                                  KeyboardNavigation.TabNavigation="Local">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition x:Name="RowDefinition0" Height="Auto"/>
+                                    <RowDefinition x:Name="RowDefinition1" Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TabPanel x:Name="headerPanel" Grid.Row="0" Grid.Column="0"
+                                          Margin="2,2,2,0" 
+                                          Background="Transparent"
+                                          IsItemsHost="true" 
+                                          KeyboardNavigation.TabIndex="1" Panel.ZIndex="1"
+                                          HorizontalAlignment="Center"/>
+                                <Border x:Name="contentPanel" Grid.Row="1" Grid.Column="0"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        Background="{TemplateBinding Background}"
+                                        KeyboardNavigation.DirectionalNavigation="Contained"
+                                        KeyboardNavigation.TabIndex="2"
+                                        KeyboardNavigation.TabNavigation="Local">
+                                    <ContentPresenter x:Name="PART_SelectedContentHost"
+                                                      ContentSource="SelectedContent"
+                                                      Margin="{TemplateBinding Padding}"
+                                                      SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                </Border>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!--MainWindows XAML - TabItem Style-->
+            <Style x:Key="TabItemStyle" TargetType="TabItem">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type TabItem}">
+                            <Grid >
+                                <Border x:Name="HeaderBorder"
+                                    Background="Transparent"
+                                    Height="30"
+                                    BorderBrush="Transparent">
+                                    <TextBlock x:Name="HeaderTextBlock" 
+                                               Text="{Binding RelativeSource={RelativeSource Mode=TemplatedParent},Path=Header}"
+                                               VerticalAlignment="Center" Margin="30,0,30,0"/>
+                                </Border>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsSelected" Value="true">
+                                    <Setter TargetName="HeaderBorder" Property="BorderBrush" Value="Transparent" />
+                                    <Setter TargetName="HeaderBorder" Property="Background" Value="#33FFFFFF" />
+                                    <Setter TargetName="HeaderTextBlock" Property="Foreground" Value="White"/>
+                                </Trigger>
+                                <MultiTrigger>
+                                    <MultiTrigger.Conditions>
+                                        <Condition Property="IsSelected" Value="False"/>
+                                        <Condition Property="IsMouseOver" Value="True"/>
+                                    </MultiTrigger.Conditions>
+                                    <Setter TargetName="HeaderTextBlock" Property="Foreground" Value="White"/>
+                                </MultiTrigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!--GroupBox Header Style Template(Base)-->
+            <Style x:Key="GroupBoxHeaderStyle" TargetType="HeaderedContentControl">
+                <Setter Property="OverridesDefaultStyle" Value="True" />
+                <Setter Property="SnapsToDevicePixels" Value="True" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type HeaderedContentControl}">
+                            <ContentPresenter ContentSource="Header"/>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            
+            <!--TCP Server - GroupBox Header Data Template[Recv]-->
+            <DataTemplate x:Key="TCPServerRecvGroupBoxHeaderData">
+                <TextBlock>
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="{}[{0}:{1}]接收区：已接收{2}字节，接收自动保存[{3}]，接收状态[{4}]">
+                                <Binding Path="SocketModel.IPString"/>
+                                <Binding Path="SocketModel.PortString"/>
+                                <Binding Path="RecvModel.TCPServerRecvDataCount"/>
+                                <Binding Path="RecvModel.TCPServerRecvAutoSave"/>
+                                <Binding Path="RecvModel.TCPServerRecvEnable"/>
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+            </DataTemplate>
+
+            <!--TCP Server - GroupBox Header Data Template[Send]-->
+            <DataTemplate x:Key="TCPServerSendGroupBoxHeaderData">
+                <TextBlock>
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="{}[{0}:{1}]发送区：已发送{2}字节">
+                            <Binding Path="SocketModel.IPString"/>
+                            <Binding Path="SocketModel.PortString"/>
+                            <Binding Path="SendModel.TCPServerSendDataCount"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+            </DataTemplate>
+
+            <!--TCP Client - GroupBox Header Data Template[Recv]-->
+            <DataTemplate x:Key="TCPClientRecvGroupBoxHeaderData">
+                <TextBlock>
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="{}[{0}:{1}]接收区：已接收{2}字节，接收自动保存[{3}]，接收状态[{4}]">
+                            <Binding Path="SocketModel.IPString"/>
+                            <Binding Path="SocketModel.PortString"/>
+                            <Binding Path="RecvModel.TCPClientRecvDataCount"/>
+                            <Binding Path="RecvModel.TCPClientRecvAutoSave"/>
+                            <Binding Path="RecvModel.TCPClientRecvEnable"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+            </DataTemplate>
+
+            <!--TCP Client - GroupBox Header Data Template[Send]-->
+            <DataTemplate x:Key="TCPClientSendGroupBoxHeaderData">
+                <TextBlock>
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="{}[{0}:{1}]发送区：已发送{2}字节">
+                            <Binding Path="SocketModel.IPString"/>
+                            <Binding Path="SocketModel.PortString"/>
+                            <Binding Path="SendModel.TCPClientSendDataCount"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+            </DataTemplate>
+
+            <!--UDP Server - GroupBox Header Data Template[Recv]-->
+            <DataTemplate x:Key="UDPServerRecvGroupBoxHeaderData">
+                <TextBlock>
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="{}[{0}:{1}]接收区：已接收{2}字节，接收自动保存[{3}]，接收状态[{4}]">
+                            <Binding Path="SocketModel.IPString"/>
+                            <Binding Path="SocketModel.PortString"/>
+                            <Binding Path="RecvModel.UDPServerRecvDataCount"/>
+                            <Binding Path="RecvModel.UDPServerRecvAutoSave"/>
+                            <Binding Path="RecvModel.UDPServerRecvEnable"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+            </DataTemplate>
+
+            <!--UDP Server - GroupBox Header Data Template[Send]-->
+            <DataTemplate x:Key="UDPServerSendGroupBoxHeaderData">
+                <TextBlock>
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="{}[{0}:{1}]发送区：已发送{2}字节">
+                            <Binding Path="SocketModel.IPString"/>
+                            <Binding Path="SocketModel.PortString"/>
+                            <Binding Path="SendModel.UDPServerSendDataCount"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+            </DataTemplate>
+
+            <!--UDP Client - GroupBox Header Data Template[Recv]-->
+            <DataTemplate x:Key="UDPClientRecvGroupBoxHeaderData">
+                <TextBlock>
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="{}[{0}:{1}]接收区：已接收{2}字节，接收自动保存[{3}]，接收状态[{4}]">
+                            <Binding Path="SocketModel.IPString"/>
+                            <Binding Path="SocketModel.PortString"/>
+                            <Binding Path="RecvModel.UDPClientRecvDataCount"/>
+                            <Binding Path="RecvModel.UDPClientRecvAutoSave"/>
+                            <Binding Path="RecvModel.UDPClientRecvEnable"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+            </DataTemplate>
+
+            <!--UDP Client - GroupBox Header Data Template[Send]-->
+            <DataTemplate x:Key="UDPClientSendGroupBoxHeaderData">
+                <TextBlock>
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="{}[{0}:{1}]发送区：已发送{2}字节">
+                            <Binding Path="SocketModel.IPString"/>
+                            <Binding Path="SocketModel.PortString"/>
+                            <Binding Path="SendModel.UDPClientSendDataCount"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+            </DataTemplate>
             
             <!--MainWindows XAML - Menu style-->
             <Style TargetType="MenuItem" x:Key="MainMenuItem">
@@ -41,10 +239,11 @@
             
             <!--MainWindows XAML - Config Block style-->
             <Style TargetType="TextBlock" x:Key="ConfigTextBlock">
-                <Setter Property="Margin" Value="3,5,0,0"/>
+                <Setter Property="Margin" Value="3,3,0,3"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
             </Style>
             <Style TargetType="ComboBox" x:Key="ConfigComboBox">
-                <Setter Property="Margin" Value="0,5,3,0"/>
+                <Setter Property="Margin" Value="0,3,3,3"/>
                 <Setter Property="Padding" Value="6,6,0,6"/>
                 <Setter Property="HorizontalAlignment" Value="Stretch"/>
                 <Setter Property="ItemContainerStyle">
@@ -57,8 +256,10 @@
                 </Setter>
             </Style>
             <Style TargetType="TextBox" x:Key="ConfigTextBox">
-                <Setter Property="Margin" Value="0,5,3,5"/>
+                <Setter Property="Margin" Value="0,3,3,3"/>
                 <Setter Property="Padding" Value="6,5,6,5"/>
+                <Setter Property="BorderBrush" Value="Black"/>
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
             </Style>
             <Style TargetType="Ellipse" x:Key="ConfigEilipse">
                 <Setter Property="Margin" Value="12,0,12,0"/>
@@ -66,7 +267,7 @@
                 <Setter Property="Height" Value="28"/>
             </Style>
             <Style TargetType="Button" x:Key="ConfigButton">
-                <Setter Property="Margin" Value="0,5,3,3"/>
+                <Setter Property="Margin" Value="0,3,3,3"/>
                 <Setter Property="Padding" Value="55,6,55,6"/>
                 <Setter Property="Background" Value="White"/>
                 <Setter Property="BorderBrush" Value="Black"/>

@@ -119,23 +119,6 @@ namespace SocketDA.Models
             }
         }
 
-        private string _AssistViewVisibility;
-        public string AssistViewVisibility
-        {
-            get
-            {
-                return _AssistViewVisibility;
-            }
-            set
-            {
-                if (_AssistViewVisibility != value)
-                {
-                    _AssistViewVisibility = value;
-                    RaisePropertyChanged(nameof(AssistViewVisibility));
-                }
-            }
-        }
-
         /// <summary>
         /// 状态栏 - 进度条可见性
         /// </summary>
@@ -201,7 +184,6 @@ namespace SocketDA.Models
             AssistReducedEnable = false;
 
             ViewVisibility = "Visible";
-            AssistViewVisibility = "Visible";
 
             StatusBarProgressBarVisibility = "Collapsed";
             StatusBarProgressBarValue = 0;

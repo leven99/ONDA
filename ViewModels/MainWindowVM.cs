@@ -2,7 +2,6 @@
 using SocketDA.Models;
 using System;
 using System.IO;
-using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Windows.Threading;
@@ -12,19 +11,14 @@ namespace SocketDA.ViewModels
     internal class MainWindowViewModel : MainWindowBase
     {
         #region 字段
-        private Socket SocketBase = null;
-
-        private readonly int SocketListenBacklog = 10;
-
-        private readonly ManualResetEvent AllDone = new ManualResetEvent(false);
-        private readonly ManualResetEvent ConnectDone = new ManualResetEvent(false);
-        private readonly ManualResetEvent SendDone = new ManualResetEvent(false);
-        private readonly ManualResetEvent ReceiveDone = new ManualResetEvent(false);
-
         private string DataRecvPath = string.Empty;   /* 数据接收路径 */
         #endregion
 
         public SocketModel SocketModel { get; set; }
+        public TCPServerModel TCPServerModel { get; set; }
+        public TCPClientModel TCPClientModel { get; set; }
+        public UDPServerModel UDPServerModel { get; set; }
+        public UDPClientModel UDPClientModel { get; set; }
         public SendModel SendModel { get; set; }
         public RecvModel RecvModel { get; set; }
         public TimerModel TimerModel { get; set; }
@@ -52,10 +46,7 @@ namespace SocketDA.ViewModels
         #region 文件
         public void ExitWindow()
         {
-            if (SocketBase != null)
-            {
-                CloseSocket(SocketBase);
-            }
+
         }
         #endregion
 
@@ -63,20 +54,6 @@ namespace SocketDA.ViewModels
         #endregion
 
         #region 视图
-        public void AssistReduced_Enable()
-        {
-            HelpModel.AssistReducedEnable = !HelpModel.AssistReducedEnable;
-
-            if(HelpModel.AssistReducedEnable)
-            {
-                HelpModel.AssistViewVisibility = "Collapsed";
-            }
-            else
-            {
-                HelpModel.AssistViewVisibility = "Visible";
-            }
-        }
-
         public void Reduced_Enable()
         {
             HelpModel.ReducedEnable = !HelpModel.ReducedEnable;
@@ -89,8 +66,6 @@ namespace SocketDA.ViewModels
             {
                 HelpModel.ViewVisibility = "Visible";
             }
-
-            AssistReduced_Enable();
         }
         #endregion
 
@@ -103,207 +78,22 @@ namespace SocketDA.ViewModels
 
         #endregion
 
-        #region 打开/关闭套接字
-        public void OpenSocket()
-        {
-            if(SocketBase != null)
-            {
-                CloseSocket(SocketBase);
-            }
-
-            try
-            {
-                /* 对目的IP地址判断有效性 */
-                if (IPAddress.TryParse(SocketModel.SocketDestinationIPAddressText, out _))
-                {
-                    IPAddress _IPAddress = IPAddress.Parse(SocketModel.SocketDestinationIPAddressText);
-
-                    if (!SocketModel.SocketDestinationIPAddressItemsSource.Contains(_IPAddress))
-                    {
-                        SocketModel.SocketDestinationIPAddressItemsSource.Add(_IPAddress);
-                    }
-
-                    SocketModel.SocketDestinationIPAddress = _IPAddress;
-                }
-
-                /* 对目的端口号、源端口号判断有效性 */
-
-                /* TCP Server */
-                if (SocketModel.SocketProtocolSelectedIndex == 0)
-                {
-                    IPEndPoint localIPEndPoint = new IPEndPoint(SocketModel.SocketSourceIPAddress, SocketModel.SocketSourcePort);
-
-                    /* 创建 TCP/IP Socket（区分 IPv4、IPv6） */
-                    if (SocketModel.SocketSourceIPAddress.IsIPv6LinkLocal)
-                    {
-                        SocketBase = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.IPv6);
-                    }
-                    else
-                    {
-                        SocketBase = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IPv4);
-                    }
-
-                    /* 绑定本地Point */
-                    SocketBase.Bind(localIPEndPoint);
-
-                    /* 侦听客户端连接 */
-                    SocketBase.Listen(SocketListenBacklog);
-
-                    SocketModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 断开");
-                }
-                /* TCP Client */
-                else if (SocketModel.SocketProtocolSelectedIndex == 1)
-                {
-                    IPEndPoint RemoteIPEndPoint = new IPEndPoint(SocketModel.SocketDestinationIPAddress, SocketModel.SocketDestinationPort);
-
-                    /* 创建 TCP/IP Socket（区分 IPv4、IPv6） */
-                    if (SocketModel.SocketDestinationIPAddress.IsIPv6LinkLocal)
-                    {
-                        SocketBase = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.IPv6);
-                    }
-                    else
-                    {
-                        SocketBase = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IPv4);
-                    }
-
-                    /* 连接远程主机（服务器） */
-                    SocketBase.BeginConnect(RemoteIPEndPoint, new AsyncCallback(ConnectCallback), SocketBase);
-                    ConnectDone.WaitOne();
-
-                    SocketModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 断开");
-                }
-                /* UDP Server */
-                else if (SocketModel.SocketProtocolSelectedIndex == 2)
-                {
-                    SocketModel.OpenCloseSocket = string.Format(cultureInfo, "UDP 断开");
-                }
-                /* UDP Client */
-                else if (SocketModel.SocketProtocolSelectedIndex == 3)
-                {
-                    SocketModel.OpenCloseSocket = string.Format(cultureInfo, "UDP 断开");
-                }
-            }
-            catch
-            {
-                DepictInfo = string.Format(cultureInfo, "请检查参数是否正确！");
-            }
-        }
-
-        public void CloseSocket(Socket socket)
-        {
-            try
-            {
-                socket.Shutdown(SocketShutdown.Both);
-                socket.Close();
-            }
-            catch
-            {
-
-            }
-        }
-        #endregion
-
-        #region Socket回调函数
-        private void AcceptCallback(IAsyncResult ar)
-        {
-            try
-            {
-                /* 主线程继续 */
-                AllDone.Set();
-
-                /* 获取并处理客户端请求的套接字 */
-                Socket _Socket = (Socket)ar.AsyncState;
-                Socket _SocketAccept = _Socket.EndAccept(ar);
-
-                /* 创建状态对象（state object）*/
-                StateObject _StateObject = new StateObject();
-                _StateObject.workSocket = _SocketAccept;
-
-                /* 从客户端接收数据 */
-            }
-            catch
-            {
-
-            }
-        }
-
-        private void ConnectCallback(IAsyncResult ar)
-        {
-            try
-            {
-                /* 从状态对象（state object）检索 Socket */
-                Socket _Socket = (Socket)ar.AsyncState;
-
-                /* 连接服务器 */
-                _Socket.EndConnect(ar);
-
-                /* 已连接服务器 */
-                ConnectDone.Set();
-            }
-            catch
-            {
-
-            }
-        }
-
-        private void ReceiveCallback(IAsyncResult ar)
-        {
-            try
-            {
-                /* 从状态对象（state object）检索 Socket */
-                StateObject _StateObject = (StateObject)ar.AsyncState;
-                Socket _Socket = _StateObject.workSocket;
-
-                /* 从远程设备接收数据 */
-                int _BytesSent = _Socket.EndReceive(ar);
-
-                if(_BytesSent > 0)
-                {
-
-                }
-            }
-            catch
-            {
-
-            }
-        }
-
-        private void SendCallback(IAsyncResult ar)
-        {
-            try
-            {
-                /* 从状态对象（state object）检索 Socket */
-                Socket _Socket = (Socket)ar.AsyncState;
-
-                /* 向远程设备发送数据 */
-                int _BytesSent = _Socket.EndSend(ar);
-
-                /* 已发送数据 */
-                SendDone.Set();
-            }
-            catch
-            {
-
-            }
-        }
-        #endregion
-
-        #region 辅助区
-        private bool _HexSend;
-        public bool HexSend
+        #region TCP Server
+        private bool _TCPServerHexSend;
+        public bool TCPServerHexSend
         {
             get
             {
-                return _HexSend;
+                return _TCPServerHexSend;
             }
             set
             {
-                if (_HexSend != value)
+                if (_TCPServerHexSend != value)
                 {
-                    _HexSend = value;
-                    RaisePropertyChanged(nameof(HexSend));
+                    _TCPServerHexSend = value;
+                    RaisePropertyChanged(nameof(TCPServerHexSend));
 
-                    if (HexSend == true)
+                    if (TCPServerHexSend == true)
                     {
                         DepictInfo = string.Format(cultureInfo, "请输入十六进制数据用空格隔开，比如A0 B1 C2 D3");
                     }
@@ -315,30 +105,30 @@ namespace SocketDA.ViewModels
             }
         }
 
-        private bool _AutoSend;
-        public bool AutoSend
+        private bool _TCPServerAutoSend;
+        public bool TCPServerAutoSend
         {
             get
             {
-                return _AutoSend;
+                return _TCPServerAutoSend;
             }
             set
             {
-                if (_AutoSend != value)
+                if (_TCPServerAutoSend != value)
                 {
-                    _AutoSend = value;
-                    RaisePropertyChanged(nameof(AutoSend));
+                    _TCPServerAutoSend = value;
+                    RaisePropertyChanged(nameof(TCPServerAutoSend));
                 }
 
-                if (AutoSend == true)
+                if (TCPServerAutoSend == true)
                 {
-                    if (SendModel.AutoSendNum <= 0)
+                    if (SendModel.TCPServerAutoSendNum <= 0)
                     {
                         DepictInfo = string.Format(cultureInfo, "请输入正确的发送时间间隔");
                         return;
                     }
 
-                    StartAutoSendTimer(SendModel.AutoSendNum);
+                    StartAutoSendTimer(SendModel.TCPServerAutoSendNum);
                 }
                 else
                 {
@@ -347,22 +137,280 @@ namespace SocketDA.ViewModels
             }
         }
 
-        private bool _SaveRecv;
-        public bool SaveRecv
+        private bool _TCPServerSaveRecv;
+        public bool TCPServerSaveRecv
         {
             get
             {
-                return _SaveRecv;
+                return _TCPServerSaveRecv;
             }
             set
             {
-                if (_SaveRecv != value)
+                if (_TCPServerSaveRecv != value)
                 {
-                    _SaveRecv = value;
-                    RaisePropertyChanged(nameof(SaveRecv));
+                    _TCPServerSaveRecv = value;
+                    RaisePropertyChanged(nameof(TCPServerSaveRecv));
                 }
 
-                if (SaveRecv)
+                if (TCPServerSaveRecv)
+                {
+                    DepictInfo = "接收数据默认保存在程序基目录，可以点击路径选择操作更换";
+                }
+                else
+                {
+                    DepictInfo = "网络端口调试助手";
+                }
+            }
+        }
+        #endregion
+
+        #region TCP Client
+        private bool _TCPClientHexSend;
+        public bool TCPClientHexSend
+        {
+            get
+            {
+                return _TCPClientHexSend;
+            }
+            set
+            {
+                if (_TCPClientHexSend != value)
+                {
+                    _TCPClientHexSend = value;
+                    RaisePropertyChanged(nameof(TCPClientHexSend));
+
+                    if (TCPClientHexSend == true)
+                    {
+                        DepictInfo = string.Format(cultureInfo, "请输入十六进制数据用空格隔开，比如A0 B1 C2 D3");
+                    }
+                    else
+                    {
+                        DepictInfo = string.Format(cultureInfo, "网络端口调试助手");
+                    }
+                }
+            }
+        }
+
+        private bool _TCPClientAutoSend;
+        public bool TCPClientAutoSend
+        {
+            get
+            {
+                return _TCPClientAutoSend;
+            }
+            set
+            {
+                if (_TCPClientAutoSend != value)
+                {
+                    _TCPClientAutoSend = value;
+                    RaisePropertyChanged(nameof(TCPClientAutoSend));
+                }
+
+                if (TCPClientAutoSend == true)
+                {
+                    if (SendModel.TCPClientAutoSendNum <= 0)
+                    {
+                        DepictInfo = string.Format(cultureInfo, "请输入正确的发送时间间隔");
+                        return;
+                    }
+
+                    StartAutoSendTimer(SendModel.TCPServerAutoSendNum);
+                }
+                else
+                {
+                    StopAutoSendTimer();
+                }
+            }
+        }
+
+        private bool _TCPClientSaveRecv;
+        public bool TCPClientSaveRecv
+        {
+            get
+            {
+                return _TCPClientSaveRecv;
+            }
+            set
+            {
+                if (_TCPClientSaveRecv != value)
+                {
+                    _TCPClientSaveRecv = value;
+                    RaisePropertyChanged(nameof(TCPClientSaveRecv));
+                }
+
+                if (TCPClientSaveRecv)
+                {
+                    DepictInfo = "接收数据默认保存在程序基目录，可以点击路径选择操作更换";
+                }
+                else
+                {
+                    DepictInfo = "网络端口调试助手";
+                }
+            }
+        }
+        #endregion
+
+        #region UDP Server
+        private bool _UDPServerHexSend;
+        public bool UDPServerHexSend
+        {
+            get
+            {
+                return _UDPServerHexSend;
+            }
+            set
+            {
+                if (_UDPServerHexSend != value)
+                {
+                    _UDPServerHexSend = value;
+                    RaisePropertyChanged(nameof(UDPServerHexSend));
+
+                    if (UDPServerHexSend == true)
+                    {
+                        DepictInfo = string.Format(cultureInfo, "请输入十六进制数据用空格隔开，比如A0 B1 C2 D3");
+                    }
+                    else
+                    {
+                        DepictInfo = string.Format(cultureInfo, "网络端口调试助手");
+                    }
+                }
+            }
+        }
+
+        private bool _UDPServerAutoSend;
+        public bool UDPServerAutoSend
+        {
+            get
+            {
+                return _UDPServerAutoSend;
+            }
+            set
+            {
+                if (_UDPServerAutoSend != value)
+                {
+                    _UDPServerAutoSend = value;
+                    RaisePropertyChanged(nameof(UDPServerAutoSend));
+                }
+
+                if (UDPServerAutoSend == true)
+                {
+                    if (SendModel.UDPServerAutoSendNum <= 0)
+                    {
+                        DepictInfo = string.Format(cultureInfo, "请输入正确的发送时间间隔");
+                        return;
+                    }
+
+                    StartAutoSendTimer(SendModel.TCPServerAutoSendNum);
+                }
+                else
+                {
+                    StopAutoSendTimer();
+                }
+            }
+        }
+
+        private bool _UDPServerSaveRecv;
+        public bool UDPServerSaveRecv
+        {
+            get
+            {
+                return _UDPServerSaveRecv;
+            }
+            set
+            {
+                if (_UDPServerSaveRecv != value)
+                {
+                    _UDPServerSaveRecv = value;
+                    RaisePropertyChanged(nameof(UDPServerSaveRecv));
+                }
+
+                if (UDPServerSaveRecv)
+                {
+                    DepictInfo = "接收数据默认保存在程序基目录，可以点击路径选择操作更换";
+                }
+                else
+                {
+                    DepictInfo = "网络端口调试助手";
+                }
+            }
+        }
+        #endregion
+
+        #region UDP Client
+        private bool _UDPClientHexSend;
+        public bool UDPClientHexSend
+        {
+            get
+            {
+                return _UDPClientHexSend;
+            }
+            set
+            {
+                if (_UDPClientHexSend != value)
+                {
+                    _UDPClientHexSend = value;
+                    RaisePropertyChanged(nameof(UDPClientHexSend));
+
+                    if (UDPClientHexSend == true)
+                    {
+                        DepictInfo = string.Format(cultureInfo, "请输入十六进制数据用空格隔开，比如A0 B1 C2 D3");
+                    }
+                    else
+                    {
+                        DepictInfo = string.Format(cultureInfo, "网络端口调试助手");
+                    }
+                }
+            }
+        }
+
+        private bool _UDPClientAutoSend;
+        public bool UDPClientAutoSend
+        {
+            get
+            {
+                return _UDPClientAutoSend;
+            }
+            set
+            {
+                if (_UDPClientAutoSend != value)
+                {
+                    _UDPClientAutoSend = value;
+                    RaisePropertyChanged(nameof(UDPClientAutoSend));
+                }
+
+                if (UDPClientAutoSend == true)
+                {
+                    if (SendModel.UDPClientAutoSendNum <= 0)
+                    {
+                        DepictInfo = string.Format(cultureInfo, "请输入正确的发送时间间隔");
+                        return;
+                    }
+
+                    StartAutoSendTimer(SendModel.TCPServerAutoSendNum);
+                }
+                else
+                {
+                    StopAutoSendTimer();
+                }
+            }
+        }
+
+        private bool _UDPClientSaveRecv;
+        public bool UDPClientSaveRecv
+        {
+            get
+            {
+                return _UDPClientSaveRecv;
+            }
+            set
+            {
+                if (_UDPClientSaveRecv != value)
+                {
+                    _UDPClientSaveRecv = value;
+                    RaisePropertyChanged(nameof(UDPClientSaveRecv));
+                }
+
+                if (UDPClientSaveRecv)
                 {
                     DepictInfo = "接收数据默认保存在程序基目录，可以点击路径选择操作更换";
                 }
@@ -385,7 +433,7 @@ namespace SocketDA.ViewModels
 
         private void AutoSendDispatcherTimer_Tick(object sender, EventArgs e)
         {
-            Send();
+            
         }
 
         private void StartAutoSendTimer(int interval)
@@ -399,20 +447,6 @@ namespace SocketDA.ViewModels
         {
             AutoSendDispatcherTimer.IsEnabled = false;
             AutoSendDispatcherTimer.Stop();
-        }
-        #endregion
-
-        #region 发送
-        public void Send()
-        {
-
-        }
-        #endregion
-
-        #region 发送文件
-        public void SendFile()
-        {
-
         }
         #endregion
 
@@ -434,78 +468,22 @@ namespace SocketDA.ViewModels
         }
         #endregion
 
-        #region 清接收区
-        public void ClarReceData()
-        {
-
-        }
-        #endregion
-
-        #region 清发送区
-        public void ClearSendData()
-        {
-            SendModel.SendData = string.Empty;
-        }
-        #endregion
-
-        #region 清空计数
-        public void ClearCount()
-        {
-
-        }
-        #endregion
-
-        #region 保存接收数据
-        public void SaveRecvData(string ReceData)
-        {
-            try
-            {
-                if (DataRecvPath == null)
-                {
-                    Directory.CreateDirectory(AppDomain.CurrentDomain.BaseDirectory + "\\ReceData\\");
-                }
-                else
-                {
-
-                }
-            }
-            catch
-            {
-
-            }
-        }
-        #endregion
-
-        #region Combobox Support
-        public void ProtocolComboBox_SelectionChanged()
-        {
-            if(SocketModel.SocketProtocolSelectedIndex == 0)
-            {
-                SocketModel.DestinationVisibility = "Collapsed";
-                SocketModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 侦听");
-            }
-            else if (SocketModel.SocketProtocolSelectedIndex == 1)
-            {
-                SocketModel.DestinationVisibility = "Visible";
-                SocketModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 连接");
-            }
-            else if (SocketModel.SocketProtocolSelectedIndex == 2)
-            {
-                SocketModel.DestinationVisibility = "Collapsed";
-                SocketModel.OpenCloseSocket = string.Format(cultureInfo, "UDP 侦听");
-            }
-            else if (SocketModel.SocketProtocolSelectedIndex == 3)
-            {
-                SocketModel.DestinationVisibility = "Visible";
-                SocketModel.OpenCloseSocket = string.Format(cultureInfo, "UDP 连接");
-            }
-        }
-        #endregion
-
         public MainWindowViewModel()
         {
             SocketModel = new SocketModel();
             SocketModel.SocketDataContext();
+
+            TCPServerModel = new TCPServerModel();
+            TCPServerModel.TCPServerDataContext();
+
+            TCPClientModel = new TCPClientModel();
+            TCPClientModel.TCPClientDataContext();
+
+            UDPServerModel = new UDPServerModel();
+            UDPServerModel.UDPServerDataContext();
+
+            UDPClientModel = new UDPClientModel();
+            UDPClientModel.UDPClientDataContext();
 
             SendModel = new SendModel();
             SendModel.SendDataContext();
@@ -519,9 +497,22 @@ namespace SocketDA.ViewModels
             HelpModel = new HelpModel();
             HelpModel.HelpDataContext();
 
-            SaveRecv = false;
-            HexSend = false;
-            AutoSend = false;
+            TCPServerHexSend = false;
+            TCPServerAutoSend = false;
+            TCPServerSaveRecv = false;
+
+            TCPClientHexSend = false;
+            TCPClientAutoSend = false;
+            TCPClientSaveRecv = false;
+
+            UDPServerHexSend = false;
+            UDPServerAutoSend = false;
+            UDPServerSaveRecv = false;
+
+            UDPClientHexSend = false;
+            UDPClientAutoSend = false;
+            UDPClientSaveRecv = false;
+
             InitAutoSendTimer();
 
             DepictInfo = string.Format(cultureInfo, "网络端口调试助手");

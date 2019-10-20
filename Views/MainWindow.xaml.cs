@@ -13,6 +13,9 @@ namespace SocketDA.Views
         {
             InitializeComponent();
 
+            Height = 535;
+            Width = Height / 0.625;
+
             mainWindowViewModel = new MainWindowViewModel();
             DataContext = mainWindowViewModel;
         }
@@ -61,16 +64,6 @@ namespace SocketDA.Views
         #endregion
 
         #region 视图
-        /// <summary>
-        /// 辅助区视图
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void AssistEveryMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            mainWindowViewModel.AssistReduced_Enable();
-        }
-
         /// <summary>
         /// 精简视图
         /// </summary>
@@ -136,60 +129,216 @@ namespace SocketDA.Views
         }
         #endregion
 
-        #region 打开/关闭Socket
-        private void OpenCloseSocket(object sender, RoutedEventArgs e)
+        #region TCP Server
+
+        #region 打开/关闭网络
+        private void TCPServerOnOffButton_Click(object sender, RoutedEventArgs e)
         {
-            mainWindowViewModel.OpenSocket();
+
         }
         #endregion
 
         #region 发送
-        private void Send(object sender, RoutedEventArgs e)
+        private void TCPServerSenfButton_Click(object sender, RoutedEventArgs e)
         {
-            mainWindowViewModel.Send();
+
         }
         #endregion
 
         #region 发送文件
-        private void SendFile(object sender, RoutedEventArgs e)
+        private void TCPServerSendFileButton_Click(object sender, RoutedEventArgs e)
         {
-            mainWindowViewModel.SendFile();
+
         }
         #endregion
 
         #region 路径选择
-        private void SaveRecvPath(object sender, RoutedEventArgs e)
+        private void TCPServerSaveReceButton_Click(object sender, RoutedEventArgs e)
         {
-            mainWindowViewModel.SaveRecvPath();
+
         }
         #endregion
 
         #region 清接收区
-        private void ClarReceData(object sender, RoutedEventArgs e)
+        private void TCPServerClearReceButton_Click(object sender, RoutedEventArgs e)
         {
-            mainWindowViewModel.ClarReceData();
+
         }
         #endregion
 
         #region 清发送区
-        private void ClearSendData(object sender, RoutedEventArgs e)
+        private void TCPServerClearSendButton_Click(object sender, RoutedEventArgs e)
         {
-            mainWindowViewModel.ClearSendData();
+
         }
         #endregion
 
         #region 清空计数
-        private void ClearCount(object sender, RoutedEventArgs e)
+        private void TCPServerClearCountButton_Click(object sender, RoutedEventArgs e)
         {
-            mainWindowViewModel.ClearCount();
+
         }
         #endregion
 
-        #region Combobox Support
-        private void ProtocolComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        #endregion
+
+        #region TCP Client
+
+        #region 打开/关闭网络
+        private void TCPClientOnOffButton_Click(object sender, RoutedEventArgs e)
         {
-            mainWindowViewModel.ProtocolComboBox_SelectionChanged();
+
         }
+        #endregion
+
+        #region 发送
+        private void TCPClientSenfButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
+
+        #region 发送文件
+        private void TCPClientSendFileButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
+
+        #region 路径选择
+        private void TCPClientSaveReceButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
+
+        #region 清接收区
+        private void TCPClientClearReceButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
+
+        #region 清发送区
+        private void TCPClientClearSendButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
+
+        #region 清空计数
+        private void TCPClientClearCountButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
+
+        #endregion
+
+        #region UDP Server
+
+        #region 打开/关闭网络
+        private void UDPServerOnOffButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
+
+        #region 发送
+        private void UDPServerSenfButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
+
+        #region 发送文件
+        private void UDPServerSendFileButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
+
+        #region 路径选择
+        private void UDPServerSaveReceButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
+
+        #region 清空接收
+        private void UDPServerClearReceButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
+
+        #region 清空发送
+        private void UDPServerClearSendButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
+
+        #region 清空计数
+        private void UDPServerClearCountButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
+
+        #endregion
+
+        #region UDP Client
+
+        #region 打开/关闭网络
+        private void UDPClientOnOffButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
+
+        #region 发送
+        private void UDPClientSenfButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
+
+        #region 发送文件
+        private void UDPClientSendFileButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
+
+        #region 路径选择
+        private void UDPClientSaveReceButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
+
+        #region 清空接收
+        private void UDPClientClearReceButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
+
+        #region 清空发送
+        private void UDPClientClearSendButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
+
+        #region 清空计数
+        private void UDPClientClearCountButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
+
         #endregion
     }
 }
