@@ -29,7 +29,7 @@ namespace SocketDA.Models
         #endregion
 
         private string _SocketDestPAddrText;
-        public string SocketDestPAddrText
+        public string SocketDestIPAddrText
         {
             get
             {
@@ -40,7 +40,7 @@ namespace SocketDA.Models
                 if (_SocketDestPAddrText != value)
                 {
                     _SocketDestPAddrText = value;
-                    RaisePropertyChanged(nameof(SocketDestPAddrText));
+                    RaisePropertyChanged(nameof(SocketDestIPAddrText));
                 }
             }
         }
@@ -61,6 +61,42 @@ namespace SocketDA.Models
                 }
             }
         }
+
+        #region 网络配置 - Socket属性控件启用/不启用
+        private bool _SocketDestIPAddrEnable;
+        public bool SocketDestIPAddrEnable
+        {
+            get
+            {
+                return _SocketDestIPAddrEnable;
+            }
+            set
+            {
+                if (_SocketDestIPAddrEnable != value)
+                {
+                    _SocketDestIPAddrEnable = value;
+                    RaisePropertyChanged(nameof(SocketDestIPAddrEnable));
+                }
+            }
+        }
+
+        private bool _SocketDestPortEnable;
+        public bool SocketDestPortEnable
+        {
+            get
+            {
+                return _SocketDestPortEnable;
+            }
+            set
+            {
+                if (_SocketDestPortEnable != value)
+                {
+                    _SocketDestPortEnable = value;
+                    RaisePropertyChanged(nameof(SocketDestPortEnable));
+                }
+            }
+        }
+        #endregion
 
         #region 网络配置 - Socket打开/关闭按钮
         private Brush _SocketBrush;
@@ -104,8 +140,11 @@ namespace SocketDA.Models
 
             SocketDestPort = 8088;
 
-            SocketDestPAddrText = string.Empty;
+            SocketDestIPAddrText = string.Empty;
             SocketDestIPAddrSelectedIndex = 0;
+
+            SocketDestIPAddrEnable = true;
+            SocketDestPortEnable = true;
 
             SocketBrush = Brushes.Red;
             OpenCloseSocket = string.Format(cultureInfo, "TCP 连接");

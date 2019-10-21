@@ -25,7 +25,7 @@ namespace SocketDA.Models
         #endregion
 
         private string _SocketSrcPAddrText;
-        public string SocketSrcPAddrText
+        public string SocketSrcIPAddrText
         {
             get
             {
@@ -36,7 +36,7 @@ namespace SocketDA.Models
                 if (_SocketSrcPAddrText != value)
                 {
                     _SocketSrcPAddrText = value;
-                    RaisePropertyChanged(nameof(SocketSrcPAddrText));
+                    RaisePropertyChanged(nameof(SocketSrcIPAddrText));
                 }
             }
         }
@@ -57,6 +57,42 @@ namespace SocketDA.Models
                 }
             }
         }
+
+        #region 网络配置 - Socket属性控件启用/不启用
+        private bool _SocketSrcIPAddrEnable;
+        public bool SocketSrcIPAddrEnable
+        {
+            get
+            {
+                return _SocketSrcIPAddrEnable;
+            }
+            set
+            {
+                if (_SocketSrcIPAddrEnable != value)
+                {
+                    _SocketSrcIPAddrEnable = value;
+                    RaisePropertyChanged(nameof(SocketSrcIPAddrEnable));
+                }
+            }
+        }
+
+        private bool _SocketSrcPortEnable;
+        public bool SocketSrcPortEnable
+        {
+            get
+            {
+                return _SocketSrcPortEnable;
+            }
+            set
+            {
+                if (_SocketSrcPortEnable != value)
+                {
+                    _SocketSrcPortEnable = value;
+                    RaisePropertyChanged(nameof(SocketSrcPortEnable));
+                }
+            }
+        }
+        #endregion
 
         #region 网络配置 - Socket打开/关闭按钮
         private Brush _SocketBrush;
@@ -98,8 +134,11 @@ namespace SocketDA.Models
         {
             SocketSrcPort = 8088;
 
-            SocketSrcPAddrText = string.Empty;
+            SocketSrcIPAddrText = string.Empty;
             SocketSrcIPAddrSelectedIndex = 0;
+
+            SocketSrcIPAddrEnable = true;
+            SocketSrcPortEnable = true;
 
             SocketBrush = Brushes.Red;
             OpenCloseSocket = string.Format(cultureInfo, "TCP 侦听");

@@ -146,9 +146,15 @@ namespace SocketDA.Models
     /// </summary>
     internal class OSCore
     {
-        public const int DEFAULT_BUFFER_SIZE = 2048;   /* 缓冲字节 */
+        /// <summary>
+        /// 缓冲字节
+        /// </summary>
+        public const int DEFAULT_BUFFER_SIZE = 2048;
 
-        public IPEndPoint ConnectionEndpoint = null;   /* 端点信息 */
+        /// <summary>
+        /// 端点信息
+        /// </summary>
+        public IPEndPoint ConnectionEndpoint = null;
 
         public Socket TCPConnectionSocket = null;    /* TCP连接Socket */
         public Socket UDPConnectionSocket = null;    /* UDP连接Socket */
@@ -209,15 +215,24 @@ namespace SocketDA.Models
     {
         protected OSCore OSCore = new OSCore();
 
-        protected const int DEFAULT_MAX_CONNECTIONS = 10;   /* TCP服务器最大连接客户端数量 */
+        /// <summary>
+        /// 服务器最大连接客户端数量
+        /// </summary>
+        protected const int DEFAULT_MAX_CONNECTIONS = 10;
 
-        /* 使用互斥锁来阻止TCP服务器侦听器线程，以便在服务器上激活有限的客户端连接。如果停止服务器，则互斥体将被释放 */
+        /// <summary>
+        /// 使用互斥锁来阻止TCP服务器侦听器线程，以便在服务器上激活有限的客户端连接。如果停止服务器，则互斥体将被释放
+        /// </summary>
         private static Mutex MutexConnections = null;
 
-        /* 跟踪TCP服务器中客户端连接数的信号量 */
+        /// <summary>
+        /// 跟踪TCP服务器中客户端连接数的信号量
+        /// </summary>
         protected int NumConnections = 0;
 
-        /* TCP服务器Socket堆栈 */
+        /// <summary>
+        /// 服务器Socket堆栈
+        /// </summary>
         protected OSAsyncEventStack SocketPool = null;
 
         public OSTCPServer()
@@ -311,6 +326,7 @@ namespace SocketDA.Models
             }
             else
             {
+                /* 必须清除套接字，因为正在重用上下文对象 */
                 acceptEventArg.AcceptSocket = null;
             }
 
@@ -344,6 +360,7 @@ namespace SocketDA.Models
             {
                 try
                 {
+                    /* 获取接受的客户端连接套接字 */
                     SocketAsyncEventArgs _readSocket = SocketPool.Pop();
 
                     if (_readSocket != null)
@@ -365,82 +382,68 @@ namespace SocketDA.Models
 
                 }
 
-                StartAcceptAsync(asyncEventArgs);
+                StartAcceptAsync(asyncEventArgs);   /* 接受下一个连接请求 */
             }
         }
 
         /// <summary>
-        /// 一旦有事务，此方法将处理readSocket
+        /// 处理 Read Socket
         /// </summary>
         /// <param name="readSocket"></param>
         private void ProcessReceive(SocketAsyncEventArgs readSocket)
         {
-            if (readSocket.BytesTransferred > 0)
+            if ( (readSocket.BytesTransferred > 0) && (readSocket.SocketError == SocketError.Success) )
             {
-                if (readSocket.SocketError == SocketError.Success)
-                {
-                    OSUserToken token = readSocket.UserToken as OSUserToken;
+                OSUserToken token = readSocket.UserToken as OSUserToken;
 
-                    if (token.ReadSocketData(readSocket))
+                if (token.ReadSocketData(readSocket))
+                {
+                    Socket _readSocket = token.OwnerSocket;
+
+                    if (_readSocket.Available == 0)
                     {
-                        Socket _readSocket = token.OwnerSocket;
-
-                        if (_readSocket.Available == 0)
-                        {
-                            token.ProcessData(readSocket);
-                        }
-
-                        bool _ioPending = _readSocket.ReceiveAsync(readSocket);
-
-                        if (!_ioPending)
-                        {
-                            ProcessReceive(readSocket);
-                        }
+                        token.ProcessData(readSocket);
                     }
-                }
-                else
-                {
-                    CloseReadSocket(readSocket);
+
+                    bool _ioPending = _readSocket.ReceiveAsync(readSocket);
+
+                    if (!_ioPending)
+                    {
+                        ProcessReceive(readSocket);
+                    }
                 }
             }
             else
             {
-                CloseReadSocket(readSocket);
+                CloseClientSocket(readSocket);
             }
         }
 
         /// <summary>
-        /// 一旦有事务，此方法将处理sendSocket
+        /// 处理 Send Socket
         /// </summary>
         /// <param name="sendSocket"></param>
         private void ProcessSend(SocketAsyncEventArgs sendSocket)
         {
-            if (sendSocket.BytesTransferred > 0)
+            if (sendSocket.SocketError == SocketError.Success)
             {
-                if (sendSocket.SocketError == SocketError.Success)
-                {
-                    OSUserToken token = sendSocket.UserToken as OSUserToken;
+                OSUserToken token = sendSocket.UserToken as OSUserToken;
 
-                    if (token.SendSocketData(sendSocket))
+                if (token.SendSocketData(sendSocket))
+                {
+                    Socket _sendSocket = token.OwnerSocket;
+
+                    if (_sendSocket.Available == 0)
                     {
-                        Socket _sendSocket = token.OwnerSocket;
-
-                        if (_sendSocket.Available == 0)
-                        {
-                            token.ProcessData(sendSocket);
-                        }
-
-                        bool _ioPending = _sendSocket.ReceiveAsync(sendSocket);
-
-                        if (!_ioPending)
-                        {
-                            ProcessSend(sendSocket);
-                        }
+                        token.ProcessData(sendSocket);
                     }
-                }
-                else
-                {
 
+                    bool _ioPending = _sendSocket.ReceiveAsync(sendSocket);
+
+                    if (!_ioPending)
+                    {
+                        ProcessSend(sendSocket);
+                    }
                 }
             }
             else
@@ -449,13 +452,14 @@ namespace SocketDA.Models
             }
         }
 
-        private void CloseReadSocket(SocketAsyncEventArgs readSocket)
+        private void CloseClientSocket(SocketAsyncEventArgs readSocket)
         {
             OSUserToken token = readSocket.UserToken as OSUserToken;
-            CloseReadSocket(token, readSocket);
+
+            CloseClientSocket(token, readSocket);
         }
 
-        private void CloseReadSocket(OSUserToken token, SocketAsyncEventArgs readSocket)
+        private void CloseClientSocket(OSUserToken token, SocketAsyncEventArgs readSocket)
         {
             token.Dispose();
 
@@ -487,6 +491,21 @@ namespace SocketDA.Models
             catch
             {
                 return false;
+            }
+        }
+
+        public void Recv(byte[] byData)
+        {
+            try
+            {
+                if(OSCore.TCPConnectionSocket.Connected)
+                {
+                    OSCore.TCPConnectionSocket.Receive(byData);
+                }
+            }
+            catch
+            {
+
             }
         }
 
@@ -537,12 +556,25 @@ namespace SocketDA.Models
 
     internal class SocketModel : MainWindowBase
     {
-        public Collection<IPAddress> SocketSrcPAddrItemsSource { get; set; }
+        public Collection<IPAddress> SocketSrcIPAddrItemsSource { get; set; }
         public Collection<string> SocketSourceIPAddressItemsSource { get; set; }
+
+        public static bool TryParseIPAddressPort(string ipAddress, int port)
+        {
+            if(IPAddress.TryParse(ipAddress, out _))
+            {
+                if ( (port > 0) && (port < 65535) )
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         public void SocketDataContext()
         {
-            SocketSrcPAddrItemsSource = new Collection<IPAddress>();
+            SocketSrcIPAddrItemsSource = new Collection<IPAddress>();
             SocketSourceIPAddressItemsSource = new Collection<string>();
 
             /* 本地计算机的所有网络设配器 */
@@ -565,7 +597,7 @@ namespace SocketDA.Models
                         /* 获取网络设配器接口单播地址 */
                         IPAddress _IPAddress = _NetworkInterfaceIPProperties.UnicastAddresses[_Count].Address;
 
-                        SocketSrcPAddrItemsSource.Add(_IPAddress);
+                        SocketSrcIPAddrItemsSource.Add(_IPAddress);
                         SocketSourceIPAddressItemsSource.Add(_IPAddress.ToString() + " / " + _NetworkInterfaceName);
                     }
                 }

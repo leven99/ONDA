@@ -131,17 +131,19 @@
                                                Style="{StaticResource ConfigTextBlock}"/>
                                     <ComboBox x:Name="TCPServerSrcAddrComboBox" Grid.Row="0" Grid.Column="1"
                                               ItemsSource="{Binding SocketModel.SocketSourceIPAddressItemsSource}"
-                                              Text="{Binding TCPServerModel.SocketSrcPAddrText}"
+                                              Text="{Binding TCPServerModel.SocketSrcIPAddrText}"
                                               SelectedIndex="{Binding TCPServerModel.SocketSrcIPAddrSelectedIndex}"
                                               Style="{DynamicResource ConfigComboBox}"
-                                              IsEditable="True" IsReadOnly="False"/>
+                                              IsEditable="True" IsReadOnly="False"
+                                              IsEnabled="{Binding TCPServerModel.SocketSrcIPAddrEnable}"/>
                                     <TextBlock x:Name="TCPServerSrcPortTextBlock" Text="源端口号："
                                                Grid.Row="0" Grid.Column="2"
                                                Style="{StaticResource ConfigTextBlock}"/>
                                     <TextBox x:Name="TCPServerSrcPortTextBox" Text="{Binding TCPServerModel.SocketSrcPort}"
                                              Grid.Row="0" Grid.Column="3"
                                              Style="{StaticResource ConfigTextBox}"
-                                             Width="120" MaxLength="5"/>
+                                             Width="120" MaxLength="5"
+                                             IsEnabled="{Binding TCPServerModel.SocketSrcPortEnable}"/>
                                     <Ellipse x:Name="TCPServerOnOffElipse" Fill="{Binding TCPServerModel.SocketBrush}"
                                              Grid.Row="0" Grid.Column="4"
                                              Style="{StaticResource ConfigEilipse}"/>
@@ -163,7 +165,7 @@
                             <!--接受区和发送区-->
                             <Grid x:Name="TCPServerDataGrid" Grid.Column="0">
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="286*"/>
+                                    <RowDefinition Height="297*"/>
                                     <RowDefinition Height="100*"/>
                                 </Grid.RowDefinitions>
 
@@ -172,7 +174,7 @@
                                           Header="{Binding}"
                                           HeaderTemplate="{StaticResource TCPServerRecvGroupBoxHeaderData}"
                                           Grid.Row="0"
-                                          Margin="5,3,2.5,3"
+                                          Margin="5,0,2.5,3"
                                           BorderBrush="#FF007ACD">
                                 </GroupBox>
 
@@ -325,7 +327,8 @@
                                         <ColumnDefinition Width="1*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBox x:Name="TCPClientSendTextBox" Text="{Binding SendModel.TCPClientSendData}" Grid.RowSpan="2"
+                                    <TextBox x:Name="TCPClientSendTextBox" Text="{Binding SendModel.TCPClientSendData}"
+                                             Grid.RowSpan="2"
                                              Style="{StaticResource RSTextBox}"/>
                                     <Button x:Name="TCPClientSendFileButton" Content="发送文件" Grid.Row="0" Grid.Column="1"
                                             Style="{StaticResource SendButton}"
@@ -370,11 +373,11 @@
                                                HorizontalAlignment="Right"/>
                                     <ComboBox x:Name="TCPClientDestAddrComboBox" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
                                               ItemsSource="{Binding TCPClientModel.SocketDestIPAddrItemsSource}"
-                                              Text="{Binding TCPClientModel.SocketDestPAddrText}"
+                                              Text="{Binding TCPClientModel.SocketDestIPAddrText}"
                                               SelectedIndex="{Binding TCPClientModel.SocketDestIPAddrSelectedIndex}"
                                               Style="{DynamicResource ConfigComboBox}"
-                                              IsEditable="True"
-                                              IsReadOnly="False"/>
+                                              IsEditable="True" IsReadOnly="False"
+                                              IsEnabled="{Binding TCPClientModel.SocketDestIPAddrEnable}"/>
                                     <TextBlock x:Name="TCPClientDestPortTextBlock" Text="目的端口号："
                                                Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
                                                Style="{StaticResource ConfigTextBlock}"
@@ -383,7 +386,8 @@
                                              Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
                                              Style="{StaticResource ConfigTextBox}"
                                              MaxLength="5"
-                                             HorizontalContentAlignment="Left"/>
+                                             HorizontalContentAlignment="Left"
+                                             IsEnabled="{Binding TCPClientModel.SocketDestPortEnable}"/>
                                     <Ellipse x:Name="TCPClientOnOffElipse" Fill="{Binding TCPClientModel.SocketBrush}"
                                              Grid.Row="4" Grid.Column="0"
                                              Style="{StaticResource ConfigEilipse}"/>
@@ -393,7 +397,7 @@
                                             Click="TCPClientOnOffButton_Click"/>
                                 </Grid>
                             </GroupBox>
-
+                            
                             <!--连接区-->
                             <GroupBox x:Name="TCPClientConnectGroupBox" Header="连接" Grid.Row="1"
                                       Margin="2.5,0,5,3"
@@ -601,7 +605,7 @@
                             <!--接受区和发送区-->
                             <Grid x:Name="UDPServerDataGrid" Grid.Column="1">
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="286*"/>
+                                    <RowDefinition Height="297*"/>
                                     <RowDefinition Height="100*"/>
                                 </Grid.RowDefinitions>
 
@@ -610,7 +614,7 @@
                                           Header="{Binding}"
                                           HeaderTemplate="{StaticResource UDPServerRecvGroupBoxHeaderData}"
                                           Grid.Row="0"
-                                          Margin="2.5,3,5,3"
+                                          Margin="2.5,0,5,3"
                                           BorderBrush="#FF007ACD">
                                 </GroupBox>
 

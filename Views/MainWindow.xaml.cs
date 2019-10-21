@@ -13,7 +13,7 @@ namespace SocketDA.Views
         {
             InitializeComponent();
 
-            Height = 535;
+            Height = 635;
             Width = Height / 0.625;
 
             mainWindowViewModel = new MainWindowViewModel();

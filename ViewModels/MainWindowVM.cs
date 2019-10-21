@@ -1,6 +1,8 @@
 ﻿using Microsoft.Win32;
 using SocketDA.Models;
 using System;
+using System.Net;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace SocketDA.ViewModels
@@ -83,7 +85,7 @@ namespace SocketDA.ViewModels
         #region 打开/关闭网络
         public void TCPServerOpenCloseSocket()
         {
-
+            OSTCPServer = new OSTCPServer();
         }
 
         #endregion
@@ -179,10 +181,64 @@ namespace SocketDA.ViewModels
         #region TCP Client
 
         #region 打开/关闭网络
-        public void TCPClientOpenCloseSocket()
+        public bool TCPClientOpenCloseSocket()
         {
+            if(OSTCPClient != null)
+            {
+                return CloseTCPClientSocket();
+            }
 
+            /* 判断Socket参数（IP地址与端口号）是否合法 */
+            if (SocketModel.TryParseIPAddressPort(TCPClientModel.SocketDestIPAddrText, TCPClientModel.SocketDestPort))
+            {
+                IPAddress _IPAddress = IPAddress.Parse(TCPClientModel.SocketDestIPAddrText);
+
+                if(!TCPClientModel.SocketDestIPAddrItemsSource.Contains(_IPAddress))
+                {
+                    TCPClientModel.SocketDestIPAddrItemsSource.Add(_IPAddress);
+                }
+            }
+
+            OSTCPClient = new OSTCPClient();
+
+            /* TCP客户端连接TCP服务器 */
+            bool _Connected = OSTCPClient.Connect(
+                TCPClientModel.SocketDestIPAddrItemsSource[TCPClientModel.SocketDestIPAddrSelectedIndex],
+                TCPClientModel.SocketDestPort);
+
+            if(_Connected)
+            {
+                TCPClientModel.SocketDestIPAddrEnable = false;
+                TCPClientModel.SocketDestPortEnable = false;
+
+                TCPClientModel.SocketBrush = Brushes.GreenYellow;
+                TCPClientModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 断开");
+            }
+
+            return true;
         }
+
+        public bool CloseTCPClientSocket()
+        {
+            if(OSTCPClient != null)
+            {
+                OSTCPClient.DisConnect();
+                OSTCPClient = null;
+
+                TCPClientModel.SocketDestIPAddrEnable = true;
+                TCPClientModel.SocketDestPortEnable = true;
+
+                TCPClientModel.SocketBrush = Brushes.Red;
+                TCPClientModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 连接");
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         #endregion
 
         #region 辅助区
