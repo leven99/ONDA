@@ -192,16 +192,17 @@
                                             <ColumnDefinition Width="1*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBox x:Name="TCPServerSendTextBox" Text="{Binding SendModel.TCPServerSendData}" Grid.RowSpan="2"
-                                             Style="{StaticResource RSTextBox}"/>
+                                        <TextBox x:Name="TCPServerSendTextBox" Text="{Binding SendModel.TCPServerSendData}"
+                                                 Grid.RowSpan="2"
+                                                 Style="{StaticResource RSTextBox}"/>
                                         <Button x:Name="TCPServerSendFileButton" Content="发送文件" Grid.Row="0" Grid.Column="1"
-                                            Style="{StaticResource SendButton}"
-                                            Margin="3,3,0,0"
-                                            Click="TCPServerSendFileButton_Click"/>
+                                                Style="{StaticResource SendButton}"
+                                                Margin="3,3,0,0"
+                                                Click="TCPServerSendFileButton_Click"/>
                                         <Button x:Name="TCPServerSenfButton" Content="发送" Grid.Row="1" Grid.Column="1"
-                                            Style="{StaticResource SendButton}"
-                                            Margin="3,3,0,0"
-                                            Click="TCPServerSenfButton_Click"/>
+                                                Style="{StaticResource SendButton}"
+                                                Margin="3,3,0,0"
+                                                Click="TCPServerSenfButton_Click"/>
                                     </Grid>
                                 </GroupBox>
                             </Grid>
@@ -629,7 +630,8 @@
                                             <ColumnDefinition Width="1*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBox x:Name="UDPServerSendTextBox" Text="{Binding SendModel.UDPServerSendData}" Grid.RowSpan="2"
+                                        <TextBox x:Name="UDPServerSendTextBox" Text="{Binding SendModel.UDPServerSendData}"
+                                                 Grid.RowSpan="2"
                                                  Style="{StaticResource RSTextBox}"/>
                                         <Button x:Name="UDPServerSendFileButton" Content="发送文件" Grid.Row="0" Grid.Column="1"
                                                 Style="{StaticResource SendButton}"
@@ -809,7 +811,8 @@
                                         <ColumnDefinition Width="1*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBox x:Name="UDPClientSendTextBox" Text="{Binding SendModel.UDPClientSendData}" Grid.RowSpan="2"
+                                    <TextBox x:Name="UDPClientSendTextBox" Text="{Binding SendModel.UDPClientSendData}"
+                                             Grid.RowSpan="2"
                                              Style="{StaticResource RSTextBox}"/>
                                     <Button x:Name="UDPClientSendFileButton" Content="发送文件" Grid.Row="0" Grid.Column="1"
                                             Style="{StaticResource SendButton}"

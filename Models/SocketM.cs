@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 
 namespace SocketDA.Models
@@ -15,7 +16,7 @@ namespace SocketDA.Models
     /// </summary>
     sealed class OSAsyncEventStack
     {
-        private readonly Stack<SocketAsyncEventArgs> SocketStack;
+        private readonly Stack<SocketAsyncEventArgs> _SocketStack;
 
         /// <summary>
         /// Stack中最大可存储的items
@@ -23,7 +24,7 @@ namespace SocketDA.Models
         /// <param name="maxCapacity"></param>
         public OSAsyncEventStack(int maxCapacity)
         {
-            SocketStack = new Stack<SocketAsyncEventArgs>(maxCapacity);
+            _SocketStack = new Stack<SocketAsyncEventArgs>(maxCapacity);
         }
 
         /// <summary>
@@ -32,11 +33,11 @@ namespace SocketDA.Models
         /// <returns></returns>
         public SocketAsyncEventArgs Pop()
         {
-            lock (SocketStack)
+            lock (_SocketStack)
             {
-                if (SocketStack.Count > 0)
+                if (_SocketStack.Count > 0)
                 {
-                    return SocketStack.Pop();
+                    return _SocketStack.Pop();
                 }
                 else
                 {
@@ -56,68 +57,120 @@ namespace SocketDA.Models
                 throw new ArgumentNullException(item.ConnectByNameError.Message);
             }
 
-            lock (SocketStack)
+            lock (_SocketStack)
             {
-                SocketStack.Push(item);
+                _SocketStack.Push(item);
             }
         }
     }
 
     sealed class OSUserToken : IDisposable
     {
-        private Socket ownersocket = null;
+        private Socket _OwnerSocket = null;
+
+        private StringBuilder _ReadStringBuilder = null;   /* 从readScoket中累积的数据 */
+
+        private Int32 _ReadTotalByteCount = 0;   /* 在_ReadStringBuilder中累积的总字节数 */
 
         public OSUserToken(Socket readSocket, Int32 bufferSize)
         {
-
+            _OwnerSocket = readSocket;
+            _ReadStringBuilder = new StringBuilder(bufferSize);
         }
 
         public Socket OwnerSocket
         {
             get
             {
-                return ownersocket;
+                return _OwnerSocket;
             }
         }
 
+        /// <summary>
+        /// 对接收到的数据进行处理
+        /// </summary>
+        /// <param name="args"></param>
         public void ProcessData(SocketAsyncEventArgs args)
         {
+            /* 获取从客户端收到的最后一条消息，该消息已存储在_ReadStringBuilder中 */
+            String _Received = _ReadStringBuilder.ToString();
 
+            /* 处理从客户端收到的消息 */
+
+            /* 清除_ReadStringBuilder，以便它可以从客户端接收更多数据 */
+            _ReadStringBuilder.Length = 0;
+            _ReadTotalByteCount = 0;
         }
 
         public bool ReadSocketData(SocketAsyncEventArgs readSocket)
+        {
+            int _ByteCount = readSocket.BytesTransferred;
+
+            if ((_ReadTotalByteCount + _ByteCount) > _ReadStringBuilder.Capacity)
+            {
+                return false;
+            }
+            else
+            {
+                _ReadStringBuilder.Append(Encoding.ASCII.GetString(readSocket.Buffer, readSocket.Offset, _ByteCount));
+                _ReadTotalByteCount += _ByteCount;
+
+                return true;
+            }
+        }
+
+        public bool SendSocketData(SocketAsyncEventArgs sendSocket)
         {
             return true;
         }
 
         public void Dispose()
         {
+            try
+            {
+                _OwnerSocket.Shutdown(SocketShutdown.Both);
+            }
+            catch
+            {
 
+            }
+            finally
+            {
+                _OwnerSocket.Close();
+            }
         }
     }
 
+    /// <summary>
+    /// 这是一个TCP/UDP, Server/Client都是用的基类
+    /// </summary>
     internal class OSCore
     {
-        protected const int DEFAULT_BUFFER_SIZE = 2048;   /* 缓冲字节 */
+        public const int DEFAULT_BUFFER_SIZE = 2048;   /* 缓冲字节 */
 
-        protected IPEndPoint ConnectionEndpoint = null;   /* 端点信息 */
+        public IPEndPoint ConnectionEndpoint = null;   /* 端点信息 */
 
-        protected Socket TCPConnectionSocket = null;    /* TCP连接Socket */
-        protected Socket UDPConnectionSocket = null;    /* UDP连接Socket */
+        public Socket TCPConnectionSocket = null;    /* TCP连接Socket */
+        public Socket UDPConnectionSocket = null;    /* UDP连接Socket */
 
-        public IPEndPoint CreateIPEndPoint(IPAddress ipAddress, int port)
+        public static IPEndPoint CreateIPEndPoint(IPAddress ipAddress, int port)
         {
+            if(ipAddress == null)
+            {
+                return null;
+            }
+
             try
             {
                 return new IPEndPoint(ipAddress, port);
             }
-            catch
+            catch (ArgumentOutOfRangeException)
             {
                 return null;
             }
         }
 
-        protected bool CreateSocket(IPAddress ipAddress, int port, ProtocolType protocolType)
+        public bool CreateSocket(IPAddress ipAddress, int port, ProtocolType protocolType)
         {
             ConnectionEndpoint = CreateIPEndPoint(ipAddress, port);
 
@@ -143,7 +196,7 @@ namespace SocketDA.Models
                     return false;
                 }
             }
-            catch
+            catch (SocketException)
             {
                 return false;
             }
@@ -152,8 +205,10 @@ namespace SocketDA.Models
         }
     }
 
-    internal class OSTCPServer : OSCore
+    internal class OSTCPServer
     {
+        protected OSCore OSCore = new OSCore();
+
         protected const int DEFAULT_MAX_CONNECTIONS = 10;   /* TCP服务器最大连接客户端数量 */
 
         /* 使用互斥锁来阻止TCP服务器侦听器线程，以便在服务器上激活有限的客户端连接。如果停止服务器，则互斥体将被释放 */
@@ -181,36 +236,65 @@ namespace SocketDA.Models
             {
                 SocketAsyncEventArgs item = new SocketAsyncEventArgs();
                 item.Completed += new EventHandler<SocketAsyncEventArgs>(OnIOCompleted);
-                item.SetBuffer(new byte[DEFAULT_BUFFER_SIZE], 0, DEFAULT_BUFFER_SIZE);
+                item.SetBuffer(new byte[OSCore.DEFAULT_BUFFER_SIZE], 0, OSCore.DEFAULT_BUFFER_SIZE);
                 SocketPool.Push(item);
             }
         }
 
+        /// <summary>
+        /// 每当套接字上的接收或发送完成时，就会调用此方法
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OnIOCompleted(object sender, SocketAsyncEventArgs e)
         {
-            throw new NotImplementedException();
+            switch (e.LastOperation)
+            {
+                case SocketAsyncOperation.Receive:
+                    ProcessReceive(e);
+                    break;
+                case SocketAsyncOperation.Send:
+                    ProcessSend(e);
+                    break;
+                default:
+                    throw new ArgumentException(e.ConnectByNameError.Message);
+            }
         }
 
-        public bool Start()
+        /// <summary>
+        /// 如果服务器未启动，则调用此方法一次启动服务器
+        /// </summary>
+        /// <returns></returns>
+        public bool Start(IPAddress ipAddress, int port)
         {
-            try
+            if(OSCore.CreateSocket(ipAddress, port, ProtocolType.Tcp))
             {
-                TCPConnectionSocket.Bind(ConnectionEndpoint);
-                TCPConnectionSocket.Listen(DEFAULT_MAX_CONNECTIONS);
-                StartAcceptAsync(null);
-                MutexConnections.WaitOne();
+                try
+                {
+                    OSCore.TCPConnectionSocket.Bind(OSCore.ConnectionEndpoint);
+                    OSCore.TCPConnectionSocket.Listen(DEFAULT_MAX_CONNECTIONS);
+                    StartAcceptAsync(null);
+                    MutexConnections.WaitOne();
 
-                return true;
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
             }
-            catch
+            else
             {
                 return false;
             }
         }
 
+        /// <summary>
+        /// 如果服务器已启动，则调用词方法一次停止服务器
+        /// </summary>
         public void Stop()
         {
-            TCPConnectionSocket.Close();
+            OSCore.TCPConnectionSocket.Close();
             MutexConnections.ReleaseMutex();
         }
 
@@ -230,7 +314,7 @@ namespace SocketDA.Models
                 acceptEventArg.AcceptSocket = null;
             }
 
-            bool _AcceptPending = TCPConnectionSocket.AcceptAsync(acceptEventArg);
+            bool _AcceptPending = OSCore.TCPConnectionSocket.AcceptAsync(acceptEventArg);
 
             if (!_AcceptPending)
             {
@@ -264,7 +348,7 @@ namespace SocketDA.Models
 
                     if (_readSocket != null)
                     {
-                        _readSocket.UserToken = new OSUserToken(_acceptSocket, DEFAULT_BUFFER_SIZE);
+                        _readSocket.UserToken = new OSUserToken(_acceptSocket, OSCore.DEFAULT_BUFFER_SIZE);
 
                         Interlocked.Increment(ref NumConnections);
 
@@ -285,6 +369,10 @@ namespace SocketDA.Models
             }
         }
 
+        /// <summary>
+        /// 一旦有事务，此方法将处理readSocket
+        /// </summary>
+        /// <param name="readSocket"></param>
         private void ProcessReceive(SocketAsyncEventArgs readSocket)
         {
             if (readSocket.BytesTransferred > 0)
@@ -321,6 +409,46 @@ namespace SocketDA.Models
             }
         }
 
+        /// <summary>
+        /// 一旦有事务，此方法将处理sendSocket
+        /// </summary>
+        /// <param name="sendSocket"></param>
+        private void ProcessSend(SocketAsyncEventArgs sendSocket)
+        {
+            if (sendSocket.BytesTransferred > 0)
+            {
+                if (sendSocket.SocketError == SocketError.Success)
+                {
+                    OSUserToken token = sendSocket.UserToken as OSUserToken;
+
+                    if (token.SendSocketData(sendSocket))
+                    {
+                        Socket _sendSocket = token.OwnerSocket;
+
+                        if (_sendSocket.Available == 0)
+                        {
+                            token.ProcessData(sendSocket);
+                        }
+
+                        bool _ioPending = _sendSocket.ReceiveAsync(sendSocket);
+
+                        if (!_ioPending)
+                        {
+                            ProcessSend(sendSocket);
+                        }
+                    }
+                }
+                else
+                {
+
+                }
+            }
+            else
+            {
+
+            }
+        }
+
         private void CloseReadSocket(SocketAsyncEventArgs readSocket)
         {
             OSUserToken token = readSocket.UserToken as OSUserToken;
@@ -331,27 +459,80 @@ namespace SocketDA.Models
         {
             token.Dispose();
 
-            // Decrement the counter keeping track of the total number of clients connected to the server.
             Interlocked.Decrement(ref NumConnections);
 
-            // Put the read socket back in the stack to be used again
             SocketPool.Push(readSocket);
         }
     }
 
-    internal class OSTCPClient : OSCore
+    internal class OSTCPClient
     {
+        protected OSCore OSCore = new OSCore();
 
+        public bool Send(byte[] byData)
+        {
+            try
+            {
+                if(OSCore.TCPConnectionSocket.Connected)
+                {
+                    OSCore.TCPConnectionSocket.Send(byData);
+
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public bool Connect(IPAddress ipAddress, int port)
+        {
+            if(OSCore.CreateSocket(ipAddress, port, ProtocolType.Tcp))
+            {
+                try
+                {
+                    var _ConnectEndpoint = OSCore.CreateIPEndPoint(ipAddress, port);
+                    OSCore.TCPConnectionSocket.Connect(_ConnectEndpoint);
+
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public void DisConnect()
+        {
+            try
+            {
+                OSCore.TCPConnectionSocket.Close();
+            }
+            catch
+            {
+
+            }
+        }
     }
 
-    internal class OSUDPServer : OSCore
+    internal class OSUDPServer
     {
-
+        protected OSCore OSCore = new OSCore();
     }
 
-    internal class OSUDPClient : OSCore
+    internal class OSUDPClient
     {
-
+        protected OSCore OSCore = new OSCore();
     }
 
     internal class SocketModel : MainWindowBase

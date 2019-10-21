@@ -7,6 +7,13 @@ namespace SocketDA.ViewModels
 {
     internal class MainWindowViewModel : MainWindowBase
     {
+        #region 字段
+        public OSTCPServer OSTCPServer = null;
+        public OSTCPClient OSTCPClient = null;
+        public OSUDPServer OSUDPServer = null;
+        public OSUDPClient OSUDPClient = null;
+        #endregion
+
         public SocketModel SocketModel { get; set; }
         public TCPServerModel TCPServerModel { get; set; }
         public TCPClientModel TCPClientModel { get; set; }
