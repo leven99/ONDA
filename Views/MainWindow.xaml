@@ -223,9 +223,9 @@
                                       Visibility="{Binding HelpModel.ViewVisibility}">
                                     <DataGrid x:Name="TCPServerConnectDataGrid"
                                           HeadersVisibility="None"
-                                          BorderBrush="#FF007ACD" Background="White"/>
+                                          BorderBrush="White" Background="White"/>
                                 </GroupBox>
-
+                                
                                 <!--辅助区-->
                                 <GroupBox x:Name="TCPServerAssistGroupBox" Header="辅助" Grid.Row="1"
                                       Margin="2.5,0,5,3"
@@ -405,9 +405,10 @@
                                       Visibility="{Binding HelpModel.ViewVisibility}">
                                 <DataGrid x:Name="TCPClientConnectDataGrid"
                                           HeadersVisibility="None"
-                                          BorderBrush="#FF007ACD" Background="White"/>
+                                          BorderBrush="White" Background="White">
+                                </DataGrid>
                             </GroupBox>
-
+                            
                             <!--辅助区-->
                             <GroupBox x:Name="TCPClientAssistGroupBox" Header="辅助" Grid.Row="2"
                                       Margin="2.5,0,5,3"

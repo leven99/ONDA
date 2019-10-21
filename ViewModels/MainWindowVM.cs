@@ -198,12 +198,17 @@ namespace SocketDA.ViewModels
                     TCPClientModel.SocketDestIPAddrItemsSource.Add(_IPAddress);
                 }
             }
+            else
+            {
+                DepictInfo = string.Format(cultureInfo, "请输入合法的IP地址和端口号");
+
+                return false;   /* Socket参数不合法，直接返回 */
+            }
 
             OSTCPClient = new OSTCPClient();
 
             /* TCP客户端连接TCP服务器 */
-            bool _Connected = OSTCPClient.Connect(
-                TCPClientModel.SocketDestIPAddrItemsSource[TCPClientModel.SocketDestIPAddrSelectedIndex],
+            bool _Connected = OSTCPClient.Connect(IPAddress.Parse(TCPClientModel.SocketDestIPAddrText),
                 TCPClientModel.SocketDestPort);
 
             if(_Connected)
@@ -213,6 +218,12 @@ namespace SocketDA.ViewModels
 
                 TCPClientModel.SocketBrush = Brushes.GreenYellow;
                 TCPClientModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 断开");
+            }
+            else
+            {
+                OSTCPClient = null;
+
+                return false;
             }
 
             return true;
