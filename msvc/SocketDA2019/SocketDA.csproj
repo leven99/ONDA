@@ -123,6 +123,9 @@
     <Compile Include="..\..\ViewModels\WPFUpdateVM.cs">
       <Link>ViewModels\WPFUpdateVM.cs</Link>
     </Compile>
+	<Compile Include="..\..\ModelsSocket\SocketSetting.cs">
+      <Link>ModelsSocket\SocketSetting.cs</Link>
+    </Compile>
     <Compile Include="..\..\ModelsSocket\SocketBase.cs">
       <Link>ModelsSocket\SocketBase.cs</Link>
     </Compile>
@@ -132,7 +135,7 @@
     <Compile Include="..\..\ModelsSocket\SocketBufferManager.cs">
       <Link>ModelsSocket\SocketBufferManager.cs</Link>
     </Compile>
-	<Compile Include="..\..\ModelsSocket\SocketUserToKen.cs">
+    <Compile Include="..\..\ModelsSocket\SocketUserToKen.cs">
       <Link>ModelsSocket\SocketUserToKen.cs</Link>
     </Compile>
     <Compile Include="..\..\Models\TimerM.cs">

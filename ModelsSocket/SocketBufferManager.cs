@@ -4,7 +4,7 @@ using System.Net.Sockets;
 namespace SocketDA.ModelsSocket
 {
     /// <summary>
-    /// 创建一个缓冲区，该缓冲区可以被分割分配给SocketAsyncEventArgs对象，以便与每个Socket I/O操作使用
+    /// 这个类用于创建一个缓冲区，该缓冲区可以被分割分配给每一个SocketAsyncEventArgs对象
     /// 
     /// 目的：缓冲区易于重复使用，并防止碎片化堆内存。
     /// 

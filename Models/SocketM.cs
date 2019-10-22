@@ -89,49 +89,42 @@ namespace SocketDA.Models
 
     internal class SocketTCPServer
     {
-        protected SocketBase SocketBase = new SocketBase();
-
-        /// <summary>
-        /// 服务器最大连接客户端数量
-        /// </summary>
-        protected const int DEFAULT_MAX_CONNECTIONS = 10;
+        protected SocketBase _SocketBase = null;
+        protected SocketSetting _SocketSetting = null;
+        protected SocketBufferManager _SocketBufferManager = null;
+        protected SocketAsyncEventArgsPool _SocketAsyncEventArgsPool = null;
 
         /// <summary>
         /// 使用互斥锁来阻止TCP服务器侦听器线程，以便在服务器上激活有限的客户端连接。如果停止服务器，则互斥体将被释放
         /// </summary>
-        private static Mutex MutexConnections = null;
+        private Mutex MutexConnections = null;
 
         /// <summary>
         /// 跟踪TCP服务器中客户端连接数的信号量
         /// </summary>
-        protected int NumConnections = 0;
+        protected Semaphore SemaphoreConnections = null;
 
-        /// <summary>
-        /// 服务器Socket堆栈
-        /// </summary>
-        protected SocketAsyncEventArgsPool SocketPool = null;
-
-        protected IPEndPoint IPEndPoint = null;
         protected Socket Socket = null;
+        protected IPEndPoint IPEndPoint = null;
 
         public SocketTCPServer()
         {
-            /* 设置互斥量和信号量 */
+            _SocketBase = new SocketBase();
+            _SocketSetting = new SocketSetting();
+            _SocketBufferManager = new SocketBufferManager(
+                _SocketSetting.DefaultMaxConnctions * _SocketSetting.BufferSize,
+                _SocketSetting.BufferSize);
+            _SocketAsyncEventArgsPool = new SocketAsyncEventArgsPool(_SocketSetting.DefaultMaxConnctions);
+
             MutexConnections = new Mutex();
-            NumConnections = 0;
+            SemaphoreConnections = new Semaphore(_SocketSetting.DefaultMaxConnctions, _SocketSetting.DefaultMaxConnctions);
 
-            /* 创建Socket堆栈 */
-            SocketPool = new SocketAsyncEventArgsPool(DEFAULT_MAX_CONNECTIONS);
-
-            /* 创建read sockets，用于服务器允许的最大客户端连接量，同时将
-             * IO Completed的事件处理程序分配给每个socket，然后
-             * 将其压入堆栈以等待客户端连接 */
-            for (int count = 0; count < DEFAULT_MAX_CONNECTIONS; count++)
+            for (int count = 0; count < _SocketSetting.DefaultMaxConnctions; count++)
             {
                 SocketAsyncEventArgs _SocketAsyncEventArgs = new SocketAsyncEventArgs();
                 _SocketAsyncEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnIOCompleted);
-                _SocketAsyncEventArgs.SetBuffer(new byte[2048], 0, 2048);
-                SocketPool.Push(_SocketAsyncEventArgs);
+                _SocketBufferManager.SetBuffer(_SocketAsyncEventArgs);
+                _SocketAsyncEventArgsPool.Push(_SocketAsyncEventArgs);
             }
         }
 
@@ -161,16 +154,16 @@ namespace SocketDA.Models
         /// <returns></returns>
         public bool Start(IPAddress ipAddress, int port)
         {
-            Socket = SocketBase.CreateSocket(ipAddress, port, ProtocolType.Tcp);
+            Socket = _SocketBase.CreateSocket(ipAddress, port, ProtocolType.Tcp);
 
             if (Socket != null)
             {
-                IPEndPoint = SocketBase.CreateIPEndPoint(ipAddress, port);
+                IPEndPoint = _SocketBase.CreateIPEndPoint(ipAddress, port);
 
                 try
                 {
                     Socket.Bind(IPEndPoint);
-                    Socket.Listen(DEFAULT_MAX_CONNECTIONS);
+                    Socket.Listen(_SocketSetting.DefaultMaxConnctions);
                     StartAcceptAsync(null);
                     MutexConnections.WaitOne();
 
@@ -243,13 +236,11 @@ namespace SocketDA.Models
             {
                 try
                 {
-                    SocketAsyncEventArgs _readSocket = SocketPool.Pop();
+                    SocketAsyncEventArgs _readSocket = _SocketAsyncEventArgsPool.Pop();
 
                     if (_readSocket != null)
                     {
                         _readSocket.UserToken = new OSUserToken(_acceptSocket, 2048);
-
-                        Interlocked.Increment(ref NumConnections);
 
                         bool _ioPending = _acceptSocket.ReceiveAsync(_readSocket);
 
@@ -343,8 +334,7 @@ namespace SocketDA.Models
             OSUserToken token = readSocket.UserToken as OSUserToken;
 
             token.Dispose();
-            Interlocked.Decrement(ref NumConnections);
-            SocketPool.Push(readSocket);
+            _SocketAsyncEventArgsPool.Push(readSocket);
         }
     }
 
