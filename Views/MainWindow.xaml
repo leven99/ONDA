@@ -138,6 +138,7 @@
                                               IsEnabled="{Binding TCPServerModel.SocketSrcIPAddrEnable}"/>
                                     <TextBlock x:Name="TCPServerSrcPortTextBlock" Text="源端口号："
                                                Grid.Row="0" Grid.Column="2"
+                                               Margin="6,3,0,3"
                                                Style="{StaticResource ConfigTextBlock}"/>
                                     <TextBox x:Name="TCPServerSrcPortTextBox" Text="{Binding TCPServerModel.SocketSrcPort}"
                                              Grid.Row="0" Grid.Column="3"
@@ -501,6 +502,7 @@
                                             Click="UDPServerOnOffButton_Click"/>
                                     <TextBlock x:Name="UDPServerSrcPortTextBlock" Text="源端口号："
                                                Grid.Row="0" Grid.Column="2"
+                                               Margin="6,3,0,3"
                                                Style="{StaticResource ConfigTextBlock}"/>
                                     <TextBox x:Name="UDPServerSrcPortTextBox" Text="{Binding UDPServerModel.SocketSrcPort}"
                                              Grid.Row="0" Grid.Column="3"

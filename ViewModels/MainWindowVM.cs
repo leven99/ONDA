@@ -2,6 +2,7 @@
 using SocketDA.Models;
 using System;
 using System.Net;
+using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Threading;
 
@@ -83,9 +84,83 @@ namespace SocketDA.ViewModels
         #region TCP Server
 
         #region 打开/关闭网络
-        public void TCPServerOpenCloseSocket()
+        public bool TCPServerOpenCloseSocket()
         {
+            if(OSTCPServer != null)
+            {
+                return CloseTCPServerSocket();
+            }
+
+            IPAddress _IPAddress;
+
+            /* 判断Socket参数（IP地址与端口号）是否合法 */
+            if (TCPServerModel.SocketSrcIPAddrSelectedIndex >= 0)
+            {
+                /* 索引选择的IP地址 */
+                _IPAddress = SocketModel.SocketSrcIPAddrItemsSource[TCPServerModel.SocketSrcIPAddrSelectedIndex];
+            }
+            else
+            {
+                /* 手动输入的IP地址 */
+                if(SocketModel.TryParseIPAddressPort(TCPServerModel.SocketSrcIPAddrText, TCPServerModel.SocketSrcPort))
+                {
+                    _IPAddress = IPAddress.Parse(TCPServerModel.SocketSrcIPAddrText);
+
+                    if(!SocketModel.SocketSrcIPAddrItemsSource.Contains(_IPAddress))
+                    {
+                        SocketModel.SocketSrcIPAddrItemsSource.Add(_IPAddress);
+                        SocketModel.SocketSourceIPAddressItemsSource.Add(_IPAddress.ToString());
+                    }
+                }
+                else
+                {
+                    DepictInfo = string.Format(cultureInfo, "请输入合法的IP地址和端口号");
+
+                    return false;   /* Socket参数不合法，直接返回 */
+                }
+            }
+
             OSTCPServer = new OSTCPServer();
+
+            /* 启动TCP服务器 */
+            var _Started = OSTCPServer.Start(_IPAddress, TCPServerModel.SocketSrcPort);
+
+            if(_Started)
+            {
+                TCPServerModel.SocketSrcIPAddrEnable = false;
+                TCPServerModel.SocketSrcPortEnable = false;
+
+                TCPServerModel.SocketBrush = Brushes.GreenYellow;
+                TCPServerModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 断开");
+            }
+            else
+            {
+                OSTCPServer = null;
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool CloseTCPServerSocket()
+        {
+            if(OSTCPServer != null)
+            {
+                OSTCPServer.Stop();
+                OSTCPServer = null;
+
+                TCPServerModel.SocketSrcIPAddrEnable = true;
+                TCPServerModel.SocketSrcPortEnable = true;
+
+                TCPServerModel.SocketBrush = Brushes.Red;
+                TCPServerModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 侦听");
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         #endregion
@@ -188,10 +263,12 @@ namespace SocketDA.ViewModels
                 return CloseTCPClientSocket();
             }
 
+            IPAddress _IPAddress;
+
             /* 判断Socket参数（IP地址与端口号）是否合法 */
             if (SocketModel.TryParseIPAddressPort(TCPClientModel.SocketDestIPAddrText, TCPClientModel.SocketDestPort))
             {
-                IPAddress _IPAddress = IPAddress.Parse(TCPClientModel.SocketDestIPAddrText);
+                _IPAddress = IPAddress.Parse(TCPClientModel.SocketDestIPAddrText);
 
                 if(!TCPClientModel.SocketDestIPAddrItemsSource.Contains(_IPAddress))
                 {
@@ -207,9 +284,8 @@ namespace SocketDA.ViewModels
 
             OSTCPClient = new OSTCPClient();
 
-            /* TCP客户端连接TCP服务器 */
-            bool _Connected = OSTCPClient.Connect(IPAddress.Parse(TCPClientModel.SocketDestIPAddrText),
-                TCPClientModel.SocketDestPort);
+            /* 连接TCP服务器 */
+            var _Connected = OSTCPClient.Connect(_IPAddress, TCPClientModel.SocketDestPort);
 
             if(_Connected)
             {

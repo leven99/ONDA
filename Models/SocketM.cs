@@ -511,7 +511,7 @@ namespace SocketDA.Models
 
         public bool Connect(IPAddress ipAddress, int port)
         {
-            if(OSCore.CreateSocket(ipAddress, port, ProtocolType.Tcp))
+            if (OSCore.CreateSocket(ipAddress, port, ProtocolType.Tcp))
             {
                 try
                 {
@@ -559,6 +559,12 @@ namespace SocketDA.Models
         public Collection<IPAddress> SocketSrcIPAddrItemsSource { get; set; }
         public Collection<string> SocketSourceIPAddressItemsSource { get; set; }
 
+        /// <summary>
+        /// 判断IP地址和端口号的合法性
+        /// </summary>
+        /// <param name="ipAddress"></param>
+        /// <param name="port"></param>
+        /// <returns></returns>
         public static bool TryParseIPAddressPort(string ipAddress, int port)
         {
             if(IPAddress.TryParse(ipAddress, out _))
