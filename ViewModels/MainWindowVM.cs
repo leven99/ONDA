@@ -11,10 +11,10 @@ namespace SocketDA.ViewModels
     internal class MainWindowViewModel : MainWindowBase
     {
         #region 字段
-        public OSTCPServer OSTCPServer = null;
-        public OSTCPClient OSTCPClient = null;
-        public OSUDPServer OSUDPServer = null;
-        public OSUDPClient OSUDPClient = null;
+        public SocketTCPServer SocketTCPServer = null;
+        public SocketTCPClient SocketTCPClient = null;
+        public SocketUDPServer SocketUDPServer = null;
+        public SocketUDPClient SocketUDPClient = null;
         #endregion
 
         public SocketModel SocketModel { get; set; }
@@ -86,7 +86,7 @@ namespace SocketDA.ViewModels
         #region 打开/关闭网络
         public bool TCPServerOpenCloseSocket()
         {
-            if(OSTCPServer != null)
+            if(SocketTCPServer != null)
             {
                 return CloseTCPServerSocket();
             }
@@ -120,10 +120,10 @@ namespace SocketDA.ViewModels
                 }
             }
 
-            OSTCPServer = new OSTCPServer();
+            SocketTCPServer = new SocketTCPServer();
 
             /* 启动TCP服务器 */
-            var _Started = OSTCPServer.Start(_IPAddress, TCPServerModel.SocketSrcPort);
+            var _Started = SocketTCPServer.Start(_IPAddress, TCPServerModel.SocketSrcPort);
 
             if(_Started)
             {
@@ -135,7 +135,7 @@ namespace SocketDA.ViewModels
             }
             else
             {
-                OSTCPServer = null;
+                SocketTCPServer = null;
                 return false;
             }
 
@@ -144,10 +144,10 @@ namespace SocketDA.ViewModels
 
         public bool CloseTCPServerSocket()
         {
-            if(OSTCPServer != null)
+            if(SocketTCPServer != null)
             {
-                OSTCPServer.Stop();
-                OSTCPServer = null;
+                SocketTCPServer.Stop();
+                SocketTCPServer = null;
 
                 TCPServerModel.SocketSrcIPAddrEnable = true;
                 TCPServerModel.SocketSrcPortEnable = true;
@@ -258,7 +258,7 @@ namespace SocketDA.ViewModels
         #region 打开/关闭网络
         public bool TCPClientOpenCloseSocket()
         {
-            if(OSTCPClient != null)
+            if(SocketTCPClient != null)
             {
                 return CloseTCPClientSocket();
             }
@@ -282,10 +282,10 @@ namespace SocketDA.ViewModels
                 return false;   /* Socket参数不合法，直接返回 */
             }
 
-            OSTCPClient = new OSTCPClient();
+            SocketTCPClient = new SocketTCPClient();
 
             /* 连接TCP服务器 */
-            var _Connected = OSTCPClient.Connect(_IPAddress, TCPClientModel.SocketDestPort);
+            var _Connected = SocketTCPClient.Connect(_IPAddress, TCPClientModel.SocketDestPort);
 
             if(_Connected)
             {
@@ -297,7 +297,7 @@ namespace SocketDA.ViewModels
             }
             else
             {
-                OSTCPClient = null;
+                SocketTCPClient = null;
 
                 return false;
             }
@@ -307,10 +307,10 @@ namespace SocketDA.ViewModels
 
         public bool CloseTCPClientSocket()
         {
-            if(OSTCPClient != null)
+            if(SocketTCPClient != null)
             {
-                OSTCPClient.DisConnect();
-                OSTCPClient = null;
+                SocketTCPClient.DisConnect();
+                SocketTCPClient = null;
 
                 TCPClientModel.SocketDestIPAddrEnable = true;
                 TCPClientModel.SocketDestPortEnable = true;

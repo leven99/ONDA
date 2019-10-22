@@ -123,6 +123,18 @@
     <Compile Include="..\..\ViewModels\WPFUpdateVM.cs">
       <Link>ViewModels\WPFUpdateVM.cs</Link>
     </Compile>
+    <Compile Include="..\..\ModelsSocket\SocketBase.cs">
+      <Link>ModelsSocket\SocketBase.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ModelsSocket\SocketAsyncEventArgsPool.cs">
+      <Link>ModelsSocket\SocketAsyncEventArgsPool.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ModelsSocket\SocketBufferManager.cs">
+      <Link>ModelsSocket\SocketBufferManager.cs</Link>
+    </Compile>
+	<Compile Include="..\..\ModelsSocket\SocketUserToKen.cs">
+      <Link>ModelsSocket\SocketUserToKen.cs</Link>
+    </Compile>
     <Compile Include="..\..\Models\TimerM.cs">
       <Link>Models\TimerM.cs</Link>
     </Compile>
@@ -138,18 +150,18 @@
     <Compile Include="..\..\Models\SocketM.cs">
       <Link>Models\SocketM.cs</Link>
     </Compile>
-	<Compile Include="..\..\Models\TCPClientM.cs">
-	  <Link>Models\TCPClientM.cs</Link>
-	</Compile>
+    <Compile Include="..\..\Models\TCPClientM.cs">
+      <Link>Models\TCPClientM.cs</Link>
+    </Compile>
     <Compile Include="..\..\Models\TCPServerM.cs">
-	  <Link>Models\TCPServerM.cs</Link>
-	</Compile>
+      <Link>Models\TCPServerM.cs</Link>
+    </Compile>
     <Compile Include="..\..\Models\UDPClientM.cs">
-	  <Link>Models\UDPClientM.cs</Link>
-	</Compile>
+      <Link>Models\UDPClientM.cs</Link>
+    </Compile>
     <Compile Include="..\..\Models\UDPServerM.cs">
-	  <Link>Models\UDPServerM.cs</Link>
-	</Compile>
+      <Link>Models\UDPServerM.cs</Link>
+    </Compile>
     <Compile Include="..\..\App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>

@@ -1,6 +1,6 @@
-﻿using SocketDA.ViewModels;
+﻿using SocketDA.ModelsSocket;
+using SocketDA.ViewModels;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -10,61 +10,7 @@ using System.Threading;
 
 namespace SocketDA.Models
 {
-    /// <summary>
-    /// 这是一个非常标准的堆栈实现，设置该堆栈就是设置可重复使用的异步套接字连接。
-    /// 该类只有两个操作：压入堆栈和弹出堆栈
-    /// </summary>
-    sealed class OSAsyncEventStack
-    {
-        private readonly Stack<SocketAsyncEventArgs> _SocketStack;
-
-        /// <summary>
-        /// Stack中最大可存储的items
-        /// </summary>
-        /// <param name="maxCapacity"></param>
-        public OSAsyncEventStack(int maxCapacity)
-        {
-            _SocketStack = new Stack<SocketAsyncEventArgs>(maxCapacity);
-        }
-
-        /// <summary>
-        /// 从Stack顶部弹出一个item
-        /// </summary>
-        /// <returns></returns>
-        public SocketAsyncEventArgs Pop()
-        {
-            lock (_SocketStack)
-            {
-                if (_SocketStack.Count > 0)
-                {
-                    return _SocketStack.Pop();
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }
-
-        /// <summary>
-        /// 将一个item推入Stack顶部
-        /// </summary>
-        /// <param name="item"></param>
-        public void Push(SocketAsyncEventArgs item)
-        {
-            if (item == null)
-            {
-                throw new ArgumentNullException(item.ConnectByNameError.Message);
-            }
-
-            lock (_SocketStack)
-            {
-                _SocketStack.Push(item);
-            }
-        }
-    }
-
-    sealed class OSUserToken : IDisposable
+    internal sealed class OSUserToken : IDisposable
     {
         private Socket _OwnerSocket = null;
 
@@ -141,79 +87,9 @@ namespace SocketDA.Models
         }
     }
 
-    /// <summary>
-    /// 这是一个TCP/UDP, Server/Client都是用的基类
-    /// </summary>
-    internal class OSCore
+    internal class SocketTCPServer
     {
-        /// <summary>
-        /// 缓冲字节
-        /// </summary>
-        public const int DEFAULT_BUFFER_SIZE = 2048;
-
-        /// <summary>
-        /// 端点信息
-        /// </summary>
-        public IPEndPoint ConnectionEndpoint = null;
-
-        public Socket TCPConnectionSocket = null;    /* TCP连接Socket */
-        public Socket UDPConnectionSocket = null;    /* UDP连接Socket */
-
-        public static IPEndPoint CreateIPEndPoint(IPAddress ipAddress, int port)
-        {
-            if(ipAddress == null)
-            {
-                return null;
-            }
-
-            try
-            {
-                return new IPEndPoint(ipAddress, port);
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                return null;
-            }
-        }
-
-        public bool CreateSocket(IPAddress ipAddress, int port, ProtocolType protocolType)
-        {
-            ConnectionEndpoint = CreateIPEndPoint(ipAddress, port);
-
-            if(ConnectionEndpoint == null)
-            {
-                return false;
-            }
-
-            try
-            {
-                if(protocolType == ProtocolType.Tcp)
-                {
-                    /* 创建TCP Socket（支持IPv4，IPv6） */
-                    TCPConnectionSocket = new Socket(ConnectionEndpoint.AddressFamily, SocketType.Stream, protocolType);
-                }
-                else if(protocolType == ProtocolType.Udp)
-                {
-                    /* 创建UDP Socket（支持IPv4，IPv6） */
-                    UDPConnectionSocket = new Socket(ConnectionEndpoint.AddressFamily, SocketType.Dgram, protocolType);
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            catch (SocketException)
-            {
-                return false;
-            }
-
-            return true;
-        }
-    }
-
-    internal class OSTCPServer
-    {
-        protected OSCore OSCore = new OSCore();
+        protected SocketBase SocketBase = new SocketBase();
 
         /// <summary>
         /// 服务器最大连接客户端数量
@@ -233,31 +109,34 @@ namespace SocketDA.Models
         /// <summary>
         /// 服务器Socket堆栈
         /// </summary>
-        protected OSAsyncEventStack SocketPool = null;
+        protected SocketAsyncEventArgsPool SocketPool = null;
 
-        public OSTCPServer()
+        protected IPEndPoint IPEndPoint = null;
+        protected Socket Socket = null;
+
+        public SocketTCPServer()
         {
             /* 设置互斥量和信号量 */
             MutexConnections = new Mutex();
             NumConnections = 0;
 
             /* 创建Socket堆栈 */
-            SocketPool = new OSAsyncEventStack(DEFAULT_MAX_CONNECTIONS);
+            SocketPool = new SocketAsyncEventArgsPool(DEFAULT_MAX_CONNECTIONS);
 
             /* 创建read sockets，用于服务器允许的最大客户端连接量，同时将
              * IO Completed的事件处理程序分配给每个socket，然后
              * 将其压入堆栈以等待客户端连接 */
             for (int count = 0; count < DEFAULT_MAX_CONNECTIONS; count++)
             {
-                SocketAsyncEventArgs item = new SocketAsyncEventArgs();
-                item.Completed += new EventHandler<SocketAsyncEventArgs>(OnIOCompleted);
-                item.SetBuffer(new byte[OSCore.DEFAULT_BUFFER_SIZE], 0, OSCore.DEFAULT_BUFFER_SIZE);
-                SocketPool.Push(item);
+                SocketAsyncEventArgs _SocketAsyncEventArgs = new SocketAsyncEventArgs();
+                _SocketAsyncEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnIOCompleted);
+                _SocketAsyncEventArgs.SetBuffer(new byte[2048], 0, 2048);
+                SocketPool.Push(_SocketAsyncEventArgs);
             }
         }
 
         /// <summary>
-        /// 每当套接字上的接收或发送完成时，就会调用此方法
+        /// 当SocketAsyncEventArgs对象完成接收或发送时，调用此方法
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -277,17 +156,21 @@ namespace SocketDA.Models
         }
 
         /// <summary>
-        /// 如果服务器未启动，则调用此方法一次启动服务器
+        /// 启动服务器
         /// </summary>
         /// <returns></returns>
         public bool Start(IPAddress ipAddress, int port)
         {
-            if(OSCore.CreateSocket(ipAddress, port, ProtocolType.Tcp))
+            Socket = SocketBase.CreateSocket(ipAddress, port, ProtocolType.Tcp);
+
+            if (Socket != null)
             {
+                IPEndPoint = SocketBase.CreateIPEndPoint(ipAddress, port);
+
                 try
                 {
-                    OSCore.TCPConnectionSocket.Bind(OSCore.ConnectionEndpoint);
-                    OSCore.TCPConnectionSocket.Listen(DEFAULT_MAX_CONNECTIONS);
+                    Socket.Bind(IPEndPoint);
+                    Socket.Listen(DEFAULT_MAX_CONNECTIONS);
                     StartAcceptAsync(null);
                     MutexConnections.WaitOne();
 
@@ -305,16 +188,16 @@ namespace SocketDA.Models
         }
 
         /// <summary>
-        /// 如果服务器已启动，则调用词方法一次停止服务器
+        /// 停止服务器
         /// </summary>
         public void Stop()
         {
-            OSCore.TCPConnectionSocket.Close();
+            Socket.Close();
             MutexConnections.ReleaseMutex();
         }
 
         /// <summary>
-        /// 此方法实现了客户端连接事件的异步循环
+        /// 开始等待来自客户端的连接请求
         /// </summary>
         /// <param name="acceptEventArg"></param>
         private void StartAcceptAsync(SocketAsyncEventArgs acceptEventArg)
@@ -330,7 +213,7 @@ namespace SocketDA.Models
                 acceptEventArg.AcceptSocket = null;
             }
 
-            bool _AcceptPending = OSCore.TCPConnectionSocket.AcceptAsync(acceptEventArg);
+            bool _AcceptPending = Socket.AcceptAsync(acceptEventArg);
 
             if (!_AcceptPending)
             {
@@ -339,7 +222,7 @@ namespace SocketDA.Models
         }
 
         /// <summary>
-        /// 当accept套接字完成异步操作时触发此方法
+        /// 异步的客户端连接请求完成时调用此方法
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="asyncEventArgs"></param>
@@ -349,7 +232,7 @@ namespace SocketDA.Models
         }
 
         /// <summary>
-        /// 此方法用于处理接受套接字连接
+        /// 处理（接收/发送）已经完成连接请求的客户端SocketAsyncEventArgs对象
         /// </summary>
         /// <param name="asyncEventArgs"></param>
         private void ProcessAccept(SocketAsyncEventArgs asyncEventArgs)
@@ -360,12 +243,11 @@ namespace SocketDA.Models
             {
                 try
                 {
-                    /* 获取接受的客户端连接套接字 */
                     SocketAsyncEventArgs _readSocket = SocketPool.Pop();
 
                     if (_readSocket != null)
                     {
-                        _readSocket.UserToken = new OSUserToken(_acceptSocket, OSCore.DEFAULT_BUFFER_SIZE);
+                        _readSocket.UserToken = new OSUserToken(_acceptSocket, 2048);
 
                         Interlocked.Increment(ref NumConnections);
 
@@ -382,12 +264,12 @@ namespace SocketDA.Models
 
                 }
 
-                StartAcceptAsync(asyncEventArgs);   /* 接受下一个连接请求 */
+                StartAcceptAsync(asyncEventArgs);   /* 开始等待来自下一个客户端的连接请求 */
             }
         }
 
         /// <summary>
-        /// 处理 Read Socket
+        /// 处理接收数据，数据来自客户端SocketAsyncEventArgs对象
         /// </summary>
         /// <param name="readSocket"></param>
         private void ProcessReceive(SocketAsyncEventArgs readSocket)
@@ -420,7 +302,7 @@ namespace SocketDA.Models
         }
 
         /// <summary>
-        /// 处理 Send Socket
+        /// 处理发送数据，数据发送给客户端SocketAsyncEventArgs对象
         /// </summary>
         /// <param name="sendSocket"></param>
         private void ProcessSend(SocketAsyncEventArgs sendSocket)
@@ -452,34 +334,39 @@ namespace SocketDA.Models
             }
         }
 
+        /// <summary>
+        /// 关闭客户端SocketAsyncEventArgs对象
+        /// </summary>
+        /// <param name="readSocket"></param>
         private void CloseClientSocket(SocketAsyncEventArgs readSocket)
         {
             OSUserToken token = readSocket.UserToken as OSUserToken;
 
-            CloseClientSocket(token, readSocket);
-        }
-
-        private void CloseClientSocket(OSUserToken token, SocketAsyncEventArgs readSocket)
-        {
             token.Dispose();
-
             Interlocked.Decrement(ref NumConnections);
-
             SocketPool.Push(readSocket);
         }
     }
 
-    internal class OSTCPClient
+    internal class SocketTCPClient
     {
-        protected OSCore OSCore = new OSCore();
+        protected SocketBase SocketBase = new SocketBase();
 
+        protected IPEndPoint IPEndPoint = null;
+        protected Socket Socket = null;
+
+        /// <summary>
+        /// 向服务器发送数据
+        /// </summary>
+        /// <param name="byData"></param>
+        /// <returns></returns>
         public bool Send(byte[] byData)
         {
             try
             {
-                if(OSCore.TCPConnectionSocket.Connected)
+                if(Socket.Connected)
                 {
-                    OSCore.TCPConnectionSocket.Send(byData);
+                    Socket.Send(byData);
 
                     return true;
                 }
@@ -494,13 +381,17 @@ namespace SocketDA.Models
             }
         }
 
+        /// <summary>
+        /// 接收来自服务器的数据
+        /// </summary>
+        /// <param name="byData"></param>
         public void Recv(byte[] byData)
         {
             try
             {
-                if(OSCore.TCPConnectionSocket.Connected)
+                if(Socket.Connected)
                 {
-                    OSCore.TCPConnectionSocket.Receive(byData);
+                    Socket.Receive(byData);
                 }
             }
             catch
@@ -509,14 +400,23 @@ namespace SocketDA.Models
             }
         }
 
+        /// <summary>
+        /// 连接服务器
+        /// </summary>
+        /// <param name="ipAddress"></param>
+        /// <param name="port"></param>
+        /// <returns></returns>
         public bool Connect(IPAddress ipAddress, int port)
         {
-            if (OSCore.CreateSocket(ipAddress, port, ProtocolType.Tcp))
+            Socket = SocketBase.CreateSocket(ipAddress, port, ProtocolType.Tcp);
+
+            if (Socket != null)
             {
+                IPEndPoint = SocketBase.CreateIPEndPoint(ipAddress, port);
+
                 try
                 {
-                    var _ConnectEndpoint = OSCore.CreateIPEndPoint(ipAddress, port);
-                    OSCore.TCPConnectionSocket.Connect(_ConnectEndpoint);
+                    Socket.Connect(IPEndPoint);
 
                     return true;
                 }
@@ -531,11 +431,14 @@ namespace SocketDA.Models
             }
         }
 
+        /// <summary>
+        /// 断开服务器连接
+        /// </summary>
         public void DisConnect()
         {
             try
             {
-                OSCore.TCPConnectionSocket.Close();
+                Socket.Close();
             }
             catch
             {
@@ -544,19 +447,26 @@ namespace SocketDA.Models
         }
     }
 
-    internal class OSUDPServer
+    internal class SocketUDPServer
     {
-        protected OSCore OSCore = new OSCore();
+        protected SocketBase SocketBase = new SocketBase();
     }
 
-    internal class OSUDPClient
+    internal class SocketUDPClient
     {
-        protected OSCore OSCore = new OSCore();
+        protected SocketBase SocketBase = new SocketBase();
     }
 
     internal class SocketModel : MainWindowBase
     {
+        /// <summary>
+        /// 本机IP地址
+        /// </summary>
         public Collection<IPAddress> SocketSrcIPAddrItemsSource { get; set; }
+
+        /// <summary>
+        /// 本机IP地址，包含网络配置器的名称
+        /// </summary>
         public Collection<string> SocketSourceIPAddressItemsSource { get; set; }
 
         /// <summary>
