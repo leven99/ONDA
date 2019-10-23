@@ -82,88 +82,6 @@ namespace SocketDA.ViewModels
 
         #region TCP Server
 
-        #region 打开/关闭网络
-        public bool TCPServerOpenCloseSocket()
-        {
-            if(SocketTCPServer != null)
-            {
-                return CloseTCPServerSocket();
-            }
-
-            IPAddress _IPAddress;
-
-            /* 判断Socket参数（IP地址与端口号）是否合法 */
-            if (TCPServerModel.SocketSrcIPAddrSelectedIndex >= 0)
-            {
-                /* 索引选择的IP地址 */
-                _IPAddress = SocketModel.SocketSrcIPAddrItemsSource[TCPServerModel.SocketSrcIPAddrSelectedIndex];
-            }
-            else
-            {
-                /* 手动输入的IP地址 */
-                if(SocketModel.TryParseIPAddressPort(TCPServerModel.SocketSrcIPAddrText, TCPServerModel.SocketSrcPort))
-                {
-                    _IPAddress = IPAddress.Parse(TCPServerModel.SocketSrcIPAddrText);
-
-                    if(!SocketModel.SocketSrcIPAddrItemsSource.Contains(_IPAddress))
-                    {
-                        SocketModel.SocketSrcIPAddrItemsSource.Add(_IPAddress);
-                        SocketModel.SocketSourceIPAddressItemsSource.Add(_IPAddress.ToString());
-                    }
-                }
-                else
-                {
-                    DepictInfo = string.Format(cultureInfo, "请输入合法的IP地址和端口号");
-
-                    return false;   /* Socket参数不合法，直接返回 */
-                }
-            }
-
-            SocketTCPServer = new SocketTCPServer();
-
-            /* 启动TCP服务器 */
-            var _Started = SocketTCPServer.Start(_IPAddress, TCPServerModel.SocketSrcPort);
-
-            if(_Started)
-            {
-                TCPServerModel.SocketSrcIPAddrEnable = false;
-                TCPServerModel.SocketSrcPortEnable = false;
-
-                TCPServerModel.SocketBrush = Brushes.GreenYellow;
-                TCPServerModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 断开");
-            }
-            else
-            {
-                SocketTCPServer = null;
-                return false;
-            }
-
-            return true;
-        }
-
-        public bool CloseTCPServerSocket()
-        {
-            if(SocketTCPServer != null)
-            {
-                SocketTCPServer.Stop();
-                SocketTCPServer = null;
-
-                TCPServerModel.SocketSrcIPAddrEnable = true;
-                TCPServerModel.SocketSrcPortEnable = true;
-
-                TCPServerModel.SocketBrush = Brushes.Red;
-                TCPServerModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 侦听");
-
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        #endregion
-
         #region 辅助区
         private bool _TCPServerHexSend;
         public bool TCPServerHexSend
@@ -250,72 +168,83 @@ namespace SocketDA.ViewModels
         }
         #endregion
 
-        #endregion
-
-        #region TCP Client
-
         #region 打开/关闭网络
-        public bool TCPClientOpenCloseSocket()
+        public bool TCPServerOpenCloseSocket()
         {
-            if(SocketTCPClient != null)
+            if(SocketTCPServer != null)
             {
-                return CloseTCPClientSocket();
+                return CloseTCPServerSocket();
             }
 
             IPAddress _IPAddress;
 
             /* 判断Socket参数（IP地址与端口号）是否合法 */
-            if (SocketModel.TryParseIPAddressPort(TCPClientModel.SocketDestIPAddrText, TCPClientModel.SocketDestPort))
+            if (TCPServerModel.SocketSrcIPAddrSelectedIndex >= 0)
             {
-                _IPAddress = IPAddress.Parse(TCPClientModel.SocketDestIPAddrText);
-
-                if(!TCPClientModel.SocketDestIPAddrItemsSource.Contains(_IPAddress))
+                /* 索引选择的IP地址 */
+                _IPAddress = SocketModel.SocketSrcIPAddrItemsSource[TCPServerModel.SocketSrcIPAddrSelectedIndex];
+            }
+            else
+            {
+                /* 手动输入的IP地址 */
+                if(SocketModel.TryParseIPAddressPort(TCPServerModel.SocketSrcIPAddrText, TCPServerModel.SocketSrcPort))
                 {
-                    TCPClientModel.SocketDestIPAddrItemsSource.Add(_IPAddress);
+                    _IPAddress = IPAddress.Parse(TCPServerModel.SocketSrcIPAddrText);
+
+                    if(!SocketModel.SocketSrcIPAddrItemsSource.Contains(_IPAddress))
+                    {
+                        SocketModel.SocketSrcIPAddrItemsSource.Add(_IPAddress);
+                        SocketModel.SocketSourceIPAddressItemsSource.Add(_IPAddress.ToString());
+                    }
+                }
+                else
+                {
+                    DepictInfo = string.Format(cultureInfo, "请输入合法的IP地址和端口号");
+
+                    return false;   /* Socket参数不合法，直接返回 */
                 }
             }
-            else
+
+            SocketTCPServer = new SocketTCPServer();
+
+            /* 初始化TCP服务器 */
+            SocketTCPServer.Init();
+
+            /* 启动TCP服务器并开始侦听客户端连接 */
+            var _Started = SocketTCPServer.Start(_IPAddress, TCPServerModel.SocketSrcPort);
+
+            if(_Started)
             {
-                DepictInfo = string.Format(cultureInfo, "请输入合法的IP地址和端口号");
+                TCPServerModel.SocketSrcIPAddrEnable = false;
+                TCPServerModel.SocketSrcPortEnable = false;
 
-                return false;   /* Socket参数不合法，直接返回 */
-            }
-
-            SocketTCPClient = new SocketTCPClient();
-
-            /* 连接TCP服务器 */
-            var _Connected = SocketTCPClient.Connect(_IPAddress, TCPClientModel.SocketDestPort);
-
-            if(_Connected)
-            {
-                TCPClientModel.SocketDestIPAddrEnable = false;
-                TCPClientModel.SocketDestPortEnable = false;
-
-                TCPClientModel.SocketBrush = Brushes.GreenYellow;
-                TCPClientModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 断开");
+                TCPServerModel.SocketBrush = Brushes.GreenYellow;
+                TCPServerModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 断开");
             }
             else
             {
-                SocketTCPClient = null;
+                SocketTCPServer = null;
 
-                return false;
+                DepictInfo = string.Format(cultureInfo, "服务器启动失败");
+
+                return false;   /* 服务器启动失败，直接返回 */
             }
 
             return true;
         }
 
-        public bool CloseTCPClientSocket()
+        public bool CloseTCPServerSocket()
         {
-            if(SocketTCPClient != null)
+            if(SocketTCPServer != null)
             {
-                SocketTCPClient.DisConnect();
-                SocketTCPClient = null;
+                SocketTCPServer.Stop();
+                SocketTCPServer = null;
 
-                TCPClientModel.SocketDestIPAddrEnable = true;
-                TCPClientModel.SocketDestPortEnable = true;
+                TCPServerModel.SocketSrcIPAddrEnable = true;
+                TCPServerModel.SocketSrcPortEnable = true;
 
-                TCPClientModel.SocketBrush = Brushes.Red;
-                TCPClientModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 连接");
+                TCPServerModel.SocketBrush = Brushes.Red;
+                TCPServerModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 侦听");
 
                 return true;
             }
@@ -326,6 +255,28 @@ namespace SocketDA.ViewModels
         }
 
         #endregion
+
+        #region 发送
+        #endregion
+
+        #region 发送文件
+        #endregion
+
+        #region 路径选择
+        #endregion
+
+        #region 清空接收
+        #endregion
+
+        #region 清空发送
+        #endregion
+
+        #region 清空计数
+        #endregion
+
+        #endregion
+
+        #region TCP Client
 
         #region 辅助区
         private bool _TCPClientHexSend;
@@ -413,16 +364,102 @@ namespace SocketDA.ViewModels
         }
         #endregion
 
+        #region 打开/关闭网络
+        public bool TCPClientOpenCloseSocket()
+        {
+            if(SocketTCPClient != null)
+            {
+                return CloseTCPClientSocket();
+            }
+
+            IPAddress _IPAddress;
+
+            /* 判断Socket参数（IP地址与端口号）是否合法 */
+            if (SocketModel.TryParseIPAddressPort(TCPClientModel.SocketDestIPAddrText, TCPClientModel.SocketDestPort))
+            {
+                _IPAddress = IPAddress.Parse(TCPClientModel.SocketDestIPAddrText);
+
+                if(!TCPClientModel.SocketDestIPAddrItemsSource.Contains(_IPAddress))
+                {
+                    TCPClientModel.SocketDestIPAddrItemsSource.Add(_IPAddress);
+                }
+            }
+            else
+            {
+                DepictInfo = string.Format(cultureInfo, "请输入合法的IP地址和端口号");
+
+                return false;   /* Socket参数不合法，直接返回 */
+            }
+
+            SocketTCPClient = new SocketTCPClient();
+
+            /* 连接TCP服务器 */
+            var _Connected = SocketTCPClient.Connect(_IPAddress, TCPClientModel.SocketDestPort);
+
+            if(_Connected)
+            {
+                TCPClientModel.SocketDestIPAddrEnable = false;
+                TCPClientModel.SocketDestPortEnable = false;
+
+                TCPClientModel.SocketBrush = Brushes.GreenYellow;
+                TCPClientModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 断开");
+            }
+            else
+            {
+                SocketTCPClient = null;
+
+                DepictInfo = string.Format(cultureInfo, "连接服务器失败");
+
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool CloseTCPClientSocket()
+        {
+            if(SocketTCPClient != null)
+            {
+                SocketTCPClient.DisConnect();
+                SocketTCPClient = null;
+
+                TCPClientModel.SocketDestIPAddrEnable = true;
+                TCPClientModel.SocketDestPortEnable = true;
+
+                TCPClientModel.SocketBrush = Brushes.Red;
+                TCPClientModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 连接");
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        #endregion
+
+        #region 发送
+        #endregion
+
+        #region 发送文件
+        #endregion
+
+        #region 路径选择
+        #endregion
+
+        #region 清空接收
+        #endregion
+
+        #region 清空发送
+        #endregion
+
+        #region 清空计数
+        #endregion
+
         #endregion
 
         #region UDP Server
-
-        #region 打开/关闭网络
-        public void UDPServerOpenCloseSocket()
-        {
-            
-        }
-        #endregion
 
         #region 辅助区
         private bool _UDPServerHexSend;
@@ -510,16 +547,34 @@ namespace SocketDA.ViewModels
         }
         #endregion
 
+        #region 打开/关闭网络
+        public void UDPServerOpenCloseSocket()
+        {
+            
+        }
+        #endregion
+
+        #region 发送
+        #endregion
+
+        #region 发送文件
+        #endregion
+
+        #region 路径选择
+        #endregion
+
+        #region 清空接收
+        #endregion
+
+        #region 清空发送
+        #endregion
+
+        #region 清空计数
+        #endregion
+
         #endregion
 
         #region UDP Client
-
-        #region 打开/关闭网络
-        public void UDOClientOpenCloseSocket()
-        {
-
-        }
-        #endregion
 
         #region 辅助区
         private bool _UDPClientHexSend;
@@ -605,6 +660,31 @@ namespace SocketDA.ViewModels
                 }
             }
         }
+        #endregion
+
+        #region 打开/关闭网络
+        public void UDOClientOpenCloseSocket()
+        {
+
+        }
+        #endregion
+
+        #region 发送
+        #endregion
+
+        #region 发送文件
+        #endregion
+
+        #region 路径选择
+        #endregion
+
+        #region 清空接收
+        #endregion
+
+        #region 清空发送
+        #endregion
+
+        #region 清空计数
         #endregion
 
         #endregion

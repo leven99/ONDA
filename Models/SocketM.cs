@@ -5,88 +5,10 @@ using System.Collections.ObjectModel;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 
 namespace SocketDA.Models
 {
-    internal sealed class OSUserToken : IDisposable
-    {
-        private Socket _OwnerSocket = null;
-
-        private StringBuilder _ReadStringBuilder = null;   /* 从readScoket中累积的数据 */
-
-        private Int32 _ReadTotalByteCount = 0;   /* 在_ReadStringBuilder中累积的总字节数 */
-
-        public OSUserToken(Socket readSocket, Int32 bufferSize)
-        {
-            _OwnerSocket = readSocket;
-            _ReadStringBuilder = new StringBuilder(bufferSize);
-        }
-
-        public Socket OwnerSocket
-        {
-            get
-            {
-                return _OwnerSocket;
-            }
-        }
-
-        /// <summary>
-        /// 对接收到的数据进行处理
-        /// </summary>
-        /// <param name="args"></param>
-        public void ProcessData(SocketAsyncEventArgs args)
-        {
-            /* 获取从客户端收到的最后一条消息，该消息已存储在_ReadStringBuilder中 */
-            String _Received = _ReadStringBuilder.ToString();
-
-            /* 处理从客户端收到的消息 */
-
-            /* 清除_ReadStringBuilder，以便它可以从客户端接收更多数据 */
-            _ReadStringBuilder.Length = 0;
-            _ReadTotalByteCount = 0;
-        }
-
-        public bool ReadSocketData(SocketAsyncEventArgs readSocket)
-        {
-            int _ByteCount = readSocket.BytesTransferred;
-
-            if ((_ReadTotalByteCount + _ByteCount) > _ReadStringBuilder.Capacity)
-            {
-                return false;
-            }
-            else
-            {
-                _ReadStringBuilder.Append(Encoding.ASCII.GetString(readSocket.Buffer, readSocket.Offset, _ByteCount));
-                _ReadTotalByteCount += _ByteCount;
-
-                return true;
-            }
-        }
-
-        public bool SendSocketData(SocketAsyncEventArgs sendSocket)
-        {
-            return true;
-        }
-
-        public void Dispose()
-        {
-            try
-            {
-                _OwnerSocket.Shutdown(SocketShutdown.Both);
-            }
-            catch
-            {
-
-            }
-            finally
-            {
-                _OwnerSocket.Close();
-            }
-        }
-    }
-
     internal class SocketTCPServer
     {
         protected SocketBase _SocketBase = null;
@@ -95,35 +17,47 @@ namespace SocketDA.Models
         protected SocketAsyncEventArgsPool _SocketAsyncEventArgsPool = null;
 
         /// <summary>
-        /// 使用互斥锁来阻止TCP服务器侦听器线程，以便在服务器上激活有限的客户端连接。如果停止服务器，则互斥体将被释放
+        /// 客户端连接请求互斥锁
         /// </summary>
-        private Mutex MutexConnections = null;
+        protected Mutex MutexConnections = null;
 
         /// <summary>
-        /// 跟踪TCP服务器中客户端连接数的信号量
+        /// 客户端连接请求信号量
         /// </summary>
         protected Semaphore SemaphoreConnections = null;
 
-        protected Socket Socket = null;
-        protected IPEndPoint IPEndPoint = null;
+        protected Socket SocketConnections = null;
+        protected IPEndPoint IPEndPointConnections = null;
 
         public SocketTCPServer()
         {
             _SocketBase = new SocketBase();
             _SocketSetting = new SocketSetting();
             _SocketBufferManager = new SocketBufferManager(
-                _SocketSetting.DefaultMaxConnctions * _SocketSetting.BufferSize,
+                _SocketSetting.DefaultMaxConnctions * _SocketSetting.OpsToPreAlloc * _SocketSetting.BufferSize,
                 _SocketSetting.BufferSize);
             _SocketAsyncEventArgsPool = new SocketAsyncEventArgsPool(_SocketSetting.DefaultMaxConnctions);
 
             MutexConnections = new Mutex();
             SemaphoreConnections = new Semaphore(_SocketSetting.DefaultMaxConnctions, _SocketSetting.DefaultMaxConnctions);
+        }
+
+        /// <summary>
+        /// 初始化服务器
+        /// </summary>
+        public void Init()
+        {
+            _SocketBufferManager.InitBuffer();
+
+            SocketAsyncEventArgs _SocketAsyncEventArgs;   /* 预分配SocketAsyncEventArgs对象池 */
 
             for (int count = 0; count < _SocketSetting.DefaultMaxConnctions; count++)
             {
-                SocketAsyncEventArgs _SocketAsyncEventArgs = new SocketAsyncEventArgs();
+                _SocketAsyncEventArgs = new SocketAsyncEventArgs();
                 _SocketAsyncEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnIOCompleted);
                 _SocketBufferManager.SetBuffer(_SocketAsyncEventArgs);
+
+                /* 添加SocketAsyncEventArgs对象到SocketAsyncEventArgs对象池 */
                 _SocketAsyncEventArgsPool.Push(_SocketAsyncEventArgs);
             }
         }
@@ -132,19 +66,19 @@ namespace SocketDA.Models
         /// 当SocketAsyncEventArgs对象完成接收或发送时，调用此方法
         /// </summary>
         /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void OnIOCompleted(object sender, SocketAsyncEventArgs e)
+        /// <param name="asyncEventArgs"></param>
+        private void OnIOCompleted(object sender, SocketAsyncEventArgs asyncEventArgs)
         {
-            switch (e.LastOperation)
+            switch (asyncEventArgs.LastOperation)
             {
                 case SocketAsyncOperation.Receive:
-                    ProcessReceive(e);
+                    ProcessReceive(asyncEventArgs);
                     break;
                 case SocketAsyncOperation.Send:
-                    ProcessSend(e);
+                    ProcessSend(asyncEventArgs);
                     break;
                 default:
-                    throw new ArgumentException(e.ConnectByNameError.Message);
+                    throw new ArgumentException(asyncEventArgs.ConnectByNameError.Message);
             }
         }
 
@@ -154,27 +88,20 @@ namespace SocketDA.Models
         /// <returns></returns>
         public bool Start(IPAddress ipAddress, int port)
         {
-            Socket = _SocketBase.CreateSocket(ipAddress, port, ProtocolType.Tcp);
+            SocketConnections = _SocketBase.CreateSocket(ipAddress, port, ProtocolType.Tcp);
+            IPEndPointConnections = _SocketBase._IPEndPoint;
 
-            if (Socket != null)
+            try
             {
-                IPEndPoint = _SocketBase.CreateIPEndPoint(ipAddress, port);
+                SocketConnections.Bind(IPEndPointConnections);
+                SocketConnections.Listen(_SocketSetting.DefaultMaxConnctions);
 
-                try
-                {
-                    Socket.Bind(IPEndPoint);
-                    Socket.Listen(_SocketSetting.DefaultMaxConnctions);
-                    StartAcceptAsync(null);
-                    MutexConnections.WaitOne();
+                StartAcceptAsync(null);
+                MutexConnections.WaitOne();
 
-                    return true;
-                }
-                catch
-                {
-                    return false;
-                }
+                return true;
             }
-            else
+            catch
             {
                 return false;
             }
@@ -185,7 +112,7 @@ namespace SocketDA.Models
         /// </summary>
         public void Stop()
         {
-            Socket.Close();
+            SocketConnections.Close();
             MutexConnections.ReleaseMutex();
         }
 
@@ -202,11 +129,13 @@ namespace SocketDA.Models
             }
             else
             {
-                /* 必须清除套接字，因为正在重用上下文对象 */
                 acceptEventArg.AcceptSocket = null;
             }
 
-            bool _AcceptPending = Socket.AcceptAsync(acceptEventArg);
+            /* 信号量用于控制对资源或资源池的访问，可以防止超出预先设置的客户端最大连接数 */
+            SemaphoreConnections.WaitOne();
+
+            bool _AcceptPending = SocketConnections.AcceptAsync(acceptEventArg);
 
             if (!_AcceptPending)
             {
@@ -218,77 +147,83 @@ namespace SocketDA.Models
         /// 异步的客户端连接请求完成时调用此方法
         /// </summary>
         /// <param name="sender"></param>
-        /// <param name="asyncEventArgs"></param>
-        private void OnAcceptCompleted(object sender, SocketAsyncEventArgs asyncEventArgs)
+        /// <param name="acceptEventArg"></param>
+        private void OnAcceptCompleted(object sender, SocketAsyncEventArgs acceptEventArg)
         {
-            ProcessAccept(asyncEventArgs);
+            ProcessAccept(acceptEventArg);
         }
 
         /// <summary>
         /// 处理（接收/发送）已经完成连接请求的客户端SocketAsyncEventArgs对象
         /// </summary>
-        /// <param name="asyncEventArgs"></param>
-        private void ProcessAccept(SocketAsyncEventArgs asyncEventArgs)
+        /// <param name="acceptEventArg"></param>
+        private void ProcessAccept(SocketAsyncEventArgs acceptEventArg)
         {
-            Socket _acceptSocket = asyncEventArgs.AcceptSocket;
+            Socket _AcceptSocket = acceptEventArg.AcceptSocket;
 
-            if (_acceptSocket.Connected)
+            if (!_AcceptSocket.Connected)
             {
-                try
+                /* 如果_acceptSocket没有连接到客户端，则直接返回 */
+                return;
+            }
+
+            try
+            {
+                /* 从SocketAsyncEventArgs池中获取一个SocketAsyncEventArgs */
+                SocketAsyncEventArgs _AcceptSocketAsyncEventArgs = _SocketAsyncEventArgsPool.Pop();
+
+                if (_AcceptSocketAsyncEventArgs != null)
                 {
-                    SocketAsyncEventArgs _readSocket = _SocketAsyncEventArgsPool.Pop();
+                    _AcceptSocketAsyncEventArgs.UserToken = new SocketUserToKen();
 
-                    if (_readSocket != null)
+                    bool _ioPending = _AcceptSocket.ReceiveAsync(_AcceptSocketAsyncEventArgs);
+
+                    if (!_ioPending)
                     {
-                        _readSocket.UserToken = new OSUserToken(_acceptSocket, 2048);
-
-                        bool _ioPending = _acceptSocket.ReceiveAsync(_readSocket);
-
-                        if (!_ioPending)
-                        {
-                            ProcessReceive(_readSocket);
-                        }
+                        ProcessReceive(_AcceptSocketAsyncEventArgs);
                     }
                 }
-                catch
+                else
                 {
-
+                    /* 拒绝客户端连接，因为已达到服务器允许的最大客户端连接数 */
+                    _AcceptSocket.Close();
                 }
-
-                StartAcceptAsync(asyncEventArgs);   /* 开始等待来自下一个客户端的连接请求 */
             }
+            catch
+            {
+                return;
+            }
+
+            StartAcceptAsync(acceptEventArg);   /* 开始等待来自下一个客户端的连接请求 */
         }
 
         /// <summary>
         /// 处理接收数据，数据来自客户端SocketAsyncEventArgs对象
         /// </summary>
-        /// <param name="readSocket"></param>
-        private void ProcessReceive(SocketAsyncEventArgs readSocket)
+        /// <param name="receiveSocket"></param>
+        private void ProcessReceive(SocketAsyncEventArgs receiveSocket)
         {
-            if ( (readSocket.BytesTransferred > 0) && (readSocket.SocketError == SocketError.Success) )
+            if(receiveSocket.SocketError != SocketError.Success)
             {
-                OSUserToken token = readSocket.UserToken as OSUserToken;
+                CloseClientSocket(receiveSocket);
+            }
 
-                if (token.ReadSocketData(readSocket))
+            /* 需要处理的字节数 */
+            int remainingBytesToProcess = receiveSocket.BytesTransferred;
+
+            if (remainingBytesToProcess > 0)
+            {
+                bool _ioPending = receiveSocket.AcceptSocket.ReceiveAsync(receiveSocket);
+
+                if (!_ioPending)
                 {
-                    Socket _readSocket = token.OwnerSocket;
-
-                    if (_readSocket.Available == 0)
-                    {
-                        token.ProcessData(readSocket);
-                    }
-
-                    bool _ioPending = _readSocket.ReceiveAsync(readSocket);
-
-                    if (!_ioPending)
-                    {
-                        ProcessReceive(readSocket);
-                    }
+                    ProcessReceive(receiveSocket);   /* 递归调用，直到receiveSocket上没有数据为止（全部接收完毕） */
                 }
             }
             else
             {
-                CloseClientSocket(readSocket);
+                /* 客户端已经关闭连接 */
+                CloseClientSocket(receiveSocket);
             }
         }
 
@@ -298,96 +233,50 @@ namespace SocketDA.Models
         /// <param name="sendSocket"></param>
         private void ProcessSend(SocketAsyncEventArgs sendSocket)
         {
-            if (sendSocket.SocketError == SocketError.Success)
+            if (sendSocket.SocketError != SocketError.Success)
             {
-                OSUserToken token = sendSocket.UserToken as OSUserToken;
-
-                if (token.SendSocketData(sendSocket))
-                {
-                    Socket _sendSocket = token.OwnerSocket;
-
-                    if (_sendSocket.Available == 0)
-                    {
-                        token.ProcessData(sendSocket);
-                    }
-
-                    bool _ioPending = _sendSocket.ReceiveAsync(sendSocket);
-
-                    if (!_ioPending)
-                    {
-                        ProcessSend(sendSocket);
-                    }
-                }
+                CloseClientSocket(sendSocket);
             }
-            else
-            {
 
+            bool _ioPending = sendSocket.AcceptSocket.SendAsync(sendSocket);
+
+            if (!_ioPending)
+            {
+                ProcessSend(sendSocket);   /* 递归调用，直到sendSocket上没有数据为止（全部发送完毕） */
             }
         }
 
         /// <summary>
         /// 关闭客户端SocketAsyncEventArgs对象
         /// </summary>
-        /// <param name="readSocket"></param>
-        private void CloseClientSocket(SocketAsyncEventArgs readSocket)
+        /// <param name="acceptSocket"></param>
+        private void CloseClientSocket(SocketAsyncEventArgs acceptSocket)
         {
-            OSUserToken token = readSocket.UserToken as OSUserToken;
-
-            token.Dispose();
-            _SocketAsyncEventArgsPool.Push(readSocket);
+            acceptSocket.AcceptSocket.Close();
+            _SocketAsyncEventArgsPool.Push(acceptSocket);
+            SemaphoreConnections.Release();
         }
     }
 
     internal class SocketTCPClient
     {
-        protected SocketBase SocketBase = new SocketBase();
-
-        protected IPEndPoint IPEndPoint = null;
-        protected Socket Socket = null;
+        protected SocketBase _SocketBase = null;
+        protected SocketSetting _SocketSetting = null;
 
         /// <summary>
-        /// 向服务器发送数据
+        /// 连接服务器信号量
         /// </summary>
-        /// <param name="byData"></param>
-        /// <returns></returns>
-        public bool Send(byte[] byData)
+        protected Semaphore SemaphoreConnections = null;
+
+        protected Socket SocketConnections = null;
+        protected IPEndPoint IPEndPointConnections = null;
+        protected SocketAsyncEventArgs SocketAsyncEventArgsConnections = null;
+
+        public SocketTCPClient()
         {
-            try
-            {
-                if(Socket.Connected)
-                {
-                    Socket.Send(byData);
-
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// 接收来自服务器的数据
-        /// </summary>
-        /// <param name="byData"></param>
-        public void Recv(byte[] byData)
-        {
-            try
-            {
-                if(Socket.Connected)
-                {
-                    Socket.Receive(byData);
-                }
-            }
-            catch
-            {
-
-            }
+            _SocketBase = new SocketBase();
+            _SocketSetting = new SocketSetting();
+            SemaphoreConnections = new Semaphore(1, 1);   /* 只连接一个服务器 */
         }
 
         /// <summary>
@@ -398,26 +287,48 @@ namespace SocketDA.Models
         /// <returns></returns>
         public bool Connect(IPAddress ipAddress, int port)
         {
-            Socket = SocketBase.CreateSocket(ipAddress, port, ProtocolType.Tcp);
+            SocketConnections = _SocketBase.CreateSocket(ipAddress, port, ProtocolType.Tcp);
 
-            if (Socket != null)
-            {
-                IPEndPoint = SocketBase.CreateIPEndPoint(ipAddress, port);
+            SocketAsyncEventArgsConnections = new SocketAsyncEventArgs();
+            SocketAsyncEventArgsConnections.Completed += new EventHandler<SocketAsyncEventArgs>(OnIOCompleted);
+            SocketAsyncEventArgsConnections.SetBuffer(new byte[_SocketSetting.BufferSize], 0, _SocketSetting.BufferSize);
+            SocketAsyncEventArgsConnections.RemoteEndPoint = _SocketBase._IPEndPoint;
 
-                try
-                {
-                    Socket.Connect(IPEndPoint);
-
-                    return true;
-                }
-                catch
-                {
-                    return false;
-                }
-            }
-            else
+            if (SocketConnections == null)
             {
                 return false;
+            }
+
+            try
+            {
+                SocketConnections.ConnectAsync(SocketAsyncEventArgsConnections);
+                SemaphoreConnections.WaitOne();
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 当SocketAsyncEventArgs对象完成接收或发送时，调用此方法
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="asyncEventArgs"></param>
+        private void OnIOCompleted(object sender, SocketAsyncEventArgs asyncEventArgs)
+        {
+            switch (asyncEventArgs.LastOperation)
+            {
+                case SocketAsyncOperation.Receive:
+                    ProcessReceive(asyncEventArgs);
+                    break;
+                case SocketAsyncOperation.Send:
+                    ProcessSend(asyncEventArgs);
+                    break;
+                default:
+                    throw new ArgumentException(asyncEventArgs.ConnectByNameError.Message);
             }
         }
 
@@ -426,14 +337,25 @@ namespace SocketDA.Models
         /// </summary>
         public void DisConnect()
         {
-            try
-            {
-                Socket.Close();
-            }
-            catch
-            {
+            SemaphoreConnections.Release();
+        }
 
-            }
+        /// <summary>
+        /// 处理接收数据，数据来自服务器SocketAsyncEventArgs对象
+        /// </summary>
+        /// <param name="asyncEventArgs"></param>
+        private void ProcessReceive(SocketAsyncEventArgs asyncEventArgs)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 处理发送数据，数据发送给客户端SocketAsyncEventArgs对象
+        /// </summary>
+        /// <param name="asyncEventArgs"></param>
+        private void ProcessSend(SocketAsyncEventArgs asyncEventArgs)
+        {
+            throw new NotImplementedException();
         }
     }
 

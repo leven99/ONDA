@@ -32,7 +32,7 @@ namespace SocketDA.ModelsSocket
         }
 
         /// <summary>
-        /// 从 SocketAsyncEventArgs Pool 中删除 SocketAsyncEventArgs 实例
+        /// 从 SocketAsyncEventArgs Pool 中推出 SocketAsyncEventArgs 实例
         /// </summary>
         /// <returns></returns>
         internal SocketAsyncEventArgs Pop()
@@ -51,7 +51,7 @@ namespace SocketDA.ModelsSocket
         }
 
         /// <summary>
-        /// 将 SocketAsyncEventArgs 实例添加到 SocketAsyncEventArgs Pool 中
+        /// 将 SocketAsyncEventArgs 实例推入到 SocketAsyncEventArgs Pool 中
         /// </summary>
         /// <param name="item"></param>
         internal void Push(SocketAsyncEventArgs item)

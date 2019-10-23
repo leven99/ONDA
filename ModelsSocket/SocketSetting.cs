@@ -5,30 +5,19 @@
     /// </summary>
     internal sealed class SocketSetting
     {
-        private const int DEFAULT_MAX_CONNECTIONS = 10;
-
-        private const int BUFFER_SIZE = 512;
-
         /// <summary>
         /// 服务器最大可以连接的客户端数量
         /// </summary>
-        internal int DefaultMaxConnctions
-        {
-            get
-            {
-                return DEFAULT_MAX_CONNECTIONS;
-            }
-        }
+        internal int DefaultMaxConnctions { get; } = 10;
 
         /// <summary>
         /// 一个SocketAsyncEventArgs对象的缓冲区大小
         /// </summary>
-        internal int BufferSize
-        {
-            get
-            {
-                return BUFFER_SIZE;
-            }
-        }
+        internal int BufferSize { get; } = 256;
+
+        /// <summary>
+        /// 预分配操作读与写
+        /// </summary>
+        internal int OpsToPreAlloc { get; } = 2;
     }
 }

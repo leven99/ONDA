@@ -175,7 +175,7 @@
                                           Header="{Binding}"
                                           HeaderTemplate="{StaticResource TCPServerRecvGroupBoxHeaderData}"
                                           Grid.Row="0"
-                                          Margin="5,0,2.5,3"
+                                          Margin="5,3,2.5,3"
                                           BorderBrush="#FF007ACD">
                                 </GroupBox>
 
@@ -617,7 +617,7 @@
                                           Header="{Binding}"
                                           HeaderTemplate="{StaticResource UDPServerRecvGroupBoxHeaderData}"
                                           Grid.Row="0"
-                                          Margin="2.5,0,5,3"
+                                          Margin="2.5,3,5,3"
                                           BorderBrush="#FF007ACD">
                                 </GroupBox>
 
