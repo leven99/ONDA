@@ -393,6 +393,9 @@ namespace SocketDA.ViewModels
 
             SocketTCPClient = new SocketTCPClient();
 
+            /* 初始化客户端 */
+            SocketTCPClient.Init();
+
             /* 连接TCP服务器 */
             var _Connected = SocketTCPClient.Connect(_IPAddress, TCPClientModel.SocketDestPort);
 

@@ -35,7 +35,7 @@ namespace SocketDA.Models
             _SocketSetting = new SocketSetting();
             _SocketBufferManager = new SocketBufferManager(
                 _SocketSetting.DefaultMaxConnctions * _SocketSetting.OpsToPreAlloc * _SocketSetting.BufferSize,
-                _SocketSetting.BufferSize);
+                _SocketSetting.OpsToPreAlloc * _SocketSetting.BufferSize);
             _SocketAsyncEventArgsPool = new SocketAsyncEventArgsPool(_SocketSetting.DefaultMaxConnctions);
 
             MutexConnections = new Mutex();
@@ -83,7 +83,7 @@ namespace SocketDA.Models
         }
 
         /// <summary>
-        /// 启动服务器
+        /// 启动服务器，开始侦听客户端连接
         /// </summary>
         /// <returns></returns>
         public bool Start(IPAddress ipAddress, int port)
@@ -108,7 +108,7 @@ namespace SocketDA.Models
         }
 
         /// <summary>
-        /// 停止服务器
+        /// 停止服务器，断开客户端所有连接
         /// </summary>
         public void Stop()
         {
@@ -119,27 +119,27 @@ namespace SocketDA.Models
         /// <summary>
         /// 开始等待来自客户端的连接请求
         /// </summary>
-        /// <param name="acceptEventArg"></param>
-        private void StartAcceptAsync(SocketAsyncEventArgs acceptEventArg)
+        /// <param name="acceptEventArgs"></param>
+        private void StartAcceptAsync(SocketAsyncEventArgs acceptEventArgs)
         {
-            if (acceptEventArg == null)
+            if (acceptEventArgs == null)
             {
-                acceptEventArg = new SocketAsyncEventArgs();
-                acceptEventArg.Completed += new EventHandler<SocketAsyncEventArgs>(OnAcceptCompleted);
+                acceptEventArgs = new SocketAsyncEventArgs();
+                acceptEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnAcceptCompleted);
             }
             else
             {
-                acceptEventArg.AcceptSocket = null;
+                acceptEventArgs.AcceptSocket = null;
             }
 
             /* 信号量用于控制对资源或资源池的访问，可以防止超出预先设置的客户端最大连接数 */
             SemaphoreConnections.WaitOne();
 
-            bool _AcceptPending = SocketConnections.AcceptAsync(acceptEventArg);
+            bool _AcceptPending = SocketConnections.AcceptAsync(acceptEventArgs);
 
             if (!_AcceptPending)
             {
-                ProcessAccept(acceptEventArg);
+                ProcessAccept(acceptEventArgs);
             }
         }
 
@@ -147,19 +147,19 @@ namespace SocketDA.Models
         /// 异步的客户端连接请求完成时调用此方法
         /// </summary>
         /// <param name="sender"></param>
-        /// <param name="acceptEventArg"></param>
-        private void OnAcceptCompleted(object sender, SocketAsyncEventArgs acceptEventArg)
+        /// <param name="acceptEventArgs"></param>
+        private void OnAcceptCompleted(object sender, SocketAsyncEventArgs acceptEventArgs)
         {
-            ProcessAccept(acceptEventArg);
+            ProcessAccept(acceptEventArgs);
         }
 
         /// <summary>
         /// 处理（接收/发送）已经完成连接请求的客户端SocketAsyncEventArgs对象
         /// </summary>
-        /// <param name="acceptEventArg"></param>
-        private void ProcessAccept(SocketAsyncEventArgs acceptEventArg)
+        /// <param name="acceptEventArgs"></param>
+        private void ProcessAccept(SocketAsyncEventArgs acceptEventArgs)
         {
-            Socket _AcceptSocket = acceptEventArg.AcceptSocket;
+            Socket _AcceptSocket = acceptEventArgs.AcceptSocket;
 
             if (!_AcceptSocket.Connected)
             {
@@ -176,9 +176,9 @@ namespace SocketDA.Models
                 {
                     _AcceptSocketAsyncEventArgs.UserToken = new SocketUserToKen();
 
-                    bool _ioPending = _AcceptSocket.ReceiveAsync(_AcceptSocketAsyncEventArgs);
+                    bool _ReceivePending = _AcceptSocket.ReceiveAsync(_AcceptSocketAsyncEventArgs);
 
-                    if (!_ioPending)
+                    if (!_ReceivePending)
                     {
                         ProcessReceive(_AcceptSocketAsyncEventArgs);
                     }
@@ -194,66 +194,66 @@ namespace SocketDA.Models
                 return;
             }
 
-            StartAcceptAsync(acceptEventArg);   /* 开始等待来自下一个客户端的连接请求 */
+            StartAcceptAsync(acceptEventArgs);   /* 开始等待来自下一个客户端的连接请求 */
         }
 
         /// <summary>
         /// 处理接收数据，数据来自客户端SocketAsyncEventArgs对象
         /// </summary>
-        /// <param name="receiveSocket"></param>
-        private void ProcessReceive(SocketAsyncEventArgs receiveSocket)
+        /// <param name="receiveEventArgs"></param>
+        private void ProcessReceive(SocketAsyncEventArgs receiveEventArgs)
         {
-            if(receiveSocket.SocketError != SocketError.Success)
+            if(receiveEventArgs.SocketError != SocketError.Success)
             {
-                CloseClientSocket(receiveSocket);
+                CloseClientSocket(receiveEventArgs);
             }
 
             /* 需要处理的字节数 */
-            int remainingBytesToProcess = receiveSocket.BytesTransferred;
+            int remainingBytesToProcess = receiveEventArgs.BytesTransferred;
 
             if (remainingBytesToProcess > 0)
             {
-                bool _ioPending = receiveSocket.AcceptSocket.ReceiveAsync(receiveSocket);
+                bool _ReceivePending = receiveEventArgs.AcceptSocket.ReceiveAsync(receiveEventArgs);
 
-                if (!_ioPending)
+                if (!_ReceivePending)
                 {
-                    ProcessReceive(receiveSocket);   /* 递归调用，直到receiveSocket上没有数据为止（全部接收完毕） */
+                    ProcessReceive(receiveEventArgs);   /* 递归调用，直到receiveSocket上没有数据为止（全部接收完毕） */
                 }
             }
             else
             {
                 /* 客户端已经关闭连接 */
-                CloseClientSocket(receiveSocket);
+                CloseClientSocket(receiveEventArgs);
             }
         }
 
         /// <summary>
         /// 处理发送数据，数据发送给客户端SocketAsyncEventArgs对象
         /// </summary>
-        /// <param name="sendSocket"></param>
-        private void ProcessSend(SocketAsyncEventArgs sendSocket)
+        /// <param name="sendEventArgs"></param>
+        private void ProcessSend(SocketAsyncEventArgs sendEventArgs)
         {
-            if (sendSocket.SocketError != SocketError.Success)
+            if (sendEventArgs.SocketError != SocketError.Success)
             {
-                CloseClientSocket(sendSocket);
+                CloseClientSocket(sendEventArgs);
             }
 
-            bool _ioPending = sendSocket.AcceptSocket.SendAsync(sendSocket);
+            bool _SendPending = sendEventArgs.AcceptSocket.SendAsync(sendEventArgs);
 
-            if (!_ioPending)
+            if (!_SendPending)
             {
-                ProcessSend(sendSocket);   /* 递归调用，直到sendSocket上没有数据为止（全部发送完毕） */
+                ProcessSend(sendEventArgs);   /* 递归调用，直到sendSocket上没有数据为止（全部发送完毕） */
             }
         }
 
         /// <summary>
         /// 关闭客户端SocketAsyncEventArgs对象
         /// </summary>
-        /// <param name="acceptSocket"></param>
-        private void CloseClientSocket(SocketAsyncEventArgs acceptSocket)
+        /// <param name="acceptEventArgs"></param>
+        private void CloseClientSocket(SocketAsyncEventArgs acceptEventArgs)
         {
-            acceptSocket.AcceptSocket.Close();
-            _SocketAsyncEventArgsPool.Push(acceptSocket);
+            acceptEventArgs.AcceptSocket.Close();
+            _SocketAsyncEventArgsPool.Push(acceptEventArgs);
             SemaphoreConnections.Release();
         }
     }
@@ -264,7 +264,7 @@ namespace SocketDA.Models
         protected SocketSetting _SocketSetting = null;
 
         /// <summary>
-        /// 连接服务器信号量
+        /// 连接服务器请求信号量
         /// </summary>
         protected Semaphore SemaphoreConnections = null;
 
@@ -276,40 +276,18 @@ namespace SocketDA.Models
         {
             _SocketBase = new SocketBase();
             _SocketSetting = new SocketSetting();
-            SemaphoreConnections = new Semaphore(1, 1);   /* 只连接一个服务器 */
         }
 
         /// <summary>
-        /// 连接服务器
+        /// 初始化客户端
         /// </summary>
-        /// <param name="ipAddress"></param>
-        /// <param name="port"></param>
-        /// <returns></returns>
-        public bool Connect(IPAddress ipAddress, int port)
+        public void Init()
         {
-            SocketConnections = _SocketBase.CreateSocket(ipAddress, port, ProtocolType.Tcp);
-
             SocketAsyncEventArgsConnections = new SocketAsyncEventArgs();
             SocketAsyncEventArgsConnections.Completed += new EventHandler<SocketAsyncEventArgs>(OnIOCompleted);
-            SocketAsyncEventArgsConnections.SetBuffer(new byte[_SocketSetting.BufferSize], 0, _SocketSetting.BufferSize);
-            SocketAsyncEventArgsConnections.RemoteEndPoint = _SocketBase._IPEndPoint;
-
-            if (SocketConnections == null)
-            {
-                return false;
-            }
-
-            try
-            {
-                SocketConnections.ConnectAsync(SocketAsyncEventArgsConnections);
-                SemaphoreConnections.WaitOne();
-
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            SocketAsyncEventArgsConnections.SetBuffer(new byte[_SocketSetting.BufferSize * _SocketSetting.OpsToPreAlloc],
+                0, _SocketSetting.OpsToPreAlloc * _SocketSetting.BufferSize);
+            SemaphoreConnections = new Semaphore(1, 1);   /* 一个客户端程序只连接一个服务器 */
         }
 
         /// <summary>
@@ -333,18 +311,65 @@ namespace SocketDA.Models
         }
 
         /// <summary>
-        /// 断开服务器连接
+        /// 连接服务器
         /// </summary>
-        public void DisConnect()
+        /// <param name="ipAddress"></param>
+        /// <param name="port"></param>
+        /// <returns></returns>
+        public bool Connect(IPAddress ipAddress, int port)
         {
-            SemaphoreConnections.Release();
+            SocketConnections = _SocketBase.CreateSocket(ipAddress, port, ProtocolType.Tcp);
+            IPEndPointConnections = _SocketBase._IPEndPoint;
+
+            try
+            {
+                SocketAsyncEventArgsConnections.RemoteEndPoint = IPEndPointConnections;
+                SocketAsyncEventArgsConnections.AcceptSocket = SocketConnections;
+
+                StartConnectAsync(null);
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private void StartConnectAsync(SocketAsyncEventArgs connectEventArgs)
+        {
+            connectEventArgs = new SocketAsyncEventArgs();
+            connectEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnConnectCompleted);
+
+            SemaphoreConnections.WaitOne();
+
+            bool _ConnectPending = connectEventArgs.AcceptSocket.ConnectAsync(connectEventArgs);
+
+            if(!_ConnectPending)
+            {
+                ProcessConnect(connectEventArgs);
+            }
+        }
+
+        private void OnConnectCompleted(object sender, SocketAsyncEventArgs connectEventArgs)
+        {
+            ProcessConnect(connectEventArgs);
+        }
+
+        /// <summary>
+        /// 处理连接服务器
+        /// </summary>
+        /// <param name="connectEventArgs"></param>
+        private void ProcessConnect(SocketAsyncEventArgs connectEventArgs)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
         /// 处理接收数据，数据来自服务器SocketAsyncEventArgs对象
         /// </summary>
-        /// <param name="asyncEventArgs"></param>
-        private void ProcessReceive(SocketAsyncEventArgs asyncEventArgs)
+        /// <param name="receiveEventArgs"></param>
+        private void ProcessReceive(SocketAsyncEventArgs receiveEventArgs)
         {
             throw new NotImplementedException();
         }
@@ -352,10 +377,19 @@ namespace SocketDA.Models
         /// <summary>
         /// 处理发送数据，数据发送给客户端SocketAsyncEventArgs对象
         /// </summary>
-        /// <param name="asyncEventArgs"></param>
-        private void ProcessSend(SocketAsyncEventArgs asyncEventArgs)
+        /// <param name="sendEventArg"></param>
+        private void ProcessSend(SocketAsyncEventArgs sendEventArg)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// 断开服务器连接
+        /// </summary>
+        public void DisConnect()
+        {
+            SocketConnections.Close();
+            SemaphoreConnections.Release();
         }
     }
 
