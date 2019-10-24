@@ -57,6 +57,7 @@ namespace SocketDA.Models
                 _SocketAsyncEventArgs = new SocketAsyncEventArgs();
                 _SocketAsyncEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnIOCompleted);
                 _SocketBufferManager.SetBuffer(_SocketAsyncEventArgs);
+                _SocketAsyncEventArgs.UserToken = new SocketUserToKen();
 
                 /* 添加SocketAsyncEventArgs对象到SocketAsyncEventArgs对象池 */
                 _SocketAsyncEventArgsPool.Push(_SocketAsyncEventArgs);
@@ -160,14 +161,6 @@ namespace SocketDA.Models
         /// <param name="acceptEventArgs"></param>
         private void ProcessAccept(SocketAsyncEventArgs acceptEventArgs)
         {
-            Socket _AcceptSocket = acceptEventArgs.AcceptSocket;
-
-            if (!_AcceptSocket.Connected)
-            {
-                /* 如果_acceptSocket没有连接到客户端，则直接返回 */
-                return;
-            }
-
             try
             {
                 /* 从SocketAsyncEventArgs池中获取一个SocketAsyncEventArgs */
@@ -175,9 +168,9 @@ namespace SocketDA.Models
 
                 if (_AcceptSocketAsyncEventArgs != null)
                 {
-                    _AcceptSocketAsyncEventArgs.UserToken = new SocketUserToKen();
+                    ((SocketUserToKen)_AcceptSocketAsyncEventArgs.UserToken).SocketConnections = acceptEventArgs.AcceptSocket;
 
-                    bool _ReceivePending = _AcceptSocket.ReceiveAsync(_AcceptSocketAsyncEventArgs);
+                    bool _ReceivePending = acceptEventArgs.AcceptSocket.ReceiveAsync(_AcceptSocketAsyncEventArgs);
 
                     if (!_ReceivePending)
                     {
@@ -187,7 +180,7 @@ namespace SocketDA.Models
                 else
                 {
                     /* 拒绝客户端连接，因为已达到服务器允许的最大客户端连接数 */
-                    _AcceptSocket.Close();
+                    acceptEventArgs.AcceptSocket.Close();
                 }
             }
             catch
@@ -209,12 +202,14 @@ namespace SocketDA.Models
                 CloseClientSocket(receiveEventArgs);
             }
 
+            SocketUserToKen _SocketUserToKen = (SocketUserToKen)receiveEventArgs.UserToken;
+
             /* 需要处理的字节数 */
             int remainingBytesToProcess = receiveEventArgs.BytesTransferred;
 
             if (remainingBytesToProcess > 0)
             {
-                bool _ReceivePending = receiveEventArgs.AcceptSocket.ReceiveAsync(receiveEventArgs);
+                bool _ReceivePending = _SocketUserToKen.SocketConnections.ReceiveAsync(receiveEventArgs);
 
                 if (!_ReceivePending)
                 {
@@ -223,8 +218,7 @@ namespace SocketDA.Models
             }
             else
             {
-                /* 客户端已经关闭连接 */
-                CloseClientSocket(receiveEventArgs);
+                CloseClientSocket(receiveEventArgs);   /* 客户端已经关闭连接 */
             }
         }
 
@@ -239,7 +233,9 @@ namespace SocketDA.Models
                 CloseClientSocket(sendEventArgs);
             }
 
-            bool _SendPending = sendEventArgs.AcceptSocket.SendAsync(sendEventArgs);
+            SocketUserToKen _SocketUserToKen = (SocketUserToKen)sendEventArgs.UserToken;
+
+            bool _SendPending = _SocketUserToKen.SocketConnections.SendAsync(sendEventArgs);
 
             if (!_SendPending)
             {
@@ -253,7 +249,9 @@ namespace SocketDA.Models
         /// <param name="acceptEventArgs"></param>
         private void CloseClientSocket(SocketAsyncEventArgs acceptEventArgs)
         {
-            acceptEventArgs.AcceptSocket.Close();
+            SocketUserToKen _SocketUserToKen = acceptEventArgs.UserToken as SocketUserToKen;
+
+            _SocketUserToKen.SocketConnections.Close();
             _SocketAsyncEventArgsPool.Push(acceptEventArgs);
             SemaphoreConnections.Release();
         }
