@@ -9,20 +9,20 @@ namespace SocketDA.ModelsSocket
     /// </summary>
     internal sealed class SocketBase
     {
-        internal IPEndPoint _IPEndPoint = null;
+        internal IPEndPoint IPEndPoint { get; set; }
 
         internal IPEndPoint CreateIPEndPoint(IPAddress ipAddress, int port)
         {
             try
             {
-                _IPEndPoint = new IPEndPoint(ipAddress, port);
+                IPEndPoint = new IPEndPoint(ipAddress, port);
             }
             catch (ArgumentOutOfRangeException)
             {
                 return null;
             }
 
-            return _IPEndPoint;
+            return IPEndPoint;
         }
 
         internal Socket CreateSocket(IPAddress ipAddress, int port, ProtocolType protocolType)
@@ -37,12 +37,12 @@ namespace SocketDA.ModelsSocket
                 if (protocolType == ProtocolType.Tcp)
                 {
                     /* 创建 TCP Socket（支持IPv4，IPv6） */
-                    return new Socket(_IPEndPoint.AddressFamily, SocketType.Stream, protocolType);
+                    return new Socket(IPEndPoint.AddressFamily, SocketType.Stream, protocolType);
                 }
                 else if (protocolType == ProtocolType.Udp)
                 {
                     /* 创建 UDP Socket（支持IPv4，IPv6） */
-                    return new Socket(_IPEndPoint.AddressFamily, SocketType.Dgram, protocolType);
+                    return new Socket(IPEndPoint.AddressFamily, SocketType.Dgram, protocolType);
                 }
                 else
                 {
