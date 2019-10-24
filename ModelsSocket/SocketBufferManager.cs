@@ -13,12 +13,14 @@ namespace SocketDA.ModelsSocket
     internal sealed class SocketBufferManager
     {
         /// <summary>
-        /// 缓冲区管理器控制的字节总数
+        /// 缓冲区管理器维护的字节总数（SocketAsyncEventArgs池的大小）
         /// </summary>
         private readonly int _ManagerNumBytes;
 
         /// <summary>
         /// 缓冲区管理器当前的索引
+        /// 
+        /// 该索引的增长是以_ManagerBufferSize为基数的，相当于已经分配了多少个SocketAsyncEventArgs对象字节数组
         /// </summary>
         private int _ManagerCurrentIndex;
 
@@ -65,10 +67,14 @@ namespace SocketDA.ModelsSocket
             {
                 if( (_ManagerNumBytes - _ManagerBufferSize) < _ManagerCurrentIndex )
                 {
+                    /* SocketAsyncEventArgs池剩余可分配的缓冲区大小不足以分配给一个SocketAsyncEventArgs对象所需要的缓冲区大小 */
                     return false;
                 }
 
+                /* 给一个SocketAsyncEventArgs对象分配缓冲区 */
                 args.SetBuffer(_ManagerBuffer, _ManagerCurrentIndex, _ManagerBufferSize);
+
+                /* 累计已经分配的缓冲区大小 */
                 _ManagerCurrentIndex += _ManagerBufferSize;
             }
 

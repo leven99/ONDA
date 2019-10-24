@@ -49,8 +49,9 @@ namespace SocketDA.Models
         {
             _SocketBufferManager.InitBuffer();
 
-            SocketAsyncEventArgs _SocketAsyncEventArgs;   /* 预分配SocketAsyncEventArgs对象池 */
-
+            SocketAsyncEventArgs _SocketAsyncEventArgs;
+            
+            /* 预分配SocketAsyncEventArgs对象池 */
             for (int count = 0; count < _SocketSetting.DefaultMaxConnctions; count++)
             {
                 _SocketAsyncEventArgs = new SocketAsyncEventArgs();
