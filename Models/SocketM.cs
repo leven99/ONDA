@@ -64,7 +64,7 @@ namespace SocketDA.Models
         }
 
         /// <summary>
-        /// 当SocketAsyncEventArgs对象完成接收或发送时，调用此方法
+        /// 当SocketAsyncEventArgs对象完成接收和发送时，调用此方法
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="asyncEventArgs"></param>
@@ -293,7 +293,7 @@ namespace SocketDA.Models
         }
 
         /// <summary>
-        /// 当SocketAsyncEventArgs对象完成接收或发送时，调用此方法
+        /// 当SocketAsyncEventArgs对象完成接收、发送和连接时，调用此方法
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="asyncEventArgs"></param>
@@ -306,6 +306,9 @@ namespace SocketDA.Models
                     break;
                 case SocketAsyncOperation.Send:
                     ProcessSend(asyncEventArgs);
+                    break;
+                case SocketAsyncOperation.Connect:
+                    ProcessConnect(asyncEventArgs);
                     break;
                 default:
                     throw new ArgumentException(asyncEventArgs.ConnectByNameError.Message);
@@ -332,7 +335,7 @@ namespace SocketDA.Models
                 SocketAsyncEventArgsConnections.RemoteEndPoint = IPEndPointConnections;
                 SocketAsyncEventArgsConnections.AcceptSocket = SocketConnections;
 
-                StartConnectAsync(null);
+                StartConnectAsync(SocketAsyncEventArgsConnections);
 
                 return true;
             }
@@ -348,19 +351,9 @@ namespace SocketDA.Models
         /// <param name="connectEventArgs"></param>
         private void StartConnectAsync(SocketAsyncEventArgs connectEventArgs)
         {
-            if(connectEventArgs == null)
-            {
-                connectEventArgs = new SocketAsyncEventArgs(); ;
-                connectEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnConnectCompleted);
-            }
-            else
-            {
-                connectEventArgs.AcceptSocket = null;
-            }
-
             SemaphoreConnections.WaitOne();
 
-            bool _ConnectPending = SocketAsyncEventArgsConnections.AcceptSocket.ConnectAsync(connectEventArgs);
+            bool _ConnectPending = SocketConnections.ConnectAsync(connectEventArgs);
 
             if(!_ConnectPending)
             {
@@ -369,19 +362,16 @@ namespace SocketDA.Models
         }
 
         /// <summary>
-        /// 连接服务器完成时调用此方法
+        /// 处理已完成连接的服务器SocketAsyncEventArgs对象
         /// </summary>
-        /// <param name="sender"></param>
         /// <param name="connectEventArgs"></param>
-        private void OnConnectCompleted(object sender, SocketAsyncEventArgs connectEventArgs)
+        private void ProcessConnect(SocketAsyncEventArgs connectEventArgs)
         {
             try
             {
-                SocketAsyncEventArgs _ConnectSocketAsyncEventArgs = SocketAsyncEventArgsConnections;
-
-                if(_ConnectSocketAsyncEventArgs != null)
+                if (connectEventArgs != null)
                 {
-                    _ConnectSocketAsyncEventArgs.UserToken = new SocketUserToKen(connectEventArgs.AcceptSocket);
+                    connectEventArgs.UserToken = new SocketUserToKen(connectEventArgs.AcceptSocket);
                 }
                 else
                 {
@@ -392,15 +382,6 @@ namespace SocketDA.Models
             {
                 return;
             }
-        }
-
-        /// <summary>
-        /// 处理已完成连接的服务器SocketAsyncEventArgs对象
-        /// </summary>
-        /// <param name="connectEventArgs"></param>
-        private void ProcessConnect(SocketAsyncEventArgs connectEventArgs)
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>
