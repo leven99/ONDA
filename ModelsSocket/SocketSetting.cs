@@ -5,12 +5,12 @@
         /// <summary>
         /// 服务器最大可以连接的客户端数量
         /// </summary>
-        internal int DefaultMaxConnctions { get; } = 10;
+        internal int DefaultMaxConnctions { get; } = 2;
 
         /// <summary>
         /// 一个SocketAsyncEventArgs对象的缓冲区大小
         /// </summary>
-        internal int BufferSize { get; } = 1048576;   /* 1MB */
+        internal int BufferSize { get; } = 512;
 
         /// <summary>
         /// 预分配操作，读与写
@@ -20,12 +20,12 @@
         /// <summary>
         /// 接收缓冲区大小（单位：Bytes，系统默认8192）
         /// </summary>
-        internal int ReceiveBufferSize { get; } = 2097152 + 2;   /* 2MB */
+        internal int ReceiveBufferSize { get; } = 2097152;   /* 2MB */
 
         /// <summary>
         /// 发送缓冲区大小（单位：Bytes，系统默认8192）
         /// </summary>
-        internal int SendBufferSize { get; } = 2097152 + 1;   /* 2MB */
+        internal int SendBufferSize { get; } = 2097152;   /* 2MB */
 
         /// <summary>
         /// 接收超时（适用：同步，单位：milliseconds，系统默认：0）
@@ -36,5 +36,13 @@
         /// 发送超时（适用：同步，单位：milliseconds，系统默认：0）
         /// </summary>
         internal int SendTimeout { get; } = 1000;   /* 1000MS */
+
+        /// <summary>
+        /// IP数据包的生存时间（Time To Live）值（取值范围：0 ~ 255）
+        /// 
+        /// 注释：生存时间是指容许这个数据包在到达其目的地之前通过多少个路由器。数据包每通过一个路由器，
+        /// 其生存时间都会由路由器减一。当生存时间降为零时， 路由器就会丢弃这个数据包。
+        /// </summary>
+        internal short Ttl { get; } = 42;
     }
 }

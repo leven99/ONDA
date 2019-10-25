@@ -17,11 +17,6 @@ namespace SocketDA.Models
         protected SocketAsyncEventArgsPool _SocketAsyncEventArgsPool = null;
 
         /// <summary>
-        /// 客户端连接请求互斥锁
-        /// </summary>
-        protected Mutex MutexConnections = null;
-
-        /// <summary>
         /// 客户端连接请求信号量
         /// </summary>
         protected Semaphore SemaphoreConnections = null;
@@ -38,7 +33,6 @@ namespace SocketDA.Models
                 _SocketSetting.OpsToPreAlloc * _SocketSetting.BufferSize);
             _SocketAsyncEventArgsPool = new SocketAsyncEventArgsPool(_SocketSetting.DefaultMaxConnctions);
 
-            MutexConnections = new Mutex();
             SemaphoreConnections = new Semaphore(_SocketSetting.DefaultMaxConnctions, _SocketSetting.DefaultMaxConnctions);
         }
 
@@ -58,7 +52,6 @@ namespace SocketDA.Models
                 _SocketAsyncEventArgs.Completed += new EventHandler<SocketAsyncEventArgs>(OnIOCompleted);
                 _SocketBufferManager.SetBuffer(_SocketAsyncEventArgs);
 
-                /* 添加SocketAsyncEventArgs对象到SocketAsyncEventArgs对象池 */
                 _SocketAsyncEventArgsPool.Push(_SocketAsyncEventArgs);
             }
         }
@@ -86,23 +79,24 @@ namespace SocketDA.Models
         /// <summary>
         /// 启动服务器，开始侦听客户端连接
         /// </summary>
-        /// <returns></returns>
+        /// <param name="ipAddress">服务器IP地址</param>
+        /// <param name="port">服务器端口号</param>
+        /// <returns>启动成功返回True，否则返回False</returns>
         public bool Start(IPAddress ipAddress, int port)
         {
-            SocketConnections = _SocketBase.CreateSocket(ipAddress, port, ProtocolType.Tcp);
-            IPEndPointConnections = _SocketBase.IPEndPoint;
-            SocketConnections.SetSocketOption(
-                SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, _SocketSetting.ReceiveBufferSize);
-            SocketConnections.SetSocketOption(
-                SocketOptionLevel.Socket, SocketOptionName.SendBuffer, _SocketSetting.SendBufferSize);
-
             try
             {
+                SocketConnections = _SocketBase.CreateSocket(ipAddress, port, ProtocolType.Tcp);
+                IPEndPointConnections = _SocketBase.IPEndPoint;
+                SocketConnections.SetSocketOption(
+                    SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, _SocketSetting.ReceiveBufferSize);
+                SocketConnections.SetSocketOption(
+                    SocketOptionLevel.Socket, SocketOptionName.SendBuffer, _SocketSetting.SendBufferSize);
+
                 SocketConnections.Bind(IPEndPointConnections);
                 SocketConnections.Listen(_SocketSetting.DefaultMaxConnctions);
 
                 StartAcceptAsync(null);
-                MutexConnections.WaitOne();
 
                 return true;
             }
@@ -117,8 +111,16 @@ namespace SocketDA.Models
         /// </summary>
         public void Stop()
         {
+            try
+            {
+                SocketConnections.Shutdown(SocketShutdown.Both);
+            }
+            catch
+            {
+
+            }
+
             SocketConnections.Close();
-            MutexConnections.ReleaseMutex();
         }
 
         /// <summary>
@@ -164,6 +166,11 @@ namespace SocketDA.Models
         /// <param name="acceptEventArgs"></param>
         private void ProcessAccept(SocketAsyncEventArgs acceptEventArgs)
         {
+            if (acceptEventArgs.SocketError != SocketError.Success)
+            {
+                CloseClientSocket(acceptEventArgs);
+            }
+
             try
             {
                 /* 从SocketAsyncEventArgs池中获取一个SocketAsyncEventArgs */
@@ -310,6 +317,9 @@ namespace SocketDA.Models
                 case SocketAsyncOperation.Connect:
                     ProcessConnect(asyncEventArgs);
                     break;
+                case SocketAsyncOperation.Disconnect:
+                    ProcessDisconnect(asyncEventArgs);
+                    break;
                 default:
                     throw new ArgumentException(asyncEventArgs.ConnectByNameError.Message);
             }
@@ -382,6 +392,11 @@ namespace SocketDA.Models
             {
                 return;
             }
+        }
+
+        private void ProcessDisconnect(SocketAsyncEventArgs disconnectEventArgs)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
