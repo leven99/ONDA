@@ -264,9 +264,9 @@
                 <Setter Property="BorderBrush" Value="White"/>
                 <Setter Property="Background" Value="#FF3FB0F9"/>
                 <Setter Property="Foreground" Value="White" />
-                <Setter Property="Padding" Value="10,5" />
+                <Setter Property="Padding" Value="5,5"/>
             </Style>
-
+            
             <!--MainWindows XAML - Assist Block style-->
             <Style TargetType="CheckBox" x:Key="AssistCheckBox">
                 <Setter Property="VerticalContentAlignment" Value="Center"/>

@@ -219,14 +219,22 @@
                                 
                                 <!--连接区-->
                                 <GroupBox x:Name="TCPServerConnectGroupBox" Header="连接" Grid.Row="0"
-                                      Margin="2.5,0,5,3"
-                                      BorderBrush="#FF007ACD"
-                                      Visibility="{Binding HelpModel.ViewVisibility}">
+                                          Margin="2.5,0,5,3"
+                                          BorderBrush="#FF007ACD"
+                                          Visibility="{Binding HelpModel.ViewVisibility}">
                                     <DataGrid x:Name="TCPServerConnectDataGrid"
                                               ColumnHeaderStyle="{StaticResource ConnectDataGrid}"
-                                              Background="White" BorderBrush="White"
+                                              VerticalAlignment="Top"
                                               HeadersVisibility="Column"
-                                              AutoGenerateColumns="False">
+                                              IsReadOnly="True"
+                                              AutoGenerateColumns="False"
+                                              AlternationCount="1"
+                                              CanUserReorderColumns="False"
+                                              CanUserResizeColumns="True"
+                                              CanUserSortColumns="True"
+                                              CanUserResizeRows="False"
+                                              CanUserAddRows="False"
+                                              RowHeight="20">
                                         <DataGrid.Columns>
                                             <DataGridTextColumn Header="S / N"/>
                                             <DataGridTextColumn Header="EndPoint"/>
@@ -412,10 +420,18 @@
                                       BorderBrush="#FF007ACD"
                                       Visibility="{Binding HelpModel.ViewVisibility}">
                                 <DataGrid x:Name="TCPClientConnectDataGrid"
-                                              ColumnHeaderStyle="{StaticResource ConnectDataGrid}"
-                                              Background="White" BorderBrush="White"
-                                              HeadersVisibility="Column"
-                                              AutoGenerateColumns="False">
+                                          ColumnHeaderStyle="{StaticResource ConnectDataGrid}"
+                                          VerticalAlignment="Top"
+                                          HeadersVisibility="Column"
+                                          IsReadOnly="True"
+                                          AutoGenerateColumns="False"
+                                          AlternationCount="1"
+                                          CanUserReorderColumns="False"
+                                          CanUserResizeColumns="True"
+                                          CanUserSortColumns="True"
+                                          CanUserResizeRows="False"
+                                          CanUserAddRows="False"
+                                          RowHeight="20">
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="S / N"/>
                                         <DataGridTextColumn Header="EndPoint"/>
@@ -556,10 +572,18 @@
                                       BorderBrush="#FF007ACD"
                                       Visibility="{Binding HelpModel.ViewVisibility}">
                                     <DataGrid x:Name="UDPServerConnectDataGrid"
-                                              ColumnHeaderStyle="{StaticResource ConnectDataGrid}"
-                                              Background="White" BorderBrush="White"
-                                              HeadersVisibility="Column"
-                                              AutoGenerateColumns="False">
+                                          ColumnHeaderStyle="{StaticResource ConnectDataGrid}"
+                                          VerticalAlignment="Top"
+                                          HeadersVisibility="Column"
+                                          IsReadOnly="True"
+                                          AutoGenerateColumns="False"
+                                          AlternationCount="1"
+                                          CanUserReorderColumns="False"
+                                          CanUserResizeColumns="True"
+                                          CanUserSortColumns="True"
+                                          CanUserResizeRows="False"
+                                          CanUserAddRows="False"
+                                          RowHeight="20">
                                         <DataGrid.Columns>
                                             <DataGridTextColumn Header="S / N"/>
                                             <DataGridTextColumn Header="EndPoint"/>
@@ -744,13 +768,21 @@
                                       BorderBrush="#FF007ACD"
                                       Visibility="{Binding HelpModel.ViewVisibility}">
                                 <DataGrid x:Name="UDPClientConnectDataGrid"
-                                              ColumnHeaderStyle="{StaticResource ConnectDataGrid}"
-                                              Background="White" BorderBrush="White"
-                                              HeadersVisibility="Column"
-                                              AutoGenerateColumns="False">
+                                          ColumnHeaderStyle="{StaticResource ConnectDataGrid}"
+                                          VerticalAlignment="Top"
+                                          HeadersVisibility="Column"
+                                          IsReadOnly="True"
+                                          AutoGenerateColumns="False"
+                                          AlternationCount="1"
+                                          CanUserReorderColumns="False"
+                                          CanUserResizeColumns="True"
+                                          CanUserSortColumns="True"
+                                          CanUserResizeRows="False"
+                                          CanUserAddRows="False"
+                                          RowHeight="20">
                                     <DataGrid.Columns>
-                                        <DataGridTextColumn Header="S / N"/>
-                                        <DataGridTextColumn Header="EndPoint"/>
+                                        <DataGridTextColumn Header="S / N" Binding="{Binding DepictInfo}"/>
+                                        <DataGridTextColumn Header="EndPoint" Binding="{Binding DepictInfo}"/>
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </GroupBox>
