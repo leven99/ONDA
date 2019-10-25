@@ -10,12 +10,12 @@ namespace SocketDA.Models
         /// <summary>
         /// 本机IP地址
         /// </summary>
-        public Collection<IPAddress> SocketSrcIPAddrItemsSource { get; set; }
+        public ObservableCollection<IPAddress> SocketSrcIPAddrItemsSource { get; set; }
 
         /// <summary>
         /// 本机IP地址，包含网络配置器的名称
         /// </summary>
-        public Collection<string> SocketSourceIPAddressItemsSource { get; set; }
+        public ObservableCollection<string> SocketSourceIPAddressItemsSource { get; set; }
 
         /// <summary>
         /// 判断IP地址和端口号的合法性
@@ -38,8 +38,8 @@ namespace SocketDA.Models
 
         public void SocketDataContext()
         {
-            SocketSrcIPAddrItemsSource = new Collection<IPAddress>();
-            SocketSourceIPAddressItemsSource = new Collection<string>();
+            SocketSrcIPAddrItemsSource = new ObservableCollection<IPAddress>();
+            SocketSourceIPAddressItemsSource = new ObservableCollection<string>();
 
             /* 本地计算机的所有网络设配器 */
             NetworkInterface[] NetworkInterfaces = NetworkInterface.GetAllNetworkInterfaces();

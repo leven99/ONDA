@@ -7,7 +7,7 @@ namespace SocketDA.Models
 {
     internal class TCPClientModel : MainWindowBase
     {
-        public Collection<IPAddress> SocketDestIPAddrItemsSource { get; set; }
+        public ObservableCollection<IPAddress> SocketDestIPAddrItemsSource { get; set; }
 
         #region 网络配置 - Socket属性
         private int _SocketDestPort;
@@ -136,7 +136,7 @@ namespace SocketDA.Models
 
         public void TCPClientDataContext()
         {
-            SocketDestIPAddrItemsSource = new Collection<IPAddress>();
+            SocketDestIPAddrItemsSource = new ObservableCollection<IPAddress>();
 
             SocketDestPort = 8088;
 
