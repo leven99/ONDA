@@ -7,7 +7,7 @@ namespace SocketDA.Views
 {
     public partial class MainWindow : Window
     {
-        private readonly MainWindowViewModel mainWindowViewModel = null;
+        internal MainWindowViewModel mainWindowViewModel = null;
 
         public MainWindow()
         {

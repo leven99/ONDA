@@ -8,7 +8,7 @@ namespace SocketDA.Views
     /// </summary>
     public partial class WPFUpdate : Window
     {
-        private readonly WPFUpdateViewModel wPFUpdateViewModel = null;
+        internal WPFUpdateViewModel wPFUpdateViewModel = null;
 
         public WPFUpdate()
         {
