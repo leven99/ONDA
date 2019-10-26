@@ -18,8 +18,9 @@ namespace SocketDA.ViewModels
         protected static SocketBufferManager _TCPServerSocketBufferManager = new SocketBufferManager(
             _TCPServerSocketSetting.DefaultMaxConnctions * _TCPServerSocketSetting.OpsToPreAlloc * _TCPServerSocketSetting.BufferSize,
             _TCPServerSocketSetting.OpsToPreAlloc * _TCPServerSocketSetting.BufferSize);
-        protected static SocketAsyncEventArgsPool _TCPServerSocketAsyncEventArgsPool = new 
-            SocketAsyncEventArgsPool(_TCPServerSocketSetting.DefaultMaxConnctions);
+        protected static SocketAsyncEventArgsPool _TCPServerSocketAsyncEventArgsPool = new SocketAsyncEventArgsPool();
+
+        protected Mutex TCPServerMutexConnections = new Mutex();
 
         /// <summary>
         /// 客户端连接请求信号量
@@ -94,6 +95,7 @@ namespace SocketDA.ViewModels
                 TCPServerSocketConnections.Listen(_TCPServerSocketSetting.DefaultMaxConnctions);
 
                 TCPServerStartAcceptAsync(null);
+                TCPServerMutexConnections.WaitOne();
 
                 return true;
             }
@@ -111,6 +113,7 @@ namespace SocketDA.ViewModels
             try
             {
                 TCPServerSocketConnections.Close();
+                TCPServerMutexConnections.ReleaseMutex();
             }
             catch
             {
