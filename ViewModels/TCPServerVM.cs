@@ -29,6 +29,8 @@ namespace SocketDA.ViewModels
 
         protected Socket TCPServerSocketConnections = null;
         protected IPEndPoint TCPServerIPEndPointConnections = null;
+
+        protected bool TCPServerConnections = false;   /* 服务器启动检测 */
         #endregion
 
         /// <summary>
@@ -104,18 +106,18 @@ namespace SocketDA.ViewModels
         /// <summary>
         /// 停止服务器，断开客户端所有连接
         /// </summary>
-        public void TCPServerStop()
+        public bool TCPServerStop()
         {
             try
             {
-                TCPServerSocketConnections.Shutdown(SocketShutdown.Both);
+                TCPServerSocketConnections.Close();
             }
             catch
             {
-
+                return false;
             }
 
-            TCPServerSocketConnections.Close();
+            return true;
         }
 
         /// <summary>
@@ -161,11 +163,6 @@ namespace SocketDA.ViewModels
         /// <param name="acceptEventArgs"></param>
         private void TCPServerProcessAccept(SocketAsyncEventArgs acceptEventArgs)
         {
-            if (acceptEventArgs.SocketError != SocketError.Success)
-            {
-                TCPServerCloseClientSocket(acceptEventArgs);
-            }
-
             try
             {
                 /* 从SocketAsyncEventArgs池中获取一个SocketAsyncEventArgs */
@@ -262,8 +259,15 @@ namespace SocketDA.ViewModels
         }
 
         #region 打开/关闭网络
-        public void TCPServerOpenCloseSocket()
+        public void TCPServerOpenSocket()
         {
+            if(TCPServerConnections)
+            {
+                TCPServerCloseSocket();
+
+                return;
+            }
+
             IPAddress _IPAddress;
 
             /* 判断Socket参数（IP地址与端口号）是否合法 */
@@ -295,9 +299,9 @@ namespace SocketDA.ViewModels
 
             TCPServerInit();
 
-            var _Started = TCPServerStart(_IPAddress, TCPServerModel.SocketSrcPort);
+            TCPServerConnections = TCPServerStart(_IPAddress, TCPServerModel.SocketSrcPort);
 
-            if (_Started)
+            if (TCPServerConnections)
             {
                 TCPServerModel.SocketSrcIPAddrEnable = false;
                 TCPServerModel.SocketSrcPortEnable = false;
@@ -313,13 +317,18 @@ namespace SocketDA.ViewModels
             }
         }
 
-        public void CloseTCPServerSocket()
+        public void TCPServerCloseSocket()
         {
-            TCPServerModel.SocketSrcIPAddrEnable = true;
-            TCPServerModel.SocketSrcPortEnable = true;
+            if(TCPServerStop())
+            {
+                TCPServerModel.SocketSrcIPAddrEnable = true;
+                TCPServerModel.SocketSrcPortEnable = true;
 
-            TCPServerModel.SocketBrush = Brushes.Red;
-            TCPServerModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 侦听");
+                TCPServerModel.SocketBrush = Brushes.Red;
+                TCPServerModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 侦听");
+
+                TCPServerConnections = false;
+            }
         }
         #endregion
 

@@ -134,7 +134,7 @@ namespace SocketDA.Views
         #region 打开/关闭网络
         private void TCPServerOnOffButton_Click(object sender, RoutedEventArgs e)
         {
-            mainWindowViewModel.TCPServerOpenCloseSocket();
+            mainWindowViewModel.TCPServerOpenSocket();
         }
         #endregion
 
