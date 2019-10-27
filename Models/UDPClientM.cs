@@ -1,4 +1,5 @@
-﻿using SocketDA.ViewModels;
+﻿using SocketDA.ModelsSocket;
+using SocketDA.ViewModels;
 using System.Collections.ObjectModel;
 using System.Net;
 using System.Windows.Media;
@@ -7,92 +8,97 @@ namespace SocketDA.Models
 {
     internal class UDPClientModel : MainWindowBase
     {
-        public ObservableCollection<IPAddress> SocketDestIPAddrItemsSource { get; set; }
+        /// <summary>
+        /// 连接区 - 服务器信息
+        /// </summary>
+        public ObservableCollection<SocketUserToKen> ConnectionsInfo { get; set; }
 
         #region 网络配置 - Socket属性
-        private int _SocketDestPort;
-        public int SocketDestPort
+        public ObservableCollection<IPAddress> IPAddrItemsSource { get; set; }
+
+        private string _IPAddrText;
+        public string IPAddrText
         {
             get
             {
-                return _SocketDestPort;
+                return _IPAddrText;
             }
             set
             {
-                if (_SocketDestPort != value)
+                if (_IPAddrText != value)
                 {
-                    _SocketDestPort = value;
-                    RaisePropertyChanged(nameof(SocketDestPort));
+                    _IPAddrText = value;
+                    RaisePropertyChanged(nameof(IPAddrText));
+                }
+            }
+        }
+
+        private int _IPAddrSelectedIndex;
+        public int IPAddrSelectedIndex
+        {
+            get
+            {
+                return _IPAddrSelectedIndex;
+            }
+            set
+            {
+                if (_IPAddrSelectedIndex != value)
+                {
+                    _IPAddrSelectedIndex = value;
+                    RaisePropertyChanged(nameof(IPAddrSelectedIndex));
+                }
+            }
+        }
+
+        private int _Port;
+        public int Port
+        {
+            get
+            {
+                return _Port;
+            }
+            set
+            {
+                if (_Port != value)
+                {
+                    _Port = value;
+                    RaisePropertyChanged(nameof(Port));
                 }
             }
         }
         #endregion
 
-        private string _SocketDestPAddrText;
-        public string SocketDestPAddrText
+        #region 网络配置 - 打开/关闭
+        private Brush _Brush;
+        public Brush Brush
         {
             get
             {
-                return _SocketDestPAddrText;
+                return _Brush;
             }
             set
             {
-                if (_SocketDestPAddrText != value)
+                if (_Brush != value)
                 {
-                    _SocketDestPAddrText = value;
-                    RaisePropertyChanged(nameof(SocketDestPAddrText));
+                    _Brush = value;
+                    RaisePropertyChanged(nameof(Brush));
                 }
             }
         }
 
-        private int _SocketDestIPAddrSelectedIndex;
-        public int SocketDestIPAddrSelectedIndex
+        private string _OpenClose;
+        public string OpenClose
         {
             get
             {
-                return _SocketDestIPAddrSelectedIndex;
+                return _OpenClose;
             }
             set
             {
-                if (_SocketDestIPAddrSelectedIndex != value)
+                if (_OpenClose != value)
                 {
-                    _SocketDestIPAddrSelectedIndex = value;
-                    RaisePropertyChanged(nameof(SocketDestIPAddrSelectedIndex));
-                }
-            }
-        }
-
-        #region 网络配置 - Socket打开/关闭按钮
-        private Brush _SocketBrush;
-        public Brush SocketBrush
-        {
-            get
-            {
-                return _SocketBrush;
-            }
-            set
-            {
-                if (_SocketBrush != value)
-                {
-                    _SocketBrush = value;
-                    RaisePropertyChanged(nameof(SocketBrush));
-                }
-            }
-        }
-
-        private string _OpenCloseSocket;
-        public string OpenCloseSocket
-        {
-            get
-            {
-                return _OpenCloseSocket;
-            }
-            set
-            {
-                if (_OpenCloseSocket != value)
-                {
-                    _OpenCloseSocket = value;
-                    RaisePropertyChanged(nameof(OpenCloseSocket));
+                    _OpenClose = value;
+                    RaisePropertyChanged(nameof(OpenClose));
                 }
             }
         }
@@ -100,15 +106,16 @@ namespace SocketDA.Models
 
         public void UDPClientDataContext()
         {
-            SocketDestIPAddrItemsSource = new ObservableCollection<IPAddress>();
+            ConnectionsInfo = new ObservableCollection<SocketUserToKen>();
 
-            SocketDestPort = 8088;
+            IPAddrItemsSource = new ObservableCollection<IPAddress>();
+            IPAddrText = string.Empty;
+            IPAddrSelectedIndex = 0;
 
-            SocketDestPAddrText = string.Empty;
-            SocketDestIPAddrSelectedIndex = 0;
-
-            SocketBrush = Brushes.Red;
-            OpenCloseSocket = string.Format(cultureInfo, "UDP 连接");
+            Port = 8088;
+           
+            Brush = Brushes.Red;
+            OpenClose = string.Format(cultureInfo, "UDP 连接");
         }
     }
 }

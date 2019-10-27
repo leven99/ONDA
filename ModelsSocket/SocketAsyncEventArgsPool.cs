@@ -6,14 +6,14 @@ namespace SocketDA.ModelsSocket
 {
     internal sealed class SocketAsyncEventArgsPool
     {
-        private readonly ConcurrentQueue<SocketAsyncEventArgs> _SocketConcurrentQueue;
+        private readonly ConcurrentQueue<SocketAsyncEventArgs> _ConcurrentQueue;
 
         /// <summary>
         /// 初始化 SocketAsyncEventArgs Pool 的大小
         /// </summary>
         internal SocketAsyncEventArgsPool()
         {
-            _SocketConcurrentQueue = new ConcurrentQueue<SocketAsyncEventArgs>();
+            _ConcurrentQueue = new ConcurrentQueue<SocketAsyncEventArgs>();
         }
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace SocketDA.ModelsSocket
                 throw new ArgumentNullException(item.ConnectByNameError.Message);
             }
 
-            _SocketConcurrentQueue.Enqueue(item);
+            _ConcurrentQueue.Enqueue(item);
         }
 
         /// <summary>
@@ -36,9 +36,9 @@ namespace SocketDA.ModelsSocket
         /// <returns></returns>
         internal SocketAsyncEventArgs Pop()
         {
-            if (_SocketConcurrentQueue.Count > 0)
+            if (_ConcurrentQueue.Count > 0)
             {
-                if (_SocketConcurrentQueue.TryDequeue(out SocketAsyncEventArgs args) )
+                if (_ConcurrentQueue.TryDequeue(out SocketAsyncEventArgs args) )
                 {
                     return args;
                 }

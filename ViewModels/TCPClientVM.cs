@@ -4,7 +4,6 @@ using SocketDA.ModelsSocket;
 using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 using System.Windows.Media;
 using System.Windows.Threading;
 
@@ -16,14 +15,10 @@ namespace SocketDA.ViewModels
         protected SocketBase _TCPClientSocketBase = new SocketBase();
         protected SocketSetting _TCPClientSocketSetting = new SocketSetting();
 
-        /// <summary>
-        /// 连接服务器请求信号量
-        /// </summary>
-        protected Semaphore TCPClientSemaphoreConnections = null;
-
         protected Socket TCPClientSocketConnections = null;
-        protected IPEndPoint TCPClientIPEndPointConnections = null;
         protected SocketAsyncEventArgs TCPClientSocketAsyncEventArgsConnections = null;
+
+        protected bool TCPClientConnectFlag = false;   /* 冗余判断客户端是否已经连接到服务器 */
         #endregion
 
         /// <summary>
@@ -36,8 +31,6 @@ namespace SocketDA.ViewModels
             TCPClientSocketAsyncEventArgsConnections.SetBuffer(
                 new byte[_TCPClientSocketSetting.BufferSize * _TCPClientSocketSetting.OpsToPreAlloc],
                 0, _TCPClientSocketSetting.OpsToPreAlloc * _TCPClientSocketSetting.BufferSize);
-
-            TCPClientSemaphoreConnections = new Semaphore(1, 1);   /* 一个客户端程序只连接一个服务器 */
         }
 
         /// <summary>
@@ -58,9 +51,6 @@ namespace SocketDA.ViewModels
                 case SocketAsyncOperation.Connect:
                     TCPClientProcessConnect(asyncEventArgs);
                     break;
-                case SocketAsyncOperation.Disconnect:
-                    TCPClientProcessDisconnect(asyncEventArgs);
-                    break;
                 default:
                     throw new ArgumentException(asyncEventArgs.ConnectByNameError.Message);
             }
@@ -72,43 +62,23 @@ namespace SocketDA.ViewModels
         /// <param name="ipAddress"></param>
         /// <param name="port"></param>
         /// <returns></returns>
-        public bool TCPClientConnect(IPAddress ipAddress, int port)
+        public void TCPClientConnect(IPAddress ipAddress, int port)
         {
             TCPClientSocketConnections = _TCPClientSocketBase.CreateSocket(ipAddress, port, ProtocolType.Tcp);
-            TCPClientIPEndPointConnections = _TCPClientSocketBase.IPEndPoint;
             TCPClientSocketConnections.SetSocketOption(
                 SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, _TCPClientSocketSetting.ReceiveBufferSize);
             TCPClientSocketConnections.SetSocketOption(
                 SocketOptionLevel.Socket, SocketOptionName.SendBuffer, _TCPClientSocketSetting.SendBufferSize);
 
-            try
-            {
-                TCPClientSocketAsyncEventArgsConnections.RemoteEndPoint = TCPClientIPEndPointConnections;
-                TCPClientSocketAsyncEventArgsConnections.AcceptSocket = TCPClientSocketConnections;
+            TCPClientSocketAsyncEventArgsConnections.RemoteEndPoint = _TCPClientSocketBase.IPEndPoint;
 
-                TCPClientStartConnectAsync(TCPClientSocketAsyncEventArgsConnections);
+            bool _ConnectPending = TCPClientSocketConnections.ConnectAsync(TCPClientSocketAsyncEventArgsConnections);
 
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// 开始连接服务器
-        /// </summary>
-        /// <param name="connectEventArgs"></param>
-        private void TCPClientStartConnectAsync(SocketAsyncEventArgs connectEventArgs)
-        {
-            TCPClientSemaphoreConnections.WaitOne();
-
-            bool _ConnectPending = TCPClientSocketConnections.ConnectAsync(connectEventArgs);
+            DepictInfo = string.Format(cultureInfo, "正在连接服务器，请稍后......");
 
             if (!_ConnectPending)
             {
-                TCPClientProcessConnect(connectEventArgs);
+                TCPClientProcessConnect(TCPClientSocketAsyncEventArgsConnections);
             }
         }
 
@@ -118,30 +88,33 @@ namespace SocketDA.ViewModels
         /// <param name="connectEventArgs"></param>
         private void TCPClientProcessConnect(SocketAsyncEventArgs connectEventArgs)
         {
-            try
+            if(connectEventArgs.SocketError == SocketError.Success)
             {
-                if (connectEventArgs != null)
-                {
-                    connectEventArgs.UserToken = new SocketUserToKen(connectEventArgs.AcceptSocket);
-                }
-                else
-                {
-                    /* 服务器已关闭 */
-                }
+                TCPClientModel.IPAddrEnable = false;
+                TCPClientModel.PortEnable = false;
+
+                TCPClientModel.Brush = Brushes.GreenYellow;
+                TCPClientModel.OpenClose = string.Format(cultureInfo, "TCP 断开");
             }
-            catch
+            else if (connectEventArgs.SocketError == SocketError.TimedOut)
             {
+                DepictInfo = string.Format(cultureInfo, "连接服务器超时或服务器未能响应......");
+
                 return;
             }
-        }
+            else
+            {
+                DepictInfo = string.Format(cultureInfo, "连接服务器失败！");
 
-        /// <summary>
-        /// 处理已断开连接的服务器SocketAsyncEventArgs对象
-        /// </summary>
-        /// <param name="disconnectEventArgs"></param>
-        private void TCPClientProcessDisconnect(SocketAsyncEventArgs disconnectEventArgs)
-        {
-            throw new NotImplementedException();
+                return;
+            }
+
+            if (connectEventArgs != null)
+            {
+                connectEventArgs.UserToken = new SocketUserToKen(connectEventArgs.AcceptSocket);
+
+                /* 将服务器信息加入到连接区 */
+            }
         }
 
         /// <summary>
@@ -165,24 +138,41 @@ namespace SocketDA.ViewModels
         /// <summary>
         /// 断开服务器连接
         /// </summary>
-        public void TCPClientDisConnect()
+        public bool TCPClientDisConnect()
         {
-            TCPClientSocketConnections.Close();
-            TCPClientSemaphoreConnections.Release();
+            try
+            {
+                TCPClientSocketConnections.Close();
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
         }
 
         #region 打开/关闭网络
         public void TCPClientOpenCloseSocket()
         {
+            if (TCPClientConnectFlag)
+            {
+                CloseTCPClientSocket();
+
+                return;
+            }
+
             IPAddress _IPAddress;
 
-            if (SocketModel.TryParseIPAddressPort(TCPClientModel.SocketDestIPAddrText, TCPClientModel.SocketDestPort))
-            {
-                _IPAddress = IPAddress.Parse(TCPClientModel.SocketDestIPAddrText);
+            SocketBase _SocketBase = new SocketBase();
 
-                if (!TCPClientModel.SocketDestIPAddrItemsSource.Contains(_IPAddress))
+            if (_SocketBase.TryParseIPAddressPort(TCPClientModel.IPAddrText, TCPClientModel.Port))
+            {
+                _IPAddress = IPAddress.Parse(TCPClientModel.IPAddrText);
+
+                if (!TCPClientModel.IPAddrItemsSource.Contains(_IPAddress))
                 {
-                    TCPClientModel.SocketDestIPAddrItemsSource.Add(_IPAddress);
+                    TCPClientModel.IPAddrItemsSource.Add(_IPAddress);
                 }
             }
             else
@@ -194,31 +184,21 @@ namespace SocketDA.ViewModels
 
             TCPClientInit();
 
-            var _Connected = TCPClientConnect(_IPAddress, TCPClientModel.SocketDestPort);
-
-            if (_Connected)
-            {
-                TCPClientModel.SocketDestIPAddrEnable = false;
-                TCPClientModel.SocketDestPortEnable = false;
-
-                TCPClientModel.SocketBrush = Brushes.GreenYellow;
-                TCPClientModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 断开");
-            }
-            else
-            {
-                DepictInfo = string.Format(cultureInfo, "连接服务器失败");
-
-                return;
-            }
+            TCPClientConnect(_IPAddress, TCPClientModel.Port);
         }
 
         public void CloseTCPClientSocket()
         {
-            TCPClientModel.SocketDestIPAddrEnable = true;
-            TCPClientModel.SocketDestPortEnable = true;
+            if(TCPClientDisConnect())
+            {
+                TCPClientModel.IPAddrEnable = true;
+                TCPClientModel.PortEnable = true;
 
-            TCPClientModel.SocketBrush = Brushes.Red;
-            TCPClientModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 连接");
+                TCPClientModel.Brush = Brushes.Red;
+                TCPClientModel.OpenClose = string.Format(cultureInfo, "TCP 连接");
+
+                TCPClientConnectFlag = false;
+            }
         }
         #endregion
 

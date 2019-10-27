@@ -4,7 +4,6 @@ namespace SocketDA.ViewModels
 {
     internal partial class MainWindowViewModel : MainWindowBase
     {
-        public SocketModel SocketModel { get; set; }
         public TCPServerModel TCPServerModel { get; set; }
         public TCPClientModel TCPClientModel { get; set; }
         public UDPServerModel UDPServerModel { get; set; }
@@ -69,9 +68,6 @@ namespace SocketDA.ViewModels
 
         public MainWindowViewModel()
         {
-            SocketModel = new SocketModel();
-            SocketModel.SocketDataContext();
-
             TCPServerModel = new TCPServerModel();
             TCPServerModel.TCPServerDataContext();
 

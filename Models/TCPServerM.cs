@@ -1,130 +1,142 @@
-﻿using SocketDA.ViewModels;
+﻿using SocketDA.ModelsSocket;
+using SocketDA.ViewModels;
+using System.Collections.ObjectModel;
+using System.Net;
 using System.Windows.Media;
 
 namespace SocketDA.Models
 {
     internal class TCPServerModel : MainWindowBase
     {
+        /// <summary>
+        /// 连接区 - 客户端信息
+        /// </summary>
+        public ObservableCollection<SocketUserToKen> ConnectionsInfo { get; set; }
+
         #region 网络配置 - Socket属性
-        private int _SocketSrcPort;
-        public int SocketSrcPort
+        public ObservableCollection<IPAddress> IPAddrItemsSource { get; set; }
+
+        public ObservableCollection<string> IPAddrInfoItemsSource { get; set; }
+
+        private string _PAddrText;
+        public string IPAddrText
         {
             get
             {
-                return _SocketSrcPort;
+                return _PAddrText;
             }
             set
             {
-                if (_SocketSrcPort != value)
+                if (_PAddrText != value)
                 {
-                    _SocketSrcPort = value;
-                    RaisePropertyChanged(nameof(SocketSrcPort));
+                    _PAddrText = value;
+                    RaisePropertyChanged(nameof(IPAddrText));
+                }
+            }
+        }
+
+        private int _IPAddrSelectedIndex;
+        public int IPAddrSelectedIndex
+        {
+            get
+            {
+                return _IPAddrSelectedIndex;
+            }
+            set
+            {
+                if (_IPAddrSelectedIndex != value)
+                {
+                    _IPAddrSelectedIndex = value;
+                    RaisePropertyChanged(nameof(IPAddrSelectedIndex));
+                }
+            }
+        }
+
+        private int _Port;
+        public int Port
+        {
+            get
+            {
+                return _Port;
+            }
+            set
+            {
+                if (_Port != value)
+                {
+                    _Port = value;
+                    RaisePropertyChanged(nameof(Port));
                 }
             }
         }
         #endregion
 
-        private string _SocketSrcPAddrText;
-        public string SocketSrcIPAddrText
-        {
-            get
-            {
-                return _SocketSrcPAddrText;
-            }
-            set
-            {
-                if (_SocketSrcPAddrText != value)
-                {
-                    _SocketSrcPAddrText = value;
-                    RaisePropertyChanged(nameof(SocketSrcIPAddrText));
-                }
-            }
-        }
-
-        private int _SocketSrcIPAddrSelectedIndex;
-        public int SocketSrcIPAddrSelectedIndex
-        {
-            get
-            {
-                return _SocketSrcIPAddrSelectedIndex;
-            }
-            set
-            {
-                if (_SocketSrcIPAddrSelectedIndex != value)
-                {
-                    _SocketSrcIPAddrSelectedIndex = value;
-                    RaisePropertyChanged(nameof(SocketSrcIPAddrSelectedIndex));
-                }
-            }
-        }
-
         #region 网络配置 - Socket属性控件启用/不启用
-        private bool _SocketSrcIPAddrEnable;
-        public bool SocketSrcIPAddrEnable
+        private bool _IPAddrEnable;
+        public bool IPAddrEnable
         {
             get
             {
-                return _SocketSrcIPAddrEnable;
+                return _IPAddrEnable;
             }
             set
             {
-                if (_SocketSrcIPAddrEnable != value)
+                if (_IPAddrEnable != value)
                 {
-                    _SocketSrcIPAddrEnable = value;
-                    RaisePropertyChanged(nameof(SocketSrcIPAddrEnable));
+                    _IPAddrEnable = value;
+                    RaisePropertyChanged(nameof(IPAddrEnable));
                 }
             }
         }
 
-        private bool _SocketSrcPortEnable;
-        public bool SocketSrcPortEnable
+        private bool _PortEnable;
+        public bool PortEnable
         {
             get
             {
-                return _SocketSrcPortEnable;
+                return _PortEnable;
             }
             set
             {
-                if (_SocketSrcPortEnable != value)
+                if (_PortEnable != value)
                 {
-                    _SocketSrcPortEnable = value;
-                    RaisePropertyChanged(nameof(SocketSrcPortEnable));
+                    _PortEnable = value;
+                    RaisePropertyChanged(nameof(PortEnable));
                 }
             }
         }
         #endregion
 
         #region 网络配置 - Socket打开/关闭按钮
-        private Brush _SocketBrush;
-        public Brush SocketBrush
+        private Brush _Brush;
+        public Brush Brush
         {
             get
             {
-                return _SocketBrush;
+                return _Brush;
             }
             set
             {
-                if (_SocketBrush != value)
+                if (_Brush != value)
                 {
-                    _SocketBrush = value;
-                    RaisePropertyChanged(nameof(SocketBrush));
+                    _Brush = value;
+                    RaisePropertyChanged(nameof(Brush));
                 }
             }
         }
 
-        private string _OpenCloseSocket;
-        public string OpenCloseSocket
+        private string _OpenClose;
+        public string OpenClose
         {
             get
             {
-                return _OpenCloseSocket;
+                return _OpenClose;
             }
             set
             {
-                if (_OpenCloseSocket != value)
+                if (_OpenClose != value)
                 {
-                    _OpenCloseSocket = value;
-                    RaisePropertyChanged(nameof(OpenCloseSocket));
+                    _OpenClose = value;
+                    RaisePropertyChanged(nameof(OpenClose));
                 }
             }
         }
@@ -132,16 +144,22 @@ namespace SocketDA.Models
 
         public void TCPServerDataContext()
         {
-            SocketSrcPort = 8088;
+            ConnectionsInfo = new ObservableCollection<SocketUserToKen>();
 
-            SocketSrcIPAddrText = string.Empty;
-            SocketSrcIPAddrSelectedIndex = 0;
+            IPAddrItemsSource = new ObservableCollection<IPAddress>();
+            IPAddrInfoItemsSource = new ObservableCollection<string>();
+            SocketBase _SocketBase = new SocketBase();
+            _SocketBase.GitNetworkInterface(IPAddrItemsSource, IPAddrInfoItemsSource);
+            IPAddrText = string.Empty;
+            IPAddrSelectedIndex = 0;
 
-            SocketSrcIPAddrEnable = true;
-            SocketSrcPortEnable = true;
+            Port = 8088;
 
-            SocketBrush = Brushes.Red;
-            OpenCloseSocket = string.Format(cultureInfo, "TCP 侦听");
+            IPAddrEnable = true;
+            PortEnable = true;
+
+            Brush = Brushes.Red;
+            OpenClose = string.Format(cultureInfo, "TCP 侦听");
         }
     }
 }

@@ -130,25 +130,25 @@
                                                Grid.Row="0" Grid.Column="0"
                                                Style="{StaticResource ConfigTextBlock}"/>
                                     <ComboBox x:Name="TCPServerSrcAddrComboBox" Grid.Row="0" Grid.Column="1"
-                                              ItemsSource="{Binding SocketModel.SocketSourceIPAddressItemsSource}"
-                                              Text="{Binding TCPServerModel.SocketSrcIPAddrText}"
-                                              SelectedIndex="{Binding TCPServerModel.SocketSrcIPAddrSelectedIndex}"
+                                              ItemsSource="{Binding TCPServerModel.IPAddrInfoItemsSource}"
+                                              Text="{Binding TCPServerModel.IPAddrText}"
+                                              SelectedIndex="{Binding TCPServerModel.IPAddrSelectedIndex}"
                                               Style="{DynamicResource ConfigComboBox}"
                                               IsEditable="True" IsReadOnly="False"
-                                              IsEnabled="{Binding TCPServerModel.SocketSrcIPAddrEnable}"/>
+                                              IsEnabled="{Binding TCPServerModel.IPAddrEnable}"/>
                                     <TextBlock x:Name="TCPServerSrcPortTextBlock" Text="源端口号："
                                                Grid.Row="0" Grid.Column="2"
                                                Margin="6,3,0,3"
                                                Style="{StaticResource ConfigTextBlock}"/>
-                                    <TextBox x:Name="TCPServerSrcPortTextBox" Text="{Binding TCPServerModel.SocketSrcPort}"
+                                    <TextBox x:Name="TCPServerSrcPortTextBox" Text="{Binding TCPServerModel.Port}"
                                              Grid.Row="0" Grid.Column="3"
                                              Style="{StaticResource ConfigTextBox}"
                                              Width="120" MaxLength="5"
-                                             IsEnabled="{Binding TCPServerModel.SocketSrcPortEnable}"/>
-                                    <Ellipse x:Name="TCPServerOnOffElipse" Fill="{Binding TCPServerModel.SocketBrush}"
+                                             IsEnabled="{Binding TCPServerModel.PortEnable}"/>
+                                    <Ellipse x:Name="TCPServerOnOffElipse" Fill="{Binding TCPServerModel.Brush}"
                                              Grid.Row="0" Grid.Column="4"
                                              Style="{StaticResource ConfigEilipse}"/>
-                                    <Button x:Name="TCPServerOnOffButton" Content="{Binding TCPServerModel.OpenCloseSocket}"
+                                    <Button x:Name="TCPServerOnOffButton" Content="{Binding TCPServerModel.OpenClose}"
                                             Grid.Row="0" Grid.Column="5"
                                             Style="{DynamicResource ConfigButton}"
                                             Click="TCPServerOnOffButton_Click"/>
@@ -223,6 +223,7 @@
                                           BorderBrush="#FF007ACD"
                                           Visibility="{Binding HelpModel.ViewVisibility}">
                                     <DataGrid x:Name="TCPServerConnectDataGrid"
+                                              ItemsSource="{Binding TCPServerModel.ConnectionsInfo}"
                                               ColumnHeaderStyle="{StaticResource ConnectDataGrid}"
                                               VerticalAlignment="Top"
                                               HeadersVisibility="Column"
@@ -236,8 +237,7 @@
                                               CanUserAddRows="False"
                                               RowHeight="20">
                                         <DataGrid.Columns>
-                                            <DataGridTextColumn Header="S / N"/>
-                                            <DataGridTextColumn Header="EndPoint"/>
+                                            <DataGridTextColumn Header="EndPoint" Binding="{Binding RemoteEndPoint}"/>
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </GroupBox>
@@ -388,26 +388,26 @@
                                                Style="{StaticResource ConfigTextBlock}"
                                                HorizontalAlignment="Right"/>
                                     <ComboBox x:Name="TCPClientDestAddrComboBox" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
-                                              ItemsSource="{Binding TCPClientModel.SocketDestIPAddrItemsSource}"
-                                              Text="{Binding TCPClientModel.SocketDestIPAddrText}"
-                                              SelectedIndex="{Binding TCPClientModel.SocketDestIPAddrSelectedIndex}"
+                                              ItemsSource="{Binding TCPClientModel.IPAddrItemsSource}"
+                                              Text="{Binding TCPClientModel.IPAddrText}"
+                                              SelectedIndex="{Binding TCPClientModel.IPAddrSelectedIndex}"
                                               Style="{DynamicResource ConfigComboBox}"
                                               IsEditable="True" IsReadOnly="False"
-                                              IsEnabled="{Binding TCPClientModel.SocketDestIPAddrEnable}"/>
+                                              IsEnabled="{Binding TCPClientModel.IPAddrEnable}"/>
                                     <TextBlock x:Name="TCPClientDestPortTextBlock" Text="目的端口号："
                                                Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
                                                Style="{StaticResource ConfigTextBlock}"
                                                HorizontalAlignment="Right"/>
-                                    <TextBox x:Name="TCPClientDestPortTextBox" Text="{Binding TCPClientModel.SocketDestPort}"
+                                    <TextBox x:Name="TCPClientDestPortTextBox" Text="{Binding TCPClientModel.Port}"
                                              Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
                                              Style="{StaticResource ConfigTextBox}"
                                              MaxLength="5"
                                              HorizontalContentAlignment="Left"
-                                             IsEnabled="{Binding TCPClientModel.SocketDestPortEnable}"/>
-                                    <Ellipse x:Name="TCPClientOnOffElipse" Fill="{Binding TCPClientModel.SocketBrush}"
+                                             IsEnabled="{Binding TCPClientModel.PortEnable}"/>
+                                    <Ellipse x:Name="TCPClientOnOffElipse" Fill="{Binding TCPClientModel.Brush}"
                                              Grid.Row="4" Grid.Column="0"
                                              Style="{StaticResource ConfigEilipse}"/>
-                                    <Button x:Name="TCPClientOnOffButton" Content="{Binding TCPClientModel.OpenCloseSocket}"
+                                    <Button x:Name="TCPClientOnOffButton" Content="{Binding TCPClientModel.OpenClose}"
                                             Grid.Row="4" Grid.Column="1"
                                             Style="{DynamicResource ConfigButton}"
                                             Click="TCPClientOnOffButton_Click"/>
@@ -522,10 +522,10 @@
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="1*"/>
                                     </Grid.ColumnDefinitions>
-                                    <Ellipse x:Name="UDPServerOnOffElipse" Fill="{Binding UDPServerModel.SocketBrush}"
+                                    <Ellipse x:Name="UDPServerOnOffElipse" Fill="{Binding UDPServerModel.Brush}"
                                              Grid.Row="0" Grid.Column="0"
                                              Style="{StaticResource ConfigEilipse}"/>
-                                    <Button x:Name="UDPServerOnOffButton" Content="{Binding UDPServerModel.OpenCloseSocket}"
+                                    <Button x:Name="UDPServerOnOffButton" Content="{Binding UDPServerModel.OpenClose}"
                                             Grid.Row="0" Grid.Column="1"
                                             Style="{DynamicResource ConfigButton}"
                                             Click="UDPServerOnOffButton_Click"/>
@@ -533,7 +533,7 @@
                                                Grid.Row="0" Grid.Column="2"
                                                Margin="6,3,0,3"
                                                Style="{StaticResource ConfigTextBlock}"/>
-                                    <TextBox x:Name="UDPServerSrcPortTextBox" Text="{Binding UDPServerModel.SocketSrcPort}"
+                                    <TextBox x:Name="UDPServerSrcPortTextBox" Text="{Binding UDPServerModel.Port}"
                                              Grid.Row="0" Grid.Column="3"
                                              Style="{StaticResource ConfigTextBox}"
                                              Width="120" MaxLength="5"/>
@@ -542,9 +542,9 @@
                                                Style="{StaticResource ConfigTextBlock}"
                                                HorizontalAlignment="Right"/>
                                     <ComboBox x:Name="UDPServerSrcAddrComboBox" Grid.Row="0" Grid.Column="5"
-                                              ItemsSource="{Binding SocketModel.SocketSourceIPAddressItemsSource}"
-                                              Text="{Binding UDPServerModel.SocketSrcPAddrText}"
-                                              SelectedIndex="{Binding UDPServerModel.SocketSrcIPAddrSelectedIndex}"
+                                              ItemsSource="{Binding UDPServerModel.IPAddrInfoItemsSource}"
+                                              Text="{Binding UDPServerModel.IPAddrText}"
+                                              SelectedIndex="{Binding UDPServerModel.IPAddrSelectedIndex}"
                                               Style="{DynamicResource ConfigComboBox}"
                                               IsEditable="True"
                                               IsReadOnly="False"/>
@@ -737,9 +737,9 @@
                                                Style="{StaticResource ConfigTextBlock}"
                                                HorizontalAlignment="Right"/>
                                     <ComboBox x:Name="UDPClientDestAddrComboBox" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
-                                              ItemsSource="{Binding UDPClientModel.SocketDestIPAddrItemsSource}"
-                                              Text="{Binding UDPClientModel.SocketDestPAddrText}"
-                                              SelectedIndex="{Binding UDPClientModel.SocketDestIPAddrSelectedIndex}"
+                                              ItemsSource="{Binding UDPClientModel.IPAddrItemsSource}"
+                                              Text="{Binding UDPClientModel.IPAddrText}"
+                                              SelectedIndex="{Binding UDPClientModel.IPAddrSelectedIndex}"
                                               Style="{DynamicResource ConfigComboBox}"
                                               IsEditable="True"
                                               IsReadOnly="False"/>
@@ -747,15 +747,15 @@
                                                Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
                                                Style="{StaticResource ConfigTextBlock}"
                                                HorizontalAlignment="Right"/>
-                                    <TextBox x:Name="UDPClientDestPortTextBox" Text="{Binding UDPClientModel.SocketDestPort}"
+                                    <TextBox x:Name="UDPClientDestPortTextBox" Text="{Binding UDPClientModel.Port}"
                                              Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
                                              Style="{StaticResource ConfigTextBox}"
                                              MaxLength="5"
                                              HorizontalContentAlignment="Left"/>
-                                    <Ellipse x:Name="UDPClientOnOffElipse" Fill="{Binding UDPClientModel.SocketBrush}"
+                                    <Ellipse x:Name="UDPClientOnOffElipse" Fill="{Binding UDPClientModel.Brush}"
                                              Grid.Row="4" Grid.Column="0"
                                              Style="{StaticResource ConfigEilipse}"/>
-                                    <Button x:Name="UDPClientOnOffButton" Content="{Binding UDPClientModel.OpenCloseSocket}"
+                                    <Button x:Name="UDPClientOnOffButton" Content="{Binding UDPClientModel.OpenClose}"
                                             Grid.Row="4" Grid.Column="1"
                                             Style="{DynamicResource ConfigButton}"
                                             Click="UDPClientOnOffButton_Click"/>

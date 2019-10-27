@@ -15,33 +15,33 @@ namespace SocketDA.ModelsSocket
         /// <summary>
         /// 缓冲区管理器维护的字节总数（SocketAsyncEventArgs池的大小）
         /// </summary>
-        private readonly int _ManagerNumBytes;
+        private readonly int _NumBytes;
 
         /// <summary>
         /// 缓冲区管理器当前的索引
         /// 
         /// 该索引的增长是以_ManagerBufferSize为基数的，相当于已经分配了多少个SocketAsyncEventArgs对象字节数组
         /// </summary>
-        private int _ManagerCurrentIndex;
+        private int _CurrentIndex;
 
         /// <summary>
         /// 缓冲区管理器维护的分配给每一个SocketAsyncEventArgs对象的字节数组
         /// </summary>
-        private byte[] _ManagerBuffer;
+        private byte[] _Buffer;
 
         /// <summary>
         /// 缓冲管理器维护的分配给每一个SocketAsyncEventArgs对象的字节数组的大小
         /// </summary>
-        private readonly int _ManagerBufferSize;
+        private readonly int _BufferSize;
 
-        private readonly Stack<int> _ManagerFreeIndexPool;
+        private readonly Stack<int> _FreeIndexPool;
 
         public SocketBufferManager(int totalBytes, int bufferSize)
         {
-            _ManagerNumBytes = totalBytes;
-            _ManagerCurrentIndex = 0;
-            _ManagerBufferSize = bufferSize;
-            _ManagerFreeIndexPool = new Stack<int>();
+            _NumBytes = totalBytes;
+            _CurrentIndex = 0;
+            _BufferSize = bufferSize;
+            _FreeIndexPool = new Stack<int>();
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace SocketDA.ModelsSocket
         /// </summary>
         internal void InitBuffer()
         {
-            _ManagerBuffer = new byte[_ManagerNumBytes];
+            _Buffer = new byte[_NumBytes];
         }
 
         /// <summary>
@@ -59,23 +59,23 @@ namespace SocketDA.ModelsSocket
         /// <returns>设置成功返回True，否则返回False</returns>
         internal bool SetBuffer(SocketAsyncEventArgs args)
         {
-            if (_ManagerFreeIndexPool.Count > 0)
+            if (_FreeIndexPool.Count > 0)
             {
-                args.SetBuffer(_ManagerBuffer, _ManagerFreeIndexPool.Pop(), _ManagerBufferSize);
+                args.SetBuffer(_Buffer, _FreeIndexPool.Pop(), _BufferSize);
             }
             else
             {
-                if( (_ManagerNumBytes - _ManagerBufferSize) < _ManagerCurrentIndex )
+                if( (_NumBytes - _BufferSize) < _CurrentIndex )
                 {
                     /* SocketAsyncEventArgs池剩余可分配的缓冲区大小不足以分配给一个SocketAsyncEventArgs对象所需要的缓冲区大小 */
                     return false;
                 }
 
                 /* 给一个SocketAsyncEventArgs对象分配缓冲区 */
-                args.SetBuffer(_ManagerBuffer, _ManagerCurrentIndex, _ManagerBufferSize);
+                args.SetBuffer(_Buffer, _CurrentIndex, _BufferSize);
 
                 /* 累计已经分配的缓冲区大小 */
-                _ManagerCurrentIndex += _ManagerBufferSize;
+                _CurrentIndex += _BufferSize;
             }
 
             return true;
@@ -87,7 +87,7 @@ namespace SocketDA.ModelsSocket
         /// <param name="args"></param>
         internal void FreeBuffer(SocketAsyncEventArgs args)
         {
-            _ManagerFreeIndexPool.Push(args.Offset);
+            _FreeIndexPool.Push(args.Offset);
             args.SetBuffer(null, 0, 0);
         }
     }

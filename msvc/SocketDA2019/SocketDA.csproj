@@ -162,9 +162,6 @@
     <Compile Include="..\..\Models\SendM.cs">
       <Link>Models\SendM.cs</Link>
     </Compile>
-    <Compile Include="..\..\Models\SocketM.cs">
-      <Link>Models\SocketM.cs</Link>
-    </Compile>
     <Compile Include="..\..\Models\TCPClientM.cs">
       <Link>Models\TCPClientM.cs</Link>
     </Compile>

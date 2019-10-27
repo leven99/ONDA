@@ -21,17 +21,12 @@ namespace SocketDA.ViewModels
         protected static SocketAsyncEventArgsPool _TCPServerSocketAsyncEventArgsPool = new SocketAsyncEventArgsPool();
 
         protected Mutex TCPServerMutexConnections = new Mutex();
-
-        /// <summary>
-        /// 客户端连接请求信号量
-        /// </summary>
         protected Semaphore TCPServerSemaphoreConnections = new Semaphore(
             _TCPServerSocketSetting.DefaultMaxConnctions, _TCPServerSocketSetting.DefaultMaxConnctions);
 
         protected Socket TCPServerSocketConnections = null;
-        protected IPEndPoint TCPServerIPEndPointConnections = null;
 
-        protected bool TCPServerConnections = false;   /* 服务器启动检测 */
+        protected bool TCPServerStartFlag = false;   /* 冗余判断服务器是否启动 */
         #endregion
 
         /// <summary>
@@ -85,13 +80,12 @@ namespace SocketDA.ViewModels
             try
             {
                 TCPServerSocketConnections = _TCPServerSocketBase.CreateSocket(ipAddress, port, ProtocolType.Tcp);
-                TCPServerIPEndPointConnections = _TCPServerSocketBase.IPEndPoint;
                 TCPServerSocketConnections.SetSocketOption(
                     SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, _TCPServerSocketSetting.ReceiveBufferSize);
                 TCPServerSocketConnections.SetSocketOption(
                     SocketOptionLevel.Socket, SocketOptionName.SendBuffer, _TCPServerSocketSetting.SendBufferSize);
 
-                TCPServerSocketConnections.Bind(TCPServerIPEndPointConnections);
+                TCPServerSocketConnections.Bind(_TCPServerSocketBase.IPEndPoint);
                 TCPServerSocketConnections.Listen(_TCPServerSocketSetting.DefaultMaxConnctions);
 
                 TCPServerStartAcceptAsync(null);
@@ -174,6 +168,8 @@ namespace SocketDA.ViewModels
                 if (_AcceptSocketAsyncEventArgs != null)
                 {
                     _AcceptSocketAsyncEventArgs.UserToken = new SocketUserToKen(acceptEventArgs.AcceptSocket);
+
+                    /* 在连接区增加客户端的终结点信息 */
 
                     bool _ReceivePending = acceptEventArgs.AcceptSocket.ReceiveAsync(_AcceptSocketAsyncEventArgs);
 
@@ -264,7 +260,7 @@ namespace SocketDA.ViewModels
         #region 打开/关闭网络
         public void TCPServerOpenSocket()
         {
-            if(TCPServerConnections)
+            if(TCPServerStartFlag)
             {
                 TCPServerCloseSocket();
 
@@ -273,23 +269,24 @@ namespace SocketDA.ViewModels
 
             IPAddress _IPAddress;
 
-            /* 判断Socket参数（IP地址与端口号）是否合法 */
-            if (TCPServerModel.SocketSrcIPAddrSelectedIndex >= 0)
+            if (TCPServerModel.IPAddrSelectedIndex >= 0)
             {
                 /* 索引选择的IP地址 */
-                _IPAddress = SocketModel.SocketSrcIPAddrItemsSource[TCPServerModel.SocketSrcIPAddrSelectedIndex];
+                _IPAddress = TCPServerModel.IPAddrItemsSource[TCPServerModel.IPAddrSelectedIndex];
             }
             else
             {
-                /* 手动输入的IP地址 */
-                if (SocketModel.TryParseIPAddressPort(TCPServerModel.SocketSrcIPAddrText, TCPServerModel.SocketSrcPort))
-                {
-                    _IPAddress = IPAddress.Parse(TCPServerModel.SocketSrcIPAddrText);
+                SocketBase _SocketBase = new SocketBase();
 
-                    if (!SocketModel.SocketSrcIPAddrItemsSource.Contains(_IPAddress))
+                /* 手动输入的IP地址 */
+                if (_SocketBase.TryParseIPAddressPort(TCPServerModel.IPAddrText, TCPServerModel.Port))
+                {
+                    _IPAddress = IPAddress.Parse(TCPServerModel.IPAddrText);
+
+                    if (!TCPServerModel.IPAddrItemsSource.Contains(_IPAddress))
                     {
-                        SocketModel.SocketSrcIPAddrItemsSource.Add(_IPAddress);
-                        SocketModel.SocketSourceIPAddressItemsSource.Add(_IPAddress.ToString());
+                        TCPServerModel.IPAddrItemsSource.Add(_IPAddress);
+                        TCPServerModel.IPAddrInfoItemsSource.Add(_IPAddress.ToString());
                     }
                 }
                 else
@@ -302,15 +299,15 @@ namespace SocketDA.ViewModels
 
             TCPServerInit();
 
-            TCPServerConnections = TCPServerStart(_IPAddress, TCPServerModel.SocketSrcPort);
+            TCPServerStartFlag = TCPServerStart(_IPAddress, TCPServerModel.Port);
 
-            if (TCPServerConnections)
+            if (TCPServerStartFlag)
             {
-                TCPServerModel.SocketSrcIPAddrEnable = false;
-                TCPServerModel.SocketSrcPortEnable = false;
+                TCPServerModel.IPAddrEnable = false;
+                TCPServerModel.PortEnable = false;
 
-                TCPServerModel.SocketBrush = Brushes.GreenYellow;
-                TCPServerModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 断开");
+                TCPServerModel.Brush = Brushes.GreenYellow;
+                TCPServerModel.OpenClose = string.Format(cultureInfo, "TCP 断开");
             }
             else
             {
@@ -324,13 +321,13 @@ namespace SocketDA.ViewModels
         {
             if(TCPServerStop())
             {
-                TCPServerModel.SocketSrcIPAddrEnable = true;
-                TCPServerModel.SocketSrcPortEnable = true;
+                TCPServerModel.IPAddrEnable = true;
+                TCPServerModel.PortEnable = true;
 
-                TCPServerModel.SocketBrush = Brushes.Red;
-                TCPServerModel.OpenCloseSocket = string.Format(cultureInfo, "TCP 侦听");
+                TCPServerModel.Brush = Brushes.Red;
+                TCPServerModel.OpenClose = string.Format(cultureInfo, "TCP 侦听");
 
-                TCPServerConnections = false;
+                TCPServerStartFlag = false;
             }
         }
         #endregion
