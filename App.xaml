@@ -260,13 +260,25 @@
             </Style>
 
             <!--MainWindows XAML - Connect Block style-->
-            <Style TargetType="DataGridColumnHeader" x:Key="ConnectDataGrid" >
+            <Style TargetType="DataGridColumnHeader" x:Key="ConnectDataGridColumnHeader" >
                 <Setter Property="BorderBrush" Value="White"/>
                 <Setter Property="Background" Value="#FF3FB0F9"/>
                 <Setter Property="Foreground" Value="White" />
                 <Setter Property="Padding" Value="5,5"/>
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
             </Style>
-            
+            <Style TargetType="DataGridRow" x:Key="ConnectDataGridRow">
+                <Setter Property="Background" Value="White" />
+            </Style>
+            <Style TargetType="DataGridCell" x:Key="ConnectDataGridCell">
+                <Style.Triggers>
+                    <Trigger Property="IsSelected" Value="True">
+                        <Setter Property="Background" Value="White"/>
+                        <Setter Property="Foreground" Value="Black"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
             <!--MainWindows XAML - Assist Block style-->
             <Style TargetType="CheckBox" x:Key="AssistCheckBox">
                 <Setter Property="VerticalContentAlignment" Value="Center"/>

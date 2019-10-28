@@ -6,12 +6,17 @@ using System.Windows.Media;
 
 namespace SocketDA.Models
 {
+    internal class TCPServerConnectionsInfo
+    {
+        public string RemoteEndPoint { get; set; }
+    }
+
     internal class TCPServerModel : MainWindowBase
     {
         /// <summary>
         /// 连接区 - 客户端信息
         /// </summary>
-        public ObservableCollection<SocketUserToKen> ConnectionsInfo { get; set; }
+        public ObservableCollection<TCPServerConnectionsInfo> ConnectionsInfo { get; set; }
 
         #region 网络配置 - Socket属性
         public ObservableCollection<IPAddress> IPAddrItemsSource { get; set; }
@@ -144,7 +149,7 @@ namespace SocketDA.Models
 
         public void TCPServerDataContext()
         {
-            ConnectionsInfo = new ObservableCollection<SocketUserToKen>();
+            ConnectionsInfo = new ObservableCollection<TCPServerConnectionsInfo>();
 
             IPAddrItemsSource = new ObservableCollection<IPAddress>();
             IPAddrInfoItemsSource = new ObservableCollection<string>();

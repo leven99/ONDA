@@ -1,17 +1,21 @@
-﻿using SocketDA.ModelsSocket;
-using SocketDA.ViewModels;
+﻿using SocketDA.ViewModels;
 using System.Collections.ObjectModel;
 using System.Net;
 using System.Windows.Media;
 
 namespace SocketDA.Models
 {
+    internal class TCPClientConnectionsInfo
+    {
+        public string RemoteEndPoint { get; set; }
+    }
+
     internal class TCPClientModel : MainWindowBase
     {
         /// <summary>
         /// 连接区 - 服务器信息
         /// </summary>
-        public ObservableCollection<SocketUserToKen> ConnectionsInfo { get; set; }
+        public ObservableCollection<TCPClientConnectionsInfo> ConnectionsInfo { get; set; }
 
         #region 网络配置 - Socket属性
         public ObservableCollection<IPAddress> IPAddrItemsSource { get; set; }
@@ -142,7 +146,7 @@ namespace SocketDA.Models
 
         public void TCPClientDataContext()
         {
-            ConnectionsInfo = new ObservableCollection<SocketUserToKen>();
+            ConnectionsInfo = new ObservableCollection<TCPClientConnectionsInfo>();
 
             IPAddrItemsSource = new ObservableCollection<IPAddress>();
             IPAddrText = string.Empty;

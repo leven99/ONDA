@@ -4,6 +4,7 @@ using SocketDA.ModelsSocket;
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Windows.Media;
 using System.Windows.Threading;
 
@@ -115,6 +116,18 @@ namespace SocketDA.ViewModels
             connectEventArgs.UserToken = new SocketUserToKen(connectEventArgs.AcceptSocket);
 
             /* 将服务器信息加入到连接区 */
+            ThreadPool.QueueUserWorkItem(delegate
+            {
+                SynchronizationContext.SetSynchronizationContext(new
+                    DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher));
+                SynchronizationContext.Current.Send(pl =>
+                {
+                    TCPClientModel.ConnectionsInfo.Add(new TCPClientConnectionsInfo()
+                    {
+                        RemoteEndPoint = connectEventArgs.AcceptSocket.RemoteEndPoint.ToString()
+                    });
+                }, null);
+            });
         }
 
         /// <summary>
