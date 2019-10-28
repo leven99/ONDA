@@ -95,26 +95,26 @@ namespace SocketDA.ViewModels
 
                 TCPClientModel.Brush = Brushes.GreenYellow;
                 TCPClientModel.OpenClose = string.Format(cultureInfo, "TCP 断开");
+
+                TCPClientConnectFlag = true;
+
+                DepictInfo = string.Format(cultureInfo, "成功连接到服务器");
             }
             else if (connectEventArgs.SocketError == SocketError.TimedOut)
             {
                 DepictInfo = string.Format(cultureInfo, "连接服务器超时或服务器未能响应......");
-
                 return;
             }
             else
             {
                 DepictInfo = string.Format(cultureInfo, "连接服务器失败！");
-
                 return;
             }
 
-            if (connectEventArgs != null)
-            {
-                connectEventArgs.UserToken = new SocketUserToKen(connectEventArgs.AcceptSocket);
+            connectEventArgs.AcceptSocket = TCPClientSocketConnections;
+            connectEventArgs.UserToken = new SocketUserToKen(connectEventArgs.AcceptSocket);
 
-                /* 将服务器信息加入到连接区 */
-            }
+            /* 将服务器信息加入到连接区 */
         }
 
         /// <summary>
@@ -198,6 +198,7 @@ namespace SocketDA.ViewModels
                 TCPClientModel.OpenClose = string.Format(cultureInfo, "TCP 连接");
 
                 TCPClientConnectFlag = false;
+                DepictInfo = string.Format(cultureInfo, "成功断开服务器");
             }
         }
         #endregion
