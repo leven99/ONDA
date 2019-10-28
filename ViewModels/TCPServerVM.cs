@@ -20,7 +20,6 @@ namespace SocketDA.ViewModels
             _TCPServerSocketSetting.OpsToPreAlloc * _TCPServerSocketSetting.BufferSize);
         protected static SocketAsyncEventArgsPool _TCPServerSocketAsyncEventArgsPool = new SocketAsyncEventArgsPool();
 
-        protected Mutex TCPServerMutexConnections = new Mutex();
         protected Semaphore TCPServerSemaphoreConnections = new Semaphore(
             _TCPServerSocketSetting.DefaultMaxConnctions, _TCPServerSocketSetting.DefaultMaxConnctions);
 
@@ -89,7 +88,6 @@ namespace SocketDA.ViewModels
                 TCPServerSocketConnections.Listen(_TCPServerSocketSetting.DefaultMaxConnctions);
 
                 TCPServerStartAcceptAsync(null);
-                TCPServerMutexConnections.WaitOne();
 
                 return true;
             }
@@ -107,7 +105,6 @@ namespace SocketDA.ViewModels
             try
             {
                 TCPServerSocketConnections.Close();
-                TCPServerMutexConnections.ReleaseMutex();
             }
             catch
             {
@@ -160,6 +157,11 @@ namespace SocketDA.ViewModels
         /// <param name="acceptEventArgs"></param>
         private void TCPServerProcessAccept(SocketAsyncEventArgs acceptEventArgs)
         {
+            if (acceptEventArgs.SocketError != SocketError.Success)
+            {
+                return;
+            }
+
             try
             {
                 /* 从SocketAsyncEventArgs池中获取一个SocketAsyncEventArgs */

@@ -5,7 +5,7 @@
         /// <summary>
         /// 服务器最大可以连接的客户端数量
         /// </summary>
-        internal int DefaultMaxConnctions { get; } = 4;
+        internal int DefaultMaxConnctions { get; } = 2;
 
         /// <summary>
         /// 一个SocketAsyncEventArgs对象的缓冲区大小
