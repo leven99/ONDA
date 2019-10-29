@@ -15,6 +15,7 @@ namespace SocketDA.ViewModels
         #region 字段
         protected static SocketBase _TCPServerSocketBase = new SocketBase();
         protected static SocketSetting _TCPServerSocketSetting = new SocketSetting();
+
         protected static SocketBufferManager _TCPServerSocketBufferManager = new SocketBufferManager(
             _TCPServerSocketSetting.DefaultMaxConnctions * _TCPServerSocketSetting.OpsToPreAlloc * _TCPServerSocketSetting.BufferSize,
             _TCPServerSocketSetting.OpsToPreAlloc * _TCPServerSocketSetting.BufferSize);
@@ -171,7 +172,19 @@ namespace SocketDA.ViewModels
                 {
                     _AcceptSocketAsyncEventArgs.UserToken = new SocketUserToKen(acceptEventArgs.AcceptSocket);
 
-                    /* 在连接区增加客户端的终结点信息 */
+                    /* 在连接区增加客户端的IP结点信息 */
+                    ThreadPool.QueueUserWorkItem(delegate
+                    {
+                        SynchronizationContext.SetSynchronizationContext(new
+                            DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher));
+                        SynchronizationContext.Current.Send(pl =>
+                        {
+                            TCPServerModel.ConnectionsInfo.Add(new TCPServerConnectionsInfo()
+                            {
+                                RemoteEndPoint = acceptEventArgs.AcceptSocket.RemoteEndPoint.ToString()
+                            });
+                        }, null);
+                    });
 
                     bool _ReceivePending = acceptEventArgs.AcceptSocket.ReceiveAsync(_AcceptSocketAsyncEventArgs);
 
@@ -253,6 +266,8 @@ namespace SocketDA.ViewModels
         private void TCPServerCloseClientSocket(SocketAsyncEventArgs acceptEventArgs)
         {
             SocketUserToKen _SocketUserToKen = acceptEventArgs.UserToken as SocketUserToKen;
+
+            /* 在连接区移除客户端的IP结点信息 */
 
             _SocketUserToKen.Socket.Close();
             _TCPServerSocketAsyncEventArgsPool.Push(acceptEventArgs);

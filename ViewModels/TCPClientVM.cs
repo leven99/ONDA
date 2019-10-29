@@ -115,7 +115,7 @@ namespace SocketDA.ViewModels
             connectEventArgs.AcceptSocket = TCPClientSocketConnections;
             connectEventArgs.UserToken = new SocketUserToKen(connectEventArgs.AcceptSocket);
 
-            /* 将服务器信息加入到连接区 */
+            /* 在连接区加入服务器的IP结点信息 */
             ThreadPool.QueueUserWorkItem(delegate
             {
                 SynchronizationContext.SetSynchronizationContext(new
@@ -155,6 +155,8 @@ namespace SocketDA.ViewModels
         {
             try
             {
+                /* 在连接区移除服务器的IP结点信息 */
+
                 TCPClientSocketConnections.Close();
             }
             catch
