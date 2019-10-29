@@ -166,7 +166,7 @@ namespace SocketDA.ViewModels
         }
 
         #region 打开/关闭网络
-        public void TCPClientOpenCloseSocket()
+        internal void TCPClientOpenCloseSocket()
         {
             if (TCPClientConnectFlag)
             {
@@ -200,7 +200,7 @@ namespace SocketDA.ViewModels
             TCPClientConnect(_IPAddress, TCPClientModel.Port);
         }
 
-        public void CloseTCPClientSocket()
+        internal void CloseTCPClientSocket()
         {
             if(TCPClientDisConnect())
             {
@@ -330,6 +330,20 @@ namespace SocketDA.ViewModels
         }
         #endregion
 
+        #region 发送
+        internal void TCPClientSend()
+        {
+
+        }
+        #endregion
+
+        #region 发送文件
+        internal void TCPClientSendFile()
+        {
+
+        }
+        #endregion
+
         #region 路径选择
         public void TCPClientSaveRecvPath()
         {
@@ -348,22 +362,25 @@ namespace SocketDA.ViewModels
         }
         #endregion
 
-        #region 发送
-        #endregion
-
-        #region 发送文件
-        #endregion
-
-        #region 路径选择
-        #endregion
-
         #region 清空接收
+        internal void TCPClientClearReceData()
+        {
+
+        }
         #endregion
 
         #region 清空发送
+        internal void TCPClientClearSendData()
+        {
+
+        }
         #endregion
 
         #region 清空计数
+        internal void TCPClientClearCount()
+        {
+
+        }
         #endregion
     }
 }

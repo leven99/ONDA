@@ -260,7 +260,7 @@ namespace SocketDA.ViewModels
         }
 
         #region 打开/关闭网络
-        public void TCPServerOpenSocket()
+        internal void TCPServerOpenSocket()
         {
             if(TCPServerStartFlag)
             {
@@ -319,7 +319,7 @@ namespace SocketDA.ViewModels
             }
         }
 
-        public void TCPServerCloseSocket()
+        internal void TCPServerCloseSocket()
         {
             if(TCPServerStop())
             {
@@ -448,6 +448,20 @@ namespace SocketDA.ViewModels
         }
         #endregion
 
+        #region 发送
+        internal void TCPServerSend()
+        {
+
+        }
+        #endregion
+
+        #region 发送文件
+        internal void TCPServerSendFile()
+        {
+
+        }
+        #endregion
+
         #region 路径选择
         public void TCPServerSaveRecvPath()
         {
@@ -466,22 +480,25 @@ namespace SocketDA.ViewModels
         }
         #endregion
 
-        #region 发送
-        #endregion
-
-        #region 发送文件
-        #endregion
-
-        #region 路径选择
-        #endregion
-
         #region 清空接收
+        internal void TCPServerClearReceData()
+        {
+
+        }
         #endregion
 
         #region 清空发送
+        internal void TCPServerClearSendData()
+        {
+
+        }
         #endregion
 
         #region 清空计数
+        internal void TCPServerClearCount()
+        {
+
+        }
         #endregion
     }
 }

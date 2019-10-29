@@ -141,42 +141,42 @@ namespace SocketDA.Views
         #region 发送
         private void TCPServerSenfButton_Click(object sender, RoutedEventArgs e)
         {
-
+            mainWindowViewModel.TCPServerSend();
         }
         #endregion
 
         #region 发送文件
         private void TCPServerSendFileButton_Click(object sender, RoutedEventArgs e)
         {
-
+            mainWindowViewModel.TCPServerSendFile();
         }
         #endregion
 
         #region 路径选择
         private void TCPServerSaveReceButton_Click(object sender, RoutedEventArgs e)
         {
-
+            mainWindowViewModel.TCPServerSaveRecvPath();
         }
         #endregion
 
         #region 清接收区
         private void TCPServerClearReceButton_Click(object sender, RoutedEventArgs e)
         {
-
+            mainWindowViewModel.TCPServerClearReceData();
         }
         #endregion
 
         #region 清发送区
         private void TCPServerClearSendButton_Click(object sender, RoutedEventArgs e)
         {
-
+            mainWindowViewModel.TCPServerClearSendData();
         }
         #endregion
 
         #region 清空计数
         private void TCPServerClearCountButton_Click(object sender, RoutedEventArgs e)
         {
-
+            mainWindowViewModel.TCPServerClearCount();
         }
         #endregion
 
@@ -194,42 +194,42 @@ namespace SocketDA.Views
         #region 发送
         private void TCPClientSenfButton_Click(object sender, RoutedEventArgs e)
         {
-
+            mainWindowViewModel.TCPClientSend();
         }
         #endregion
 
         #region 发送文件
         private void TCPClientSendFileButton_Click(object sender, RoutedEventArgs e)
         {
-
+            mainWindowViewModel.TCPClientSendFile();
         }
         #endregion
 
         #region 路径选择
         private void TCPClientSaveReceButton_Click(object sender, RoutedEventArgs e)
         {
-
+            mainWindowViewModel.TCPClientSaveRecvPath();
         }
         #endregion
 
         #region 清接收区
         private void TCPClientClearReceButton_Click(object sender, RoutedEventArgs e)
         {
-
+            mainWindowViewModel.TCPClientClearReceData();
         }
         #endregion
 
         #region 清发送区
         private void TCPClientClearSendButton_Click(object sender, RoutedEventArgs e)
         {
-
+            mainWindowViewModel.TCPClientClearSendData();
         }
         #endregion
 
         #region 清空计数
         private void TCPClientClearCountButton_Click(object sender, RoutedEventArgs e)
         {
-
+            mainWindowViewModel.TCPServerClearCount();
         }
         #endregion
 
